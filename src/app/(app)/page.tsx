@@ -108,7 +108,9 @@ export default function AnimalsVidaDignaLanding() {
                 className="rounded-lg shadow-lg"
               />
               <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-lg shadow-lg">
-                <p className="text-lg font-medium">"Tots els animals mereixen una vida digna."</p>
+                <p className="text-lg font-medium">
+                  &quot;Tots els animals mereixen una vida digna&quot;
+                </p>
                 <p className="text-sm text-muted-foreground">- Fundadors de l&apos;associació</p>
               </div>
             </div>
