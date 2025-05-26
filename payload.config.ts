@@ -1,25 +1,23 @@
-import path from 'path'
+import path from 'node:path'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { en } from 'payload/i18n/en'
-import {
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 import { UsersCollection } from '@/cms/collections/Users'
-import { MoviesCollection } from '@/cms/collections/Movies'
 import { MediaCollection } from '@/cms/collections/Media'
+import { VolunteersCollection } from '@/cms/collections/Volunteers'
 
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || 'set-a-secret-in-your-env',
-  collections: [UsersCollection, MoviesCollection, MediaCollection],
+  collections: [UsersCollection, MediaCollection, VolunteersCollection],
   admin: {
     autoLogin: {
       email: 'dev@payloadcms.com',
@@ -46,7 +44,7 @@ export default buildConfig({
   // richText editor
   editor: lexicalEditor(),
   typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
+    outputFile: path.resolve(dirname, 'src/types/payload-types.ts'),
   },
   i18n: {
     supportedLanguages: { en },
