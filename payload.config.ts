@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { postgresAdapter } from '@payloadcms/db-postgres'
-import { en } from 'payload/i18n/en'
+import { es } from 'payload/i18n/es'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 
@@ -18,13 +18,6 @@ import { VolunteersCollection } from '@/cms/collections/Volunteers'
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || 'set-a-secret-in-your-env',
   collections: [UsersCollection, MediaCollection, VolunteersCollection],
-  admin: {
-    autoLogin: {
-      email: 'dev@payloadcms.com',
-      password: 'test',
-      prefillOnly: true,
-    },
-  },
   // the type of DB you would like to use
   db: postgresAdapter({
     pool: {
@@ -47,25 +40,7 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'src/types/payload-types.ts'),
   },
   i18n: {
-    supportedLanguages: { en },
-  },
-  async onInit(payload) {
-    const existingUsers = await payload.find({
-      collection: 'users',
-      limit: 1,
-    })
-
-    // This is useful for local development
-    // so you do not need to create a first-user every time
-    if (existingUsers.docs.length === 0) {
-      await payload.create({
-        collection: 'users',
-        data: {
-          email: 'dev@payloadcms.com',
-          password: 'test',
-        },
-      })
-    }
+    supportedLanguages: { es },
   },
   // Sharp is now an optional dependency -
   // if you want to resize images, crop, set focal point, etc.
