@@ -11,7 +11,7 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
-    "ci": "payload migrate && pnpm build",
+    "ci": "payload migrate --force && pnpm build",
     "generate:types": "payload generate:types",
     "generate:schema": "payload-graphql generate:schema"
   },
