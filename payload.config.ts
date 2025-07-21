@@ -1,19 +1,19 @@
-import path from 'node:path'
-import { postgresAdapter } from '@payloadcms/db-postgres'
-import { es } from 'payload/i18n/es'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { postgresAdapter } from '@payloadcms/db-postgres';
+import { lexicalEditor } from '@payloadcms/richtext-lexical';
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob';
 
-import { buildConfig } from 'payload'
-import sharp from 'sharp'
-import { fileURLToPath } from 'node:url'
+import { buildConfig } from 'payload';
+import { es } from 'payload/i18n/es';
+import sharp from 'sharp';
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
-import { UsersCollection } from '@/cms/collections/Users'
-import { MediaCollection } from '@/cms/collections/Media'
-import { VolunteersCollection } from '@/cms/collections/Volunteers'
+import { MediaCollection } from '@/cms/collections/Media';
+import { UsersCollection } from '@/cms/collections/Users';
+import { VolunteersCollection } from '@/cms/collections/Volunteers';
 
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || 'set-a-secret-in-your-env',
@@ -46,7 +46,7 @@ export default buildConfig({
     const existingUsers = await payload.find({
       collection: 'users',
       limit: 1,
-    })
+    });
 
     // This is useful for local development
     // so you do not need to create a first-user every time
@@ -57,11 +57,11 @@ export default buildConfig({
           email: 'animals.vidadigna@gmail.com',
           password: 'rbm*PQC8wug*cdq4jpd',
         },
-      })
+      });
     }
   },
   // Sharp is now an optional dependency -
   // if you want to resize images, crop, set focal point, etc.
   // make sure to install it and pass it to the config.
   sharp,
-})
+});

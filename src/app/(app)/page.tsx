@@ -1,12 +1,12 @@
-import Image from 'next/image'
-import HeroSection from '@/sections/HeroSection'
-import StatsSection from '@/sections/StatsSection'
-import QuiSomSection from '@/sections/QuiSomSection'
-import ColoniesSection from '@/sections/ColoniesSection'
-import AdoptaSection from '@/sections/AdoptaSection'
-import ColaboraSection from '@/sections/ColaboraSection'
-import ContactSection from '@/sections/ContactSection'
-import NewsletterSection from '@/sections/NewsletterSection'
+import Image from 'next/image';
+import AdoptaSection from '@/sections/adopta-section';
+import ColaboraSection from '@/sections/colabora-section';
+import ColoniesSection from '@/sections/colonies-section';
+import ContactSection from '@/sections/contact-section';
+import HeroSection from '@/sections/hero-section';
+import NewsletterSection from '@/sections/newsletter-section';
+import QuiSomSection from '@/sections/qui-som-section';
+import StatsSection from '@/sections/stats-section';
 
 export default function AnimalsVidaDignaLanding() {
   return (
@@ -28,5 +28,5 @@ export default function AnimalsVidaDignaLanding() {
         className="mx-auto my-4"
       />
     </main>
-  )
+  );
 }

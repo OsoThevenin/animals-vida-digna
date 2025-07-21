@@ -1,4 +1,4 @@
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload';
 
 export const UsersCollection: CollectionConfig = {
   slug: 'users',
@@ -8,4 +8,4 @@ export const UsersCollection: CollectionConfig = {
     update: () => false,
   },
   fields: [],
-}
+};

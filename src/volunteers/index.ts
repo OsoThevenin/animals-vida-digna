@@ -1,10 +1,10 @@
-'use server'
+'use server';
 
-import { getPayloadHMR } from '@payloadcms/next/utilities'
-import configPromise from '@payload-config'
+import configPromise from '@payload-config';
+import { getPayloadHMR } from '@payloadcms/next/utilities';
 
 export async function getVolunteers() {
-  const payload = await getPayloadHMR({ config: configPromise })
+  const payload = await getPayloadHMR({ config: configPromise });
 
   const volunteers = await payload.find({
     collection: 'volunteers',
@@ -15,7 +15,7 @@ export async function getVolunteers() {
     },
     sort: 'order',
     depth: 1, // Per obtenir les relacions (foto)
-  })
+  });
 
-  return volunteers.docs
+  return volunteers.docs;
 }
