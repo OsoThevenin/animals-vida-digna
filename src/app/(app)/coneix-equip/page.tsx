@@ -1,7 +1,7 @@
 import type { Media, Volunteer } from '@payload-types';
 import VolunteerCard from '@/components/volunteer-card';
 import type { UIVolunteer } from '@/lib/types';
-import { getVolunteers } from '@/volunteers';
+import { getVolunteers } from '@/queries';
 
 export default async function ConeixEquip() {
   // Obtenir voluntaris del CMS

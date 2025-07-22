@@ -8,6 +8,9 @@ import NewsletterSection from '@/sections/newsletter-section';
 import QuiSomSection from '@/sections/qui-som-section';
 import StatsSection from '@/sections/stats-section';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function AnimalsVidaDignaLanding() {
   return (
     <main className="flex-1">

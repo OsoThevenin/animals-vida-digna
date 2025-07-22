@@ -1,30 +1,9 @@
 import { CatCard } from '@/components/cat-card';
 import { Button } from '@/components/ui/button';
-import type { Cat } from '@/types/payload-types';
-import { getPayloadClient } from '../lib/payload';
+import { getCats } from '@/queries';
 
 export default async function AdoptaSection() {
-  let cats: Cat[] = [];
-
-  try {
-    const payload = await getPayloadClient();
-
-    const catsResponse = await payload.find({
-      collection: 'cats',
-      where: {
-        status: {
-          equals: 'available',
-        },
-      },
-      sort: 'order',
-      limit: 6,
-    });
-
-    cats = catsResponse.docs as Cat[];
-  } catch (error) {
-    // Fallback for build time or when database is not available
-    console.log('Could not fetch cats from database:', error);
-  }
+  const cats = await getCats();
 
   return (
     <section id="adopta" className="py-16 md:py-24">

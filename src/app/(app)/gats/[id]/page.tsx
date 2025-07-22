@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getPayloadClient } from '@/lib/payload';
+import { getCat } from '@/queries';
 import type { Cat } from '@/types/payload-types';
 
 interface CatPageProps {
@@ -55,21 +56,9 @@ export async function generateMetadata({ params }: CatPageProps) {
 }
 
 export default async function CatPage({ params }: CatPageProps) {
-  let cat: Cat;
+  const cat = await getCat(params.id);
 
-  try {
-    const payload = await getPayloadClient();
-
-    cat = await payload.findByID({
-      collection: 'cats',
-      id: params.id,
-    });
-
-    if (!cat) {
-      notFound();
-    }
-  } catch (error) {
-    console.log('Could not fetch cat from database:', error);
+  if (!cat) {
     notFound();
   }
 
