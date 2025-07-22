@@ -1,0 +1,29 @@
+---
+alwaysApply: true
+---
+
+# Animals Vida Digna - Cat Shelter Landing Page
+
+A modern, SEO-optimized landing page for Animals Vida Digna, a cat shelter and rescue organization. The application serves as the primary web presence for the shelter, showcasing their mission, available cats for adoption, volunteer team, and ways to support the organization.
+
+## Key Features
+
+- **Dynamic Content Management**: Team information, cat profiles, and shelter updates managed through Payload CMS
+- **SEO Optimization**: Built with Next.js 15 for optimal search engine visibility and performance
+- **Responsive Design**: Modern, accessible interface that works across all devices
+- **Content Sections**: Hero, About Us, Cat Adoption, Colonies, Team, Contact, and Newsletter signup
+- **Catalan Language**: Primary language is Catalan, with infrastructure for future internationalization
+
+## Target Audience
+
+- Potential cat adopters
+- Volunteers and supporters
+- Local community members
+- Animal welfare advocates
+
+## Business Goals
+
+- Increase cat adoption rates
+- Attract new volunteers and donors
+- Build community awareness
+- Provide transparent information about shelter operations

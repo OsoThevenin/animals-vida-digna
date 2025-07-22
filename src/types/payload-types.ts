@@ -14,6 +14,7 @@ export interface Config {
     users: User;
     media: Media;
     volunteers: Volunteer;
+    cats: Cat;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -89,6 +90,42 @@ export interface Volunteer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cats".
+ */
+export interface Cat {
+  id: number;
+  givenName: string;
+  race?: string | null;
+  age: number;
+  gender: 'male' | 'female';
+  size: 'small' | 'medium' | 'large';
+  rescueDate: string;
+  adoptionDate?: string | null;
+  status: 'available' | 'adopted' | 'treatment' | 'unavailable';
+  personality?:
+    | ('playful' | 'calm' | 'shy' | 'affectionate' | 'independent' | 'social' | 'curious' | 'protective')[]
+    | null;
+  goodWith?: ('children' | 'other-cats' | 'dogs' | 'elderly')[] | null;
+  healthStatus: 'healthy' | 'treatment' | 'special-needs';
+  vaccinated: boolean;
+  microchipped: boolean;
+  sterilized: boolean;
+  specialNeeds?: string | null;
+  observations?: string | null;
+  photo: number | Media;
+  additionalPhotos?:
+    | {
+        photo: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  featured: boolean;
+  order: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -128,6 +165,7 @@ export interface PayloadMigration {
 export interface Auth {
   [k: string]: unknown;
 }
+
 
 declare module 'payload' {
   export interface GeneratedTypes extends Config {}

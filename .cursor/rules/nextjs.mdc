@@ -1,11 +1,6 @@
 ---
-description: Next.js with TypeScript and Tailwind UI best practices
-globs: 
+globs: *.tsx
 alwaysApply: false
----
----
-description: Next.js with TypeScript and Tailwind UI best practices
-globs: **/*.tsx, **/*.ts, src/**/*.ts, src/**/*.tsx
 ---
 
 # Next.js Best Practices

@@ -11,13 +11,19 @@ import sharp from 'sharp';
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
+import { CatsCollection } from '@/cms/collections/Cats';
 import { MediaCollection } from '@/cms/collections/Media';
 import { UsersCollection } from '@/cms/collections/Users';
 import { VolunteersCollection } from '@/cms/collections/Volunteers';
 
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || 'set-a-secret-in-your-env',
-  collections: [UsersCollection, MediaCollection, VolunteersCollection],
+  collections: [
+    UsersCollection,
+    MediaCollection,
+    VolunteersCollection,
+    CatsCollection,
+  ],
   // the type of DB you would like to use
   db: postgresAdapter({
     pool: {

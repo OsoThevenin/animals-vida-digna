@@ -1,10 +1,9 @@
 'use server';
 
-import configPromise from '@payload-config';
-import { getPayloadHMR } from '@payloadcms/next/utilities';
+import { getPayloadClient } from '@/lib/payload';
 
 export async function getVolunteers() {
-  const payload = await getPayloadHMR({ config: configPromise });
+  const payload = await getPayloadClient();
 
   const volunteers = await payload.find({
     collection: 'volunteers',

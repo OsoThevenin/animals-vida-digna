@@ -1,0 +1,44 @@
+---
+alwaysApply: true
+---
+
+# Technology Stack
+
+## Core Framework
+- **Next.js 15** - React framework with App Router for optimal performance and SEO
+- **React 19** - Latest React version with new features and optimizations
+
+## Content Management
+- **Payload CMS 3.0** - Headless CMS for dynamic content management
+- **PostgreSQL** - Primary database with Payload Postgres adapter
+- **GraphQL** - API layer for data fetching
+
+## Frontend & Styling
+- **TypeScript 5.5** - Type-safe development
+- **Tailwind CSS** - Utility-first CSS framework
+- **Radix UI** - Accessible component primitives
+- **Lucide React** - Icon library
+- **Embla Carousel** - Touch-friendly carousel component
+
+## Development Tools
+- **Biome** - Fast linter and formatter
+- **PostCSS** - CSS processing
+- **Sharp** - Image optimization
+- **Cross-env** - Environment variable management
+
+## Deployment & Storage
+- **Vercel Blob** - File storage for media uploads
+- **Cloud Storage Plugin** - Payload integration for cloud storage
+
+## Key Features
+- **SEO Optimized**: Built-in Next.js SEO capabilities
+- **Image Optimization**: Automatic image processing and optimization
+- **Type Safety**: Full TypeScript coverage
+- **Performance**: React 19 compiler and Next.js optimizations
+- **Accessibility**: Radix UI components ensure WCAG compliance
+- **Catalan Language**: Primary language with i18n-ready architecture
+
+## Development Workflow
+- **Package Manager**: pnpm for fast, efficient dependency management
+- **Code Quality**: Biome for linting and formatting
+- **Database**: Docker-based PostgreSQL for local development

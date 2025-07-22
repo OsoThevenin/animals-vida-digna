@@ -1,0 +1,60 @@
+---
+alwaysApply: true
+---
+
+# Project Structure
+
+## Root Level
+- `src/` - Main source code directory
+- `public/` - Static assets (images, logos)
+- `migrations/` - Database migration files
+- Configuration files (next.config.mjs, tailwind.config.js, etc.)
+
+## Source Code Organization
+
+### `/src/app/`
+- `(app)/` - Main application routes and pages
+  - `page.tsx` - Homepage with all sections
+  - `la-nostra-historia/` - About page (Catalan)
+  - `coneix-equip/` - Team page (Catalan)
+  - `api/` - API routes
+- `(payload)/` - Payload CMS admin interface
+  - `admin/` - Admin panel routes
+  - `api/` - Payload API endpoints
+
+### `/src/sections/`
+Landing page content sections (Catalan content):
+- `hero-section.tsx` - Main banner
+- `qui-som-section.tsx` - About us
+- `colonies-section.tsx` - Cat colonies info
+- `adopta-section.tsx` - Adoption process
+- `stats-section.tsx` - Statistics display
+- `colabora-section.tsx` - How to help
+- `contact-section.tsx` - Contact information
+- `newsletter-section.tsx` - Newsletter signup
+
+### `/src/cms/collections/`
+Payload CMS content collections:
+- `Volunteers/` - Team member profiles
+- `Users/` - Admin users
+- `Media/` - Image and file management
+
+### `/src/components/`
+Reusable UI components:
+- `ui/` - Base UI components (buttons, cards, etc.)
+- `header.tsx` - Site navigation
+- `footer.tsx` - Site footer
+- `volunteer-card.tsx` - Team member display
+
+### `/src/lib/`
+Utility functions and shared code:
+- `utils.ts` - Helper functions
+- `types.ts` - TypeScript type definitions
+
+## Key Patterns
+
+- **Section-based Architecture**: Each landing page section is a separate component
+- **CMS Integration**: Content managed through Payload collections
+- **Component Reusability**: Shared UI components in `/components/ui/`
+- **Type Safety**: Comprehensive TypeScript definitions
+- **Catalan Language**: All content and routes use Catalan, ready for future i18n
