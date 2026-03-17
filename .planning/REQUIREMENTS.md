@@ -128,13 +128,67 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| *(populated during roadmap creation)* | | |
+| FOUND-01 | Phase 1 | Pending |
+| FOUND-02 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Pending |
+| I18N-01 | Phase 1 | Pending |
+| I18N-02 | Phase 1 | Pending |
+| I18N-03 | Phase 1 | Pending |
+| I18N-04 | Phase 1 | Pending |
+| I18N-05 | Phase 1 | Pending |
+| CMS-01 | Phase 1 | Pending |
+| CMS-02 | Phase 1 | Pending |
+| CMS-03 | Phase 1 | Pending |
+| CMS-04 | Phase 1 | Pending |
+| CMS-05 | Phase 1 | Pending |
+| CATS-01 | Phase 2 | Pending |
+| CATS-02 | Phase 2 | Pending |
+| CATS-03 | Phase 2 | Pending |
+| CATS-04 | Phase 2 | Pending |
+| CATS-05 | Phase 2 | Pending |
+| LAND-01 | Phase 2 | Pending |
+| LAND-02 | Phase 2 | Pending |
+| LAND-03 | Phase 2 | Pending |
+| LAND-04 | Phase 2 | Pending |
+| LAND-05 | Phase 2 | Pending |
+| LAND-06 | Phase 2 | Pending |
+| LAND-07 | Phase 2 | Pending |
+| DONA-01 | Phase 2 | Pending |
+| DONA-02 | Phase 2 | Pending |
+| DONA-03 | Phase 2 | Pending |
+| FORM-01 | Phase 3 | Pending |
+| FORM-02 | Phase 3 | Pending |
+| FORM-03 | Phase 3 | Pending |
+| FORM-04 | Phase 3 | Pending |
+| FORM-05 | Phase 3 | Pending |
+| FORM-06 | Phase 3 | Pending |
+| IMG-01 | Phase 3 | Pending |
+| IMG-02 | Phase 3 | Pending |
+| IMG-03 | Phase 3 | Pending |
+| IMG-04 | Phase 3 | Pending |
+| IMG-05 | Phase 3 | Pending |
+| SEO-01 | Phase 4 | Pending |
+| SEO-02 | Phase 4 | Pending |
+| SEO-03 | Phase 4 | Pending |
+| SEO-04 | Phase 4 | Pending |
+| SEO-05 | Phase 4 | Pending |
+| SEO-06 | Phase 4 | Pending |
+| A11Y-01 | Phase 4 | Pending |
+| A11Y-02 | Phase 4 | Pending |
+| A11Y-03 | Phase 4 | Pending |
+| A11Y-04 | Phase 4 | Pending |
+| A11Y-05 | Phase 4 | Pending |
+| PERF-01 | Phase 4 | Pending |
+| PERF-02 | Phase 4 | Pending |
+| PERF-03 | Phase 4 | Pending |
+| PERF-04 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 45 total
-- Mapped to phases: 0
-- Unmapped: 45 ⚠️
+- Mapped to phases: 45
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-03-17 after initial definition*
+*Last updated: 2026-03-17 after roadmap creation*
