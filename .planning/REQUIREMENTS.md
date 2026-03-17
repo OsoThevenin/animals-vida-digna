@@ -7,10 +7,10 @@
 
 ### Foundation
 
-- [ ] **FOUND-01**: Site builds with Astro 5 hybrid mode and deploys to Cloudflare Workers
-- [ ] **FOUND-02**: TailwindCSS theme derived from existing brand assets (logo, colors)
+- [x] **FOUND-01**: Site builds with Astro 5 hybrid mode and deploys to Cloudflare Workers
+- [x] **FOUND-02**: TailwindCSS theme derived from existing brand assets (logo, colors)
 - [ ] **FOUND-03**: Keystatic CMS admin accessible for content editing in hybrid SSR mode
-- [ ] **FOUND-04**: R2 bucket configured for image storage with public access
+- [x] **FOUND-04**: R2 bucket configured for image storage with public access
 
 ### Internationalization
 
@@ -128,10 +128,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1 | Pending |
-| FOUND-02 | Phase 1 | Pending |
+| FOUND-01 | Phase 1 | Complete |
+| FOUND-02 | Phase 1 | Complete |
 | FOUND-03 | Phase 1 | Pending |
-| FOUND-04 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Complete |
 | I18N-01 | Phase 1 | Pending |
 | I18N-02 | Phase 1 | Pending |
 | I18N-03 | Phase 1 | Pending |
