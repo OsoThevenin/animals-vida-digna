@@ -1,0 +1,7 @@
+name = "animals-vida-digna"
+compatibility_date = "2025-08-15"
+compatibility_flags = ["nodejs_compat"]
+
+[[r2_buckets]]
+binding = "IMAGES_BUCKET"
+bucket_name = "animals-vida-digna-images"
