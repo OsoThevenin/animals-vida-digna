@@ -29,12 +29,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Visiting `/` shows Catalan content and `/es` shows Spanish content, with the language switcher deep-linking between them
   4. All content schemas (site settings, cats, landing sections, static pages) are defined in Keystatic with localized fields and alt text in both languages
   5. TailwindCSS theme reflects the shelter's brand colors derived from existing logo assets
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md — Scaffold Astro 5 project with Cloudflare adapter, Tailwind v4 brand theme, R2 config, and Vitest infrastructure
+- [ ] 01-02-PLAN.md — Define all Keystatic CMS content schemas (settings, cats, landing, pages) with bilingual fields and reader API
+- [ ] 01-03-PLAN.md — Implement bilingual i18n routing, language switcher, base layout with header/footer
 
 ### Phase 2: Public Pages & Cats Directory
 **Goal**: Visitors can browse the full website -- landing page with all configurable sections, cat listing with filters, cat detail pages with galleries, and prominent donation CTAs
