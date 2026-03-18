@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactForm from '../components/forms/ContactForm.tsx';
+import { reader } from '../lib/keystatic';
+import { t } from '../i18n/index';
+
+const locale = 'ca' as const;
+
+const settings = await reader.singletons.settings.read();
+const donateUrl = settings?.donateUrl ?? '#';
+
+const translations = {
+  name: t(locale, 'form.name'),
+  email: t(locale, 'form.email'),
+  message: t(locale, 'form.message'),
+  submit: t(locale, 'form.submit'),
+  sending: t(locale, 'form.sending'),
+  successContact: t(locale, 'form.success.contact'),
+  errorRequired: t(locale, 'form.error.required'),
+  errorInvalidEmail: t(locale, 'form.error.invalidEmail'),
+  errorServer: t(locale, 'form.error.server'),
+  errorRateLimited: t(locale, 'form.error.rateLimited'),
+};
+---
+
+<BaseLayout title={t(locale, 'contact.title')} donateUrl={donateUrl}>
+  <section class="py-16 sm:py-24">
+    <div class="mx-auto max-w-2xl px-4 sm:px-6">
+      <div class="mb-10 text-center">
+        <h1 class="font-display text-3xl font-bold text-primary sm:text-4xl">
+          {t(locale, 'contact.title')}
+        </h1>
+        <p class="mt-4 text-lg text-text-muted">
+          {t(locale, 'contact.subtitle')}
+        </p>
+      </div>
+      <ContactForm client:load locale={locale} translations={translations} />
+    </div>
+  </section>
+</BaseLayout>

@@ -30,7 +30,7 @@ const sectionId = locale === 'ca' ? 'contacte' : 'contacto';
     {ctaText && (
       <div class="mt-8">
         <a
-          href={`mailto:info@animalsvidadigna.org`}
+          href={`/${locale === 'es' ? 'es/' : ''}contact`}
           class="inline-block rounded-lg bg-accent px-8 py-3 font-semibold text-text transition-colors hover:bg-accent-light"
         >
           {ctaText}
