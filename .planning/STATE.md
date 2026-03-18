@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 3 context gathered
-last_updated: "2026-03-18T11:33:00.596Z"
-last_activity: 2026-03-18 -- Plan 02-02 executed (cats directory, detail pages, filters, gallery)
+stopped_at: Completed 03-03-PLAN.md
+last_updated: "2026-03-18T11:50:32.682Z"
+last_activity: 2026-03-18 -- Plan 03-03 executed (image pipeline, OptimizedImage component, R2 sync)
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
-  percent: 56
+  total_plans: 8
+  completed_plans: 6
+  percent: 75
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Visitors can discover adoptable cats and take action (adopt, donate, contact) in their language, with all content managed by non-technical shelter staff through Keystatic.
-**Current focus:** Phase 2: Public Pages & Cats Directory
+**Current focus:** Phase 3: Forms, Images & Media
 
 ## Current Position
 
-Phase: 2 of 4 (Public Pages & Cats Directory)
-Plan: 2 of 2 in current phase (PHASE COMPLETE)
+Phase: 3 of 4 (Forms, Images & Media)
+Plan: 3 of 3 in current phase (PHASE COMPLETE)
 Status: In Progress
-Last activity: 2026-03-18 -- Plan 02-02 executed (cats directory, detail pages, filters, gallery)
+Last activity: 2026-03-18 -- Plan 03-03 executed (image pipeline, OptimizedImage component, R2 sync)
 
-Progress: [██████░░░░] 56%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [██████░░░░] 56%
 - Trend: stable
 
 *Updated after each plan completion*
+| Phase 03 P03 | 2min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,9 @@ Recent decisions affecting current work:
 - 02-02: CatFilters Preact island owns rendering with noscript SSR fallback for SEO
 - 02-02: Gallery uses Astro script tag with Tobii (not Preact island) for DOM-based lightbox
 - 02-02: Spanish cat routes use slug_es with automatic keystatic slug fallback
+- [Phase 03-03]: Pure image URL logic in src/lib/image-utils.ts for testability, imported by Astro component
+- [Phase 03-03]: No picture element needed -- Cloudflare format=auto handles AVIF/WebP negotiation
+- [Phase 03-03]: sync-images uses wrangler CLI (execSync) rather than aws4fetch SDK for simplicity
 
 ### Pending Todos
 
@@ -85,6 +89,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T11:33:00.593Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-forms-images-media/03-CONTEXT.md
+Last session: 2026-03-18T11:50:32.679Z
+Stopped at: Completed 03-03-PLAN.md
+Resume file: None

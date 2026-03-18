@@ -72,11 +72,11 @@
 
 ### Images & Performance
 
-- [ ] **IMG-01**: Images stored in Cloudflare R2 and served via Cloudflare CDN
-- [ ] **IMG-02**: CMS image uploads via Worker-signed URLs to R2
-- [ ] **IMG-03**: Responsive images using Cloudflare Image Resizing (/cdn-cgi/image/) with AVIF/WebP auto-format
-- [ ] **IMG-04**: Long-lived immutable cache headers on image assets
-- [ ] **IMG-05**: Lazy loading for below-fold images and gallery thumbnails
+- [x] **IMG-01**: Images stored in Cloudflare R2 and served via Cloudflare CDN
+- [x] **IMG-02**: CMS image uploads via Worker-signed URLs to R2
+- [x] **IMG-03**: Responsive images using Cloudflare Image Resizing (/cdn-cgi/image/) with AVIF/WebP auto-format
+- [x] **IMG-04**: Long-lived immutable cache headers on image assets
+- [x] **IMG-05**: Lazy loading for below-fold images and gallery thumbnails
 
 ### Accessibility
 
@@ -163,11 +163,11 @@
 | FORM-04 | Phase 3 | Pending |
 | FORM-05 | Phase 3 | Pending |
 | FORM-06 | Phase 3 | Pending |
-| IMG-01 | Phase 3 | Pending |
-| IMG-02 | Phase 3 | Pending |
-| IMG-03 | Phase 3 | Pending |
-| IMG-04 | Phase 3 | Pending |
-| IMG-05 | Phase 3 | Pending |
+| IMG-01 | Phase 3 | Complete |
+| IMG-02 | Phase 3 | Complete |
+| IMG-03 | Phase 3 | Complete |
+| IMG-04 | Phase 3 | Complete |
+| IMG-05 | Phase 3 | Complete |
 | SEO-01 | Phase 4 | Pending |
 | SEO-02 | Phase 4 | Pending |
 | SEO-03 | Phase 4 | Pending |
