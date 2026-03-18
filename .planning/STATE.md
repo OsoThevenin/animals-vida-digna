@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-03-18T11:57:41.913Z"
+stopped_at: Completed 03-04-PLAN.md
+last_updated: "2026-03-18T15:18:42.474Z"
 last_activity: 2026-03-18 -- Plan 03-03 executed (image pipeline, OptimizedImage component, R2 sync)
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 9
+  completed_plans: 9
   percent: 75
 ---
 
@@ -54,6 +54,7 @@ Progress: [████████░░] 75%
 | Phase 03 P03 | 2min | 2 tasks | 5 files |
 | Phase 03 P01 | 4min | 2 tasks | 16 files |
 | Phase 03 P02 | 3min | 2 tasks | 7 files |
+| Phase 03 P04 | 1min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,8 @@ Recent decisions affecting current work:
 - [Phase 03-01]: Validation returns error keys not locale strings for API/client flexibility
 - [Phase 03-01]: API endpoint pattern: prerender=false, FormData, honeypot, rate limiting, JSON response
 - [Phase 03]: Adoption form uses accent color submit button and conditional status rendering with semantic colors
+- [Phase 03]: CatFilters uses image-utils.ts directly since Preact islands cannot use Astro components
+- [Phase 03]: Gallery lightbox links remain raw URLs; only thumbnails get OptimizedImage
 
 ### Pending Todos
 
@@ -95,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T11:57:41.910Z
-Stopped at: Completed 03-02-PLAN.md
+Last session: 2026-03-18T15:18:42.471Z
+Stopped at: Completed 03-04-PLAN.md
 Resume file: None
