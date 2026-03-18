@@ -2,6 +2,7 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import CatTraits from '../../../components/cats/CatTraits.astro';
 import CatGallery from '../../../components/cats/CatGallery.astro';
+import AdoptionForm from '../../../components/forms/AdoptionForm.tsx';
 import { reader } from '../../../lib/keystatic';
 import { getLocalizedCat } from '../../../i18n/content';
 import { t } from '../../../i18n/index';
@@ -52,6 +53,26 @@ const donateUrl = settings?.donateUrl ?? '#';
 
 const seoTitle = cat.seo?.title || cat.name;
 const seoDescription = cat.seo?.description || cat.shortDescription || '';
+
+const adoptionFormTranslations = {
+  name: t(locale, 'form.name'),
+  email: t(locale, 'form.email'),
+  phone: t(locale, 'form.phone'),
+  livingSituation: t(locale, 'form.livingSituation'),
+  message: t(locale, 'form.message'),
+  submit: t(locale, 'form.submit'),
+  sending: t(locale, 'form.sending'),
+  successAdoption: t(locale, 'form.success.adoption'),
+  errorRequired: t(locale, 'form.error.required'),
+  errorInvalidEmail: t(locale, 'form.error.invalidEmail'),
+  errorServer: t(locale, 'form.error.server'),
+  errorRateLimited: t(locale, 'form.error.rateLimited'),
+  livingSituationFlat: t(locale, 'form.livingSituation.flat'),
+  livingSituationHouse: t(locale, 'form.livingSituation.house'),
+  livingSituationHouseGarden: t(locale, 'form.livingSituation.houseGarden'),
+  livingSituationRural: t(locale, 'form.livingSituation.rural'),
+  livingSituationOther: t(locale, 'form.livingSituation.other'),
+};
 ---
 
 <BaseLayout title={seoTitle} description={seoDescription} donateUrl={donateUrl}>
@@ -82,14 +103,6 @@ const seoDescription = cat.seo?.description || cat.shortDescription || '';
       {/* Sidebar: traits */}
       <aside class="lg:col-span-1">
         <CatTraits cat={cat} locale={locale} />
-
-        {/* Adopt CTA */}
-        <a
-          href={`mailto:${settings?.contactEmail || ''}?subject=${encodeURIComponent(t(locale, 'cat.adoptMe') + ' - ' + cat.name)}`}
-          class="mt-6 block w-full rounded-xl bg-accent px-6 py-3 text-center font-bold text-white shadow-md transition-colors hover:bg-accent/90"
-        >
-          {t(locale, 'cat.adoptMe')}
-        </a>
       </aside>
 
       {/* Main content: description */}
@@ -105,6 +118,30 @@ const seoDescription = cat.seo?.description || cat.shortDescription || '';
         )}
       </div>
     </div>
+
+    {/* Adoption form / status message */}
+    <section class="mt-12">
+      {cat.status === 'available' ? (
+        <div class="mx-auto max-w-2xl">
+          <h2 class="mb-6 font-display text-2xl font-bold text-primary">
+            {t(locale, 'cat.adoptionInquiry')}
+          </h2>
+          <AdoptionForm client:load locale={locale} translations={adoptionFormTranslations} catName={cat.name} />
+        </div>
+      ) : cat.status === 'adopted' ? (
+        <div class="mx-auto max-w-2xl rounded-xl bg-primary/5 p-6 text-center">
+          <p class="text-lg font-medium text-primary">{t(locale, 'cat.status.adopted.message')}</p>
+        </div>
+      ) : cat.status === 'treatment' ? (
+        <div class="mx-auto max-w-2xl rounded-xl bg-amber-50 p-6 text-center">
+          <p class="text-lg font-medium text-amber-800">{t(locale, 'cat.status.treatment.message')}</p>
+        </div>
+      ) : (
+        <div class="mx-auto max-w-2xl rounded-xl bg-gray-50 p-6 text-center">
+          <p class="text-lg font-medium text-gray-600">{t(locale, 'cat.status.unavailable.message')}</p>
+        </div>
+      )}
+    </section>
 
     {/* Gallery */}
     {cat.gallery?.length > 0 && (
