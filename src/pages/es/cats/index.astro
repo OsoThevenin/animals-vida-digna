@@ -1,0 +1,101 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import CatCard from '../../../components/cats/CatCard.astro';
+import CatFilters from '../../../components/cats/CatFilters.tsx';
+import { reader } from '../../../lib/keystatic';
+import { getLocalizedCat } from '../../../i18n/content';
+import { t } from '../../../i18n/index';
+import type { CatFilterData } from '../../../lib/cat-filters';
+
+const locale = 'es' as const;
+
+const settings = await reader.singletons.settings.read();
+const donateUrl = settings?.donateUrl ?? '#';
+
+const allCatSlugs = await reader.collections.cats.list();
+const allCatsRaw = await Promise.all(
+  allCatSlugs.map(async (slug) => {
+    const entry = await reader.collections.cats.read(slug);
+    return entry ? { ...entry, keystatic_slug: slug } : null;
+  }),
+);
+const allCatsEntries = allCatsRaw.filter(Boolean) as (Record<string, unknown> & { keystatic_slug: string })[];
+
+// Localize and sort
+const localizedCats = allCatsEntries
+  .map((entry) => {
+    const cat = getLocalizedCat(entry, locale);
+    return { ...cat, keystatic_slug: entry.keystatic_slug };
+  })
+  .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+// Serializable data for Preact island
+const filterData: CatFilterData[] = localizedCats.map((cat) => ({
+  keystatic_slug: cat.keystatic_slug,
+  name: cat.name,
+  slug: cat.slug || cat.keystatic_slug,
+  status: cat.status,
+  age: cat.age,
+  gender: cat.gender,
+  personality: cat.personality ?? [],
+  coverImage: cat.coverImage,
+  shortDescription: cat.shortDescription ?? '',
+  featured: cat.featured ?? false,
+}));
+
+// Translation strings for the Preact island
+const translations = {
+  filterStatus: t(locale, 'cats.filterStatus'),
+  filterGender: t(locale, 'cats.filterGender'),
+  filterPersonality: t(locale, 'cats.filterPersonality'),
+  filterAll: t(locale, 'cats.filterAll'),
+  showing: t(locale, 'cats.showing'),
+  noResults: t(locale, 'cats.noResults'),
+  statusAvailable: t(locale, 'cat.status.available'),
+  statusAdopted: t(locale, 'cat.status.adopted'),
+  statusTreatment: t(locale, 'cat.status.treatment'),
+  statusUnavailable: t(locale, 'cat.status.unavailable'),
+  genderMale: t(locale, 'cat.male'),
+  genderFemale: t(locale, 'cat.female'),
+  personalityPlayful: t(locale, 'cat.personality.playful'),
+  personalityCalm: t(locale, 'cat.personality.calm'),
+  personalityShy: t(locale, 'cat.personality.shy'),
+  personalityAffectionate: t(locale, 'cat.personality.affectionate'),
+  personalityIndependent: t(locale, 'cat.personality.independent'),
+  personalitySocial: t(locale, 'cat.personality.social'),
+  personalityCurious: t(locale, 'cat.personality.curious'),
+  personalityProtective: t(locale, 'cat.personality.protective'),
+  catsLabel: t(locale, 'cats.title'),
+};
+---
+
+<BaseLayout title={t(locale, 'cats.title')} donateUrl={donateUrl}>
+  <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <h1 class="mb-2 font-display text-3xl font-bold text-primary md:text-4xl">
+      {t(locale, 'cats.title')}
+    </h1>
+    <p class="mb-8 text-text-muted">
+      {t(locale, 'cats.subtitle')}
+    </p>
+
+    <CatFilters client:load cats={filterData} locale={locale} translations={translations} />
+
+    <noscript>
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {localizedCats.map((cat) => (
+          <CatCard
+            cat={{
+              name: cat.name,
+              slug: cat.slug || cat.keystatic_slug,
+              shortDescription: cat.shortDescription ?? '',
+              status: cat.status,
+              coverImage: cat.coverImage,
+              keystatic_slug: cat.keystatic_slug,
+            }}
+            locale={locale}
+          />
+        ))}
+      </div>
+    </noscript>
+  </section>
+</BaseLayout>
