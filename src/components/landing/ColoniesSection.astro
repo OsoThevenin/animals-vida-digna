@@ -1,0 +1,45 @@
+---
+import type { Locale } from '../../i18n/index';
+import { getLocalizedField } from '../../i18n/content';
+import { renderMarkdoc } from '../../lib/markdoc';
+
+interface Props {
+  data: Record<string, unknown>;
+  locale: Locale;
+}
+
+const { data, locale } = Astro.props;
+
+const title = getLocalizedField(data, 'title', locale) as string;
+const contentField = data[`content_${locale}`] as
+  | (() => Promise<{ node: unknown }>)
+  | { node: unknown }
+  | null;
+const contentHtml = await renderMarkdoc(contentField);
+const image = data.image as { src?: string; alt_ca?: string; alt_es?: string } | null;
+const imageAlt = image ? getLocalizedField(image as Record<string, string>, 'alt', locale) : '';
+const sectionId = locale === 'ca' ? 'colonies' : 'colonias';
+---
+
+<section id={sectionId} class="bg-surface py-16 sm:py-24">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6">
+    {title && (
+      <h2 class="mb-8 text-center font-display text-3xl font-bold text-primary sm:text-4xl">
+        {title}
+      </h2>
+    )}
+    <div class="grid items-center gap-10 lg:grid-cols-2">
+      {image?.src && (
+        <div>
+          <img
+            src={image.src}
+            alt={imageAlt || ''}
+            class="rounded-2xl object-cover shadow-md"
+            loading="lazy"
+          />
+        </div>
+      )}
+      <div class="prose prose-lg max-w-none text-text-muted" set:html={contentHtml} />
+    </div>
+  </div>
+</section>

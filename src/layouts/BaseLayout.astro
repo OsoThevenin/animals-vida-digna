@@ -7,9 +7,10 @@ import Footer from '../components/Footer.astro';
 interface Props {
   title: string;
   description?: string;
+  donateUrl?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, donateUrl = '#' } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url);
 const currentUrl = Astro.url.href;
 ---
@@ -24,10 +25,10 @@ const currentUrl = Astro.url.href;
     <link rel="icon" type="image/webp" href="/images/logo.webp" />
   </head>
   <body class="flex min-h-screen flex-col bg-surface font-sans text-text">
-    <Header locale={locale} currentUrl={currentUrl} />
+    <Header locale={locale} currentUrl={currentUrl} donateUrl={donateUrl} />
     <main class="flex-1">
       <slot />
     </main>
-    <Footer locale={locale} />
+    <Footer locale={locale} donateUrl={donateUrl} />
   </body>
 </html>

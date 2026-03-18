@@ -1,0 +1,44 @@
+---
+import type { Locale } from '../../i18n/index';
+import { getLocalizedField } from '../../i18n/content';
+import { renderMarkdoc } from '../../lib/markdoc';
+
+interface Props {
+  data: Record<string, unknown>;
+  locale: Locale;
+}
+
+const { data, locale } = Astro.props;
+
+const title = getLocalizedField(data, 'title', locale) as string;
+const ctaText = getLocalizedField(data, 'ctaText', locale) as string;
+const contentField = data[`content_${locale}`] as
+  | (() => Promise<{ node: unknown }>)
+  | { node: unknown }
+  | null;
+const contentHtml = await renderMarkdoc(contentField);
+const sectionId = 'colabora';
+---
+
+<section id={sectionId} class="bg-surface py-16 sm:py-24">
+  <div class="mx-auto max-w-4xl px-4 sm:px-6">
+    {title && (
+      <h2 class="mb-8 text-center font-display text-3xl font-bold text-primary sm:text-4xl">
+        {title}
+      </h2>
+    )}
+    {contentHtml && (
+      <div class="prose prose-lg mx-auto max-w-none text-text-muted" set:html={contentHtml} />
+    )}
+    {ctaText && (
+      <div class="mt-8 text-center">
+        <a
+          href={locale === 'ca' ? '/#contacte' : '/es/#contacto'}
+          class="inline-block rounded-lg bg-accent px-8 py-3 font-semibold text-text transition-colors hover:bg-accent-light"
+        >
+          {ctaText}
+        </a>
+      </div>
+    )}
+  </div>
+</section>

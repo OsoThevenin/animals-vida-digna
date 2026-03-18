@@ -1,0 +1,41 @@
+---
+import type { Locale } from '../../i18n/index';
+import { getLocalizedField } from '../../i18n/content';
+
+interface Props {
+  data: Record<string, unknown>;
+  locale: Locale;
+}
+
+const { data, locale } = Astro.props;
+
+const title = getLocalizedField(data, 'title', locale) as string;
+const subtitle = getLocalizedField(data, 'subtitle', locale) as string;
+const ctaText = getLocalizedField(data, 'ctaText', locale) as string;
+const sectionId = locale === 'ca' ? 'contacte' : 'contacto';
+---
+
+<section id={sectionId} class="bg-primary-dark py-16 text-surface sm:py-24">
+  <div class="mx-auto max-w-4xl px-4 text-center sm:px-6">
+    {title && (
+      <h2 class="font-display text-3xl font-bold sm:text-4xl">
+        {title}
+      </h2>
+    )}
+    {subtitle && (
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-surface/80">
+        {subtitle}
+      </p>
+    )}
+    {ctaText && (
+      <div class="mt-8">
+        <a
+          href={`mailto:info@animalsvidadigna.org`}
+          class="inline-block rounded-lg bg-accent px-8 py-3 font-semibold text-text transition-colors hover:bg-accent-light"
+        >
+          {ctaText}
+        </a>
+      </div>
+    )}
+  </div>
+</section>

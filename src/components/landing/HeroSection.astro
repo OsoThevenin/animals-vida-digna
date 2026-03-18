@@ -1,0 +1,63 @@
+---
+import type { Locale } from '../../i18n/index';
+import { getLocalizedField } from '../../i18n/content';
+
+interface Props {
+  data: Record<string, unknown>;
+  locale: Locale;
+  donateUrl: string;
+}
+
+const { data, locale, donateUrl } = Astro.props;
+
+const title = getLocalizedField(data, 'title', locale) as string;
+const subtitle = getLocalizedField(data, 'subtitle', locale) as string;
+const ctaAdoptText = getLocalizedField(data, 'ctaAdoptText', locale) as string;
+const ctaDonateText = getLocalizedField(data, 'ctaDonateText', locale) as string;
+const image = data.image as { src?: string; alt_ca?: string; alt_es?: string } | null;
+const imageAlt = image ? getLocalizedField(image as Record<string, string>, 'alt', locale) : '';
+const adoptHref = locale === 'ca' ? '/#gats' : '/es/#gatos';
+---
+
+<section class="relative overflow-hidden bg-primary-dark py-20 text-surface sm:py-28">
+  <div class="mx-auto flex max-w-7xl flex-col items-center gap-10 px-4 sm:px-6 lg:flex-row lg:gap-16">
+    <div class="flex-1 text-center lg:text-left">
+      {title && (
+        <h1 class="font-display text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+          {title}
+        </h1>
+      )}
+      {subtitle && (
+        <p class="mx-auto mt-4 max-w-xl text-lg text-surface/80 lg:mx-0">
+          {subtitle}
+        </p>
+      )}
+      <div class="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
+        <a
+          href={adoptHref}
+          class="rounded-lg bg-accent px-6 py-3 font-semibold text-text transition-colors hover:bg-accent-light"
+        >
+          {ctaAdoptText || (locale === 'ca' ? "Adopta'm" : 'Adoptame')}
+        </a>
+        <a
+          href={donateUrl}
+          target={donateUrl.startsWith('http') ? '_blank' : undefined}
+          rel={donateUrl.startsWith('http') ? 'noopener noreferrer' : undefined}
+          class="rounded-lg border-2 border-surface/30 bg-transparent px-6 py-3 font-semibold text-surface transition-colors hover:border-surface hover:bg-surface/10"
+        >
+          {ctaDonateText || (locale === 'ca' ? 'Fes un donatiu' : 'Haz un donativo')}
+        </a>
+      </div>
+    </div>
+    {image?.src && (
+      <div class="flex-1">
+        <img
+          src={image.src}
+          alt={imageAlt || ''}
+          class="mx-auto max-h-96 w-full rounded-2xl object-cover shadow-xl lg:max-h-[28rem]"
+          loading="eager"
+        />
+      </div>
+    )}
+  </div>
+</section>

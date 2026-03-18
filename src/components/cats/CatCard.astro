@@ -1,0 +1,70 @@
+---
+import type { Locale } from '../../i18n/index';
+import { t } from '../../i18n/index';
+
+interface CatData {
+  name: string;
+  slug: string;
+  shortDescription: string;
+  status: string;
+  coverImage: { src: string; alt: string } | null;
+  keystatic_slug: string;
+}
+
+interface Props {
+  cat: CatData;
+  locale: Locale;
+}
+
+const { cat, locale } = Astro.props;
+
+const catHref = locale === 'ca' ? `/cat/${cat.slug}` : `/es/cat/${cat.slug}`;
+
+const statusKey = `cat.status.${cat.status}` as const;
+const statusLabel = t(locale, statusKey as any);
+
+const statusColors: Record<string, string> = {
+  available: 'bg-green-100 text-green-800',
+  adopted: 'bg-blue-100 text-blue-800',
+  treatment: 'bg-amber-100 text-amber-800',
+  unavailable: 'bg-gray-100 text-gray-600',
+};
+const statusColor = statusColors[cat.status] ?? 'bg-gray-100 text-gray-600';
+---
+
+<a
+  href={catHref}
+  class="group block overflow-hidden rounded-xl bg-surface shadow-sm transition-shadow hover:shadow-md"
+>
+  {cat.coverImage?.src ? (
+    <div class="aspect-[4/3] overflow-hidden">
+      <img
+        src={cat.coverImage.src}
+        alt={cat.coverImage.alt || cat.name}
+        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        loading="lazy"
+      />
+    </div>
+  ) : (
+    <div class="flex aspect-[4/3] items-center justify-center bg-primary/5">
+      <svg class="h-16 w-16 text-primary/20" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+      </svg>
+    </div>
+  )}
+  <div class="p-4">
+    <div class="mb-2 flex items-center justify-between gap-2">
+      <h3 class="font-display text-lg font-bold text-primary">
+        {cat.name}
+      </h3>
+      <span class={`inline-block shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${statusColor}`}>
+        {statusLabel}
+      </span>
+    </div>
+    {cat.shortDescription && (
+      <p class="line-clamp-2 text-sm text-text-muted">
+        {cat.shortDescription}
+      </p>
+    )}
+  </div>
+</a>

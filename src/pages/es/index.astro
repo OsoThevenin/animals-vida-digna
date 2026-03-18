@@ -1,32 +1,52 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { reader } from '../../lib/keystatic';
+import { getLocalizedField } from '../../i18n/content';
+import HeroSection from '../../components/landing/HeroSection.astro';
+import AboutSection from '../../components/landing/AboutSection.astro';
+import StatsSection from '../../components/landing/StatsSection.astro';
+import ColoniesSection from '../../components/landing/ColoniesSection.astro';
+import AdoptSection from '../../components/landing/AdoptSection.astro';
+import CollaborateSection from '../../components/landing/CollaborateSection.astro';
+import ContactCtaSection from '../../components/landing/ContactCtaSection.astro';
+import FeaturedCatsSection from '../../components/landing/FeaturedCatsSection.astro';
+
+const locale = 'es' as const;
+
+const settings = await reader.singletons.settings.read();
+const landing = await reader.singletons.landing.read();
+
+const donateUrl = settings?.donateUrl ?? '#';
+const seoTitle = settings?.seo?.title_es || 'Inicio';
+const seoDescription = settings?.seo?.description_es || 'Protectora de animales en Catalunya';
+
+const sections = landing?.sections ?? [];
 ---
 
-<BaseLayout title="Inicio" description="Protectora de animales en Catalunya">
-  <section class="mx-auto max-w-4xl px-4 py-16 sm:px-6 sm:py-24">
-    <div class="text-center">
-      <h1 class="font-display text-4xl font-bold text-primary sm:text-5xl">
-        Bienvenidos a Animals Vida Digna
-      </h1>
-      <p class="mx-auto mt-6 max-w-2xl text-lg text-text-muted">
-        Somos una protectora de animales dedicada a rescatar, cuidar y encontrar
-        hogares amorosos para los gatos abandonados y maltratados de nuestra
-        comunidad.
-      </p>
-      <div class="mt-8 flex justify-center gap-4">
-        <a
-          href="#gatos"
-          class="rounded-lg bg-primary px-6 py-3 font-semibold text-surface transition-colors hover:bg-primary-dark"
-        >
-          Adoptame
-        </a>
-        <a
-          href="#"
-          class="rounded-lg border-2 border-accent bg-transparent px-6 py-3 font-semibold text-accent transition-colors hover:bg-accent hover:text-text"
-        >
-          Haz un donativo
-        </a>
-      </div>
-    </div>
-  </section>
+<BaseLayout title={seoTitle} description={seoDescription} donateUrl={donateUrl}>
+  {sections.map((section) => {
+    switch (section.discriminant) {
+      case 'hero':
+        return <HeroSection data={section.value as Record<string, unknown>} locale={locale} donateUrl={donateUrl} />;
+      case 'about':
+        return <AboutSection data={section.value as Record<string, unknown>} locale={locale} />;
+      case 'stats':
+        return <StatsSection data={section.value as Record<string, unknown>} locale={locale} />;
+      case 'colonies':
+        return <ColoniesSection data={section.value as Record<string, unknown>} locale={locale} />;
+      case 'adopt':
+        return <AdoptSection data={section.value as Record<string, unknown>} locale={locale} />;
+      case 'collaborate':
+        return <CollaborateSection data={section.value as Record<string, unknown>} locale={locale} />;
+      case 'contactCta':
+        return <ContactCtaSection data={section.value as Record<string, unknown>} locale={locale} />;
+      case 'newsletter':
+        return <div class="py-8 text-center text-text-muted">{/* TODO: Newsletter section (v2) */}</div>;
+      case 'faq':
+        return <div class="py-8 text-center text-text-muted">{/* TODO: FAQ section (v2) */}</div>;
+      default:
+        return null;
+    }
+  })}
+  <FeaturedCatsSection locale={locale} />
 </BaseLayout>
