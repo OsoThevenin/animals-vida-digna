@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
 import { filterCats, type CatFilterData } from '../../lib/cat-filters';
+import { imageUrl, generateSrcset, DEFAULT_WIDTHS, DEFAULT_SIZES } from '../../lib/image-utils';
 
 interface Translations {
   filterStatus: string;
@@ -131,10 +132,13 @@ export default function CatFilters({ cats, locale, translations: t }: Props) {
               {cat.coverImage?.src ? (
                 <div class="aspect-[4/3] overflow-hidden">
                   <img
-                    src={cat.coverImage.src}
+                    src={imageUrl(cat.coverImage.src, DEFAULT_WIDTHS[DEFAULT_WIDTHS.length - 1], import.meta.env.DEV)}
+                    srcset={generateSrcset(cat.coverImage.src, DEFAULT_WIDTHS, import.meta.env.DEV)}
+                    sizes={DEFAULT_SIZES}
                     alt={cat.coverImage.alt || cat.name}
                     class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
+                    decoding="async"
                   />
                 </div>
               ) : (
