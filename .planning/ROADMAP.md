@@ -13,7 +13,7 @@ Rebuild the Animals Vida Digna cat shelter website from Next.js + Payload CMS to
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation, CMS & i18n** - Astro + Keystatic + Cloudflare skeleton with content model and bilingual routing (completed 2026-03-18)
-- [ ] **Phase 2: Public Pages & Cats Directory** - Landing page sections, cat listing/detail pages, and donation CTAs
+- [x] **Phase 2: Public Pages & Cats Directory** - Landing page sections, cat listing/detail pages, and donation CTAs (completed 2026-03-18)
 - [ ] **Phase 3: Forms, Images & Media** - Contact/adoption forms via Resend, R2 image pipeline, and gallery component
 - [ ] **Phase 4: SEO, Accessibility & Performance** - Full SEO markup, WCAG AA compliance, and Lighthouse 95+ scores
 
@@ -50,7 +50,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — Landing page with all CMS section components, donate URL wiring, sticky CTA, and featured cats
-- [ ] 02-02-PLAN.md — Cats listing with SSR and Preact filter island, cat detail pages with gallery lightbox
+- [x] 02-02-PLAN.md — Cats listing with SSR and Preact filter island, cat detail pages with gallery lightbox
 
 ### Phase 3: Forms, Images & Media
 **Goal**: Visitors can submit contact and adoption forms that deliver emails via Resend, and all images flow through the R2 storage and Cloudflare Image Resizing pipeline
@@ -92,6 +92,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation, CMS & i18n | 3/3 | Complete    | 2026-03-18 |
-| 2. Public Pages & Cats Directory | 1/2 | In progress | - |
+| 2. Public Pages & Cats Directory | 2/2 | Complete    | 2026-03-18 |
 | 3. Forms, Images & Media | 0/2 | Not started | - |
 | 4. SEO, Accessibility & Performance | 0/2 | Not started | - |

@@ -10,8 +10,8 @@ progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 5
-  completed_plans: 4
-  percent: 44
+  completed_plans: 5
+  percent: 56
 ---
 
 # Project State
@@ -26,28 +26,28 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 2 of 4 (Public Pages & Cats Directory)
-Plan: 1 of 2 in current phase
+Plan: 2 of 2 in current phase (PHASE COMPLETE)
 Status: In Progress
-Last activity: 2026-03-18 -- Plan 02-01 executed (landing page, donate CTA)
+Last activity: 2026-03-18 -- Plan 02-02 executed (cats directory, detail pages, filters, gallery)
 
-Progress: [████░░░░░░] 44%
+Progress: [██████░░░░] 56%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 4min
-- Total execution time: 0.3 hours
+- Total execution time: 0.33 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-cms-i18n | 3 | 11min | 4min |
-| 02-public-pages-cats-directory | 1 | 5min | 5min |
+| 02-public-pages-cats-directory | 2 | 9min | 4.5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (5min), 01-02 (3min), 01-03 (3min), 02-01 (5min)
+- Last 5 plans: 01-01 (5min), 01-02 (3min), 01-03 (3min), 02-01 (5min), 02-02 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -69,6 +69,10 @@ Recent decisions affecting current work:
 - 02-01: renderMarkdoc handles both async functions and resolved .node objects
 - 02-01: DonateSticky uses Preact island with client:idle and 600px scroll threshold
 - 02-01: CMS block rendering uses discriminant switch pattern in landing pages
+- 02-02: Pure filter/route utilities extracted for testability outside Astro/Preact context
+- 02-02: CatFilters Preact island owns rendering with noscript SSR fallback for SEO
+- 02-02: Gallery uses Astro script tag with Tobii (not Preact island) for DOM-based lightbox
+- 02-02: Spanish cat routes use slug_es with automatic keystatic slug fallback
 
 ### Pending Todos
 
@@ -81,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T08:40:00Z
-Stopped at: Completed 02-01-PLAN.md
-Resume file: .planning/phases/02-public-pages-cats-directory/02-02-PLAN.md
+Last session: 2026-03-18T08:48:00Z
+Stopped at: Completed 02-02-PLAN.md (Phase 02 complete)
+Resume file: .planning/phases/03-server-features/ (next phase)

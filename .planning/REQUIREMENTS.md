@@ -30,10 +30,10 @@
 
 ### Cats Directory
 
-- [ ] **CATS-01**: Filterable cats listing page with client-side filters (status, age, sex, temperament) rendered as an interactive island
-- [ ] **CATS-02**: SSR base for cats listing ensuring SEO crawlability of all cat entries
-- [ ] **CATS-03**: Cat detail pages at /cat/[slug_ca] and /es/cat/[slug_es] with cover image, gallery, traits, and MDX description
-- [ ] **CATS-04**: Lightbox/gallery component with keyboard navigation and reduced-motion support
+- [x] **CATS-01**: Filterable cats listing page with client-side filters (status, age, sex, temperament) rendered as an interactive island
+- [x] **CATS-02**: SSR base for cats listing ensuring SEO crawlability of all cat entries
+- [x] **CATS-03**: Cat detail pages at /cat/[slug_ca] and /es/cat/[slug_es] with cover image, gallery, traits, and MDX description
+- [x] **CATS-04**: Lightbox/gallery component with keyboard navigation and reduced-motion support
 - [x] **CATS-05**: Featured cats displayed on homepage from CMS-flagged entries
 
 ### Landing Page
@@ -142,10 +142,10 @@
 | CMS-03 | Phase 1 | Pending |
 | CMS-04 | Phase 1 | Pending |
 | CMS-05 | Phase 1 | Pending |
-| CATS-01 | Phase 2 | Pending |
-| CATS-02 | Phase 2 | Pending |
-| CATS-03 | Phase 2 | Pending |
-| CATS-04 | Phase 2 | Pending |
+| CATS-01 | Phase 2 | Complete |
+| CATS-02 | Phase 2 | Complete |
+| CATS-03 | Phase 2 | Complete |
+| CATS-04 | Phase 2 | Complete |
 | CATS-05 | Phase 2 | Complete |
 | LAND-01 | Phase 2 | Complete |
 | LAND-02 | Phase 2 | Complete |
