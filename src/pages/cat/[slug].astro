@@ -1,0 +1,111 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CatTraits from '../../components/cats/CatTraits.astro';
+import CatGallery from '../../components/cats/CatGallery.astro';
+import { reader } from '../../lib/keystatic';
+import { getLocalizedCat } from '../../i18n/content';
+import { t } from '../../i18n/index';
+import { renderMarkdoc } from '../../lib/markdoc';
+import { generateCatPathsCa } from '../../lib/cat-routes';
+
+const locale = 'ca' as const;
+
+export async function getStaticPaths() {
+  const slugs = await reader.collections.cats.list();
+  const entries = slugs.map((slug) => ({ keystatic_slug: slug }));
+  return generateCatPathsCa(entries);
+}
+
+const { keystatic_slug } = Astro.props;
+
+const entry = await reader.collections.cats.read(keystatic_slug, {
+  resolveLinkedFiles: true,
+});
+
+if (!entry) {
+  return Astro.redirect('/cats');
+}
+
+const cat = getLocalizedCat(entry as Record<string, unknown>, locale);
+
+// Render markdoc description
+let descriptionHtml = '';
+const descField = cat.description;
+if (descField) {
+  if (typeof descField === 'function') {
+    descriptionHtml = await renderMarkdoc(descField as () => Promise<{ node: unknown }>);
+  } else if (typeof descField === 'object' && descField !== null && 'node' in (descField as Record<string, unknown>)) {
+    descriptionHtml = await renderMarkdoc(descField as { node: unknown });
+  }
+}
+
+const settings = await reader.singletons.settings.read();
+const donateUrl = settings?.donateUrl ?? '#';
+
+const seoTitle = cat.seo?.title || cat.name;
+const seoDescription = cat.seo?.description || cat.shortDescription || '';
+---
+
+<BaseLayout title={seoTitle} description={seoDescription} donateUrl={donateUrl}>
+  <article class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    {/* Back link */}
+    <a href="/cats" class="mb-6 inline-flex items-center gap-1 text-sm text-accent hover:text-accent/80">
+      &larr; {t(locale, 'cat.backToList')}
+    </a>
+
+    {/* Cover image */}
+    {cat.coverImage?.src && (
+      <div class="mb-8 overflow-hidden rounded-2xl">
+        <img
+          src={cat.coverImage.src}
+          alt={cat.coverImage.alt || cat.name}
+          class="h-64 w-full object-cover sm:h-80 lg:h-96"
+        />
+      </div>
+    )}
+
+    {/* Title */}
+    <h1 class="mb-6 font-display text-3xl font-bold text-primary md:text-4xl">
+      {cat.name}
+    </h1>
+
+    {/* Two-column layout: traits sidebar + description */}
+    <div class="grid gap-8 lg:grid-cols-3">
+      {/* Sidebar: traits */}
+      <aside class="lg:col-span-1">
+        <CatTraits cat={cat} locale={locale} />
+
+        {/* Adopt CTA */}
+        <a
+          href={`mailto:${settings?.contactEmail || ''}?subject=${encodeURIComponent(t(locale, 'cat.adoptMe') + ' - ' + cat.name)}`}
+          class="mt-6 block w-full rounded-xl bg-accent px-6 py-3 text-center font-bold text-white shadow-md transition-colors hover:bg-accent/90"
+        >
+          {t(locale, 'cat.adoptMe')}
+        </a>
+      </aside>
+
+      {/* Main content: description */}
+      <div class="lg:col-span-2">
+        {descriptionHtml && (
+          <div class="prose prose-lg max-w-none text-text" set:html={descriptionHtml} />
+        )}
+
+        {cat.observations && (
+          <div class="mt-6 rounded-lg bg-primary/5 p-4">
+            <p class="text-sm text-text-muted">{cat.observations}</p>
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* Gallery */}
+    {cat.gallery?.length > 0 && (
+      <section class="mt-12">
+        <h2 class="mb-4 font-display text-2xl font-bold text-primary">
+          {t(locale, 'cat.gallery')}
+        </h2>
+        <CatGallery images={cat.gallery} catName={cat.name} />
+      </section>
+    )}
+  </article>
+</BaseLayout>

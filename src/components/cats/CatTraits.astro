@@ -1,0 +1,152 @@
+---
+import type { Locale } from '../../i18n/index';
+import { t } from '../../i18n/index';
+
+interface LocalizedCat {
+  status: string;
+  age: number | null;
+  gender: string;
+  size: string;
+  race: string;
+  weight: number | null;
+  personality: string[];
+  goodWith: string[];
+  healthStatus: string;
+  vaccinated: boolean;
+  microchipped: boolean;
+  sterilized: boolean;
+  rescueDate: string | null;
+  specialNeeds: string;
+}
+
+interface Props {
+  cat: LocalizedCat;
+  locale: Locale;
+}
+
+const { cat, locale } = Astro.props;
+
+const statusColors: Record<string, string> = {
+  available: 'bg-green-100 text-green-800',
+  adopted: 'bg-blue-100 text-blue-800',
+  treatment: 'bg-amber-100 text-amber-800',
+  unavailable: 'bg-gray-100 text-gray-600',
+};
+const statusColor = statusColors[cat.status] ?? 'bg-gray-100 text-gray-600';
+const statusKey = `cat.status.${cat.status}` as const;
+const statusLabel = t(locale, statusKey as any);
+
+const genderLabel = t(locale, cat.gender === 'female' ? 'cat.female' : 'cat.male');
+const sizeKey = `cat.size.${cat.size}` as const;
+const sizeLabel = t(locale, sizeKey as any);
+const healthKey = `cat.healthStatus.${cat.healthStatus}` as const;
+const healthLabel = t(locale, healthKey as any);
+
+const ageText = cat.age != null ? `${cat.age} ${t(locale, 'cat.years')}` : null;
+const weightText = cat.weight != null ? `${cat.weight} ${t(locale, 'cat.kg')}` : null;
+---
+
+<div class="rounded-xl bg-surface p-6 shadow-sm">
+  {/* Status badge */}
+  <div class="mb-4">
+    <span class={`inline-block rounded-full px-3 py-1 text-sm font-medium ${statusColor}`}>
+      {statusLabel}
+    </span>
+  </div>
+
+  {/* Traits grid */}
+  <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+    {cat.race && (
+      <>
+        <dt class="font-medium text-text-muted">{t(locale, 'cat.race')}</dt>
+        <dd class="text-text">{cat.race}</dd>
+      </>
+    )}
+    {ageText && (
+      <>
+        <dt class="font-medium text-text-muted">{t(locale, 'cat.age')}</dt>
+        <dd class="text-text">{ageText}</dd>
+      </>
+    )}
+    <>
+      <dt class="font-medium text-text-muted">{t(locale, 'cat.gender')}</dt>
+      <dd class="text-text">{genderLabel}</dd>
+    </>
+    <>
+      <dt class="font-medium text-text-muted">{t(locale, 'cat.size')}</dt>
+      <dd class="text-text">{sizeLabel}</dd>
+    </>
+    {weightText && (
+      <>
+        <dt class="font-medium text-text-muted">{t(locale, 'cat.weight')}</dt>
+        <dd class="text-text">{weightText}</dd>
+      </>
+    )}
+    <>
+      <dt class="font-medium text-text-muted">{t(locale, 'cat.healthStatus')}</dt>
+      <dd class="text-text">{healthLabel}</dd>
+    </>
+    {cat.rescueDate && (
+      <>
+        <dt class="font-medium text-text-muted">{t(locale, 'cat.rescueDate')}</dt>
+        <dd class="text-text">{new Date(cat.rescueDate).toLocaleDateString(locale === 'ca' ? 'ca-ES' : 'es-ES')}</dd>
+      </>
+    )}
+  </dl>
+
+  {/* Personality tags */}
+  {cat.personality?.length > 0 && (
+    <div class="mt-4">
+      <h4 class="mb-2 text-sm font-medium text-text-muted">{t(locale, 'cat.personality')}</h4>
+      <div class="flex flex-wrap gap-2">
+        {cat.personality.map((trait) => {
+          const traitKey = `cat.personality.${trait}` as const;
+          return (
+            <span class="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
+              {t(locale, traitKey as any)}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  )}
+
+  {/* Good with tags */}
+  {cat.goodWith?.length > 0 && (
+    <div class="mt-4">
+      <h4 class="mb-2 text-sm font-medium text-text-muted">{t(locale, 'cat.goodWith')}</h4>
+      <div class="flex flex-wrap gap-2">
+        {cat.goodWith.map((item) => {
+          const itemKey = `cat.goodWith.${item}` as const;
+          return (
+            <span class="rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
+              {t(locale, itemKey as any)}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  )}
+
+  {/* Medical info */}
+  <div class="mt-4 border-t border-primary/10 pt-4">
+    <div class="flex flex-wrap gap-4 text-sm">
+      <span class={cat.vaccinated ? 'text-green-700' : 'text-text-muted'}>
+        {cat.vaccinated ? '\u2713' : '\u2717'} {t(locale, 'cat.vaccinated')}
+      </span>
+      <span class={cat.microchipped ? 'text-green-700' : 'text-text-muted'}>
+        {cat.microchipped ? '\u2713' : '\u2717'} {t(locale, 'cat.microchipped')}
+      </span>
+      <span class={cat.sterilized ? 'text-green-700' : 'text-text-muted'}>
+        {cat.sterilized ? '\u2713' : '\u2717'} {t(locale, 'cat.sterilized')}
+      </span>
+    </div>
+  </div>
+
+  {/* Special needs */}
+  {cat.specialNeeds && (
+    <div class="mt-4 rounded-lg bg-amber-50 p-3">
+      <p class="text-sm text-amber-800">{cat.specialNeeds}</p>
+    </div>
+  )}
+</div>
