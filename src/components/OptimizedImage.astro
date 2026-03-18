@@ -1,0 +1,35 @@
+---
+import { imageUrl, generateSrcset, DEFAULT_WIDTHS, DEFAULT_SIZES } from '../lib/image-utils';
+
+interface Props {
+  src: string;
+  alt: string;
+  widths?: number[];
+  sizes?: string;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+}
+
+const {
+  src,
+  alt,
+  widths = DEFAULT_WIDTHS,
+  sizes = DEFAULT_SIZES,
+  class: className,
+  loading = 'lazy',
+} = Astro.props;
+
+const isDev = import.meta.env.DEV;
+const srcset = generateSrcset(src, widths, isDev);
+const fallbackSrc = imageUrl(src, widths[widths.length - 1], isDev);
+---
+
+<img
+  src={fallbackSrc}
+  srcset={srcset}
+  sizes={sizes}
+  alt={alt}
+  class={className}
+  loading={loading}
+  decoding="async"
+/>
