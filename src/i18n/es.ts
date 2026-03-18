@@ -78,6 +78,30 @@ const es: Record<TranslationKey, string> = {
   'cats.filterPersonality': 'Personalidad',
   'cats.filterAll': 'Todos',
 
+  // Forms
+  'form.name': 'Nombre',
+  'form.email': 'Correo electronico',
+  'form.message': 'Mensaje',
+  'form.phone': 'Telefono',
+  'form.livingSituation': 'Situacion de vivienda',
+  'form.submit': 'Enviar',
+  'form.sending': 'Enviando...',
+  'form.success.contact': 'Gracias por contactar con nosotros! Te responderemos pronto.',
+  'form.success.adoption': 'Gracias por tu interes en adoptar a {catName}! Te contactaremos pronto.',
+  'form.error.required': 'Este campo es obligatorio',
+  'form.error.invalidEmail': 'El correo electronico no es valido',
+  'form.error.server': 'Ha ocurrido un error. Intentalo de nuevo.',
+  'form.error.rateLimited': 'Has enviado demasiados mensajes. Intentalo mas tarde.',
+  'form.livingSituation.flat': 'Piso',
+  'form.livingSituation.house': 'Casa',
+  'form.livingSituation.houseGarden': 'Casa con jardin',
+  'form.livingSituation.rural': 'Entorno rural',
+  'form.livingSituation.other': 'Otros',
+
+  // Contact page
+  'contact.title': 'Contacto',
+  'contact.subtitle': 'Tienes alguna pregunta o quieres saber mas sobre nosotros? Escribenos!',
+
   // Footer
   'footer.shelter': 'Protectora de animales',
   'footer.socialLinks': 'Redes sociales',

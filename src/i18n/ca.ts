@@ -76,6 +76,30 @@ const ca = {
   'cats.filterPersonality': 'Personalitat',
   'cats.filterAll': 'Tots',
 
+  // Forms
+  'form.name': 'Nom',
+  'form.email': 'Correu electronic',
+  'form.message': 'Missatge',
+  'form.phone': 'Telefon',
+  'form.livingSituation': 'Situacio de vivenda',
+  'form.submit': 'Enviar',
+  'form.sending': 'Enviant...',
+  'form.success.contact': 'Gracies per contactar amb nosaltres! Et respondrem aviat.',
+  'form.success.adoption': 'Gracies pel teu interes en adoptar {catName}! Et contactarem aviat.',
+  'form.error.required': 'Aquest camp es obligatori',
+  'form.error.invalidEmail': 'El correu electronic no es valid',
+  'form.error.server': 'Hi ha hagut un error. Torna-ho a provar.',
+  'form.error.rateLimited': 'Has enviat massa missatges. Torna-ho a provar mes tard.',
+  'form.livingSituation.flat': 'Pis',
+  'form.livingSituation.house': 'Casa',
+  'form.livingSituation.houseGarden': 'Casa amb jardi',
+  'form.livingSituation.rural': 'Entorn rural',
+  'form.livingSituation.other': 'Altres',
+
+  // Contact page
+  'contact.title': 'Contacte',
+  'contact.subtitle': 'Tens alguna pregunta o vols saber mes sobre nosaltres? Escriu-nos!',
+
   // Footer
   'footer.shelter': 'Protectora d\'animals',
   'footer.socialLinks': 'Xarxes socials',

@@ -5,3 +5,9 @@ compatibility_flags = ["nodejs_compat"]
 [[r2_buckets]]
 binding = "IMAGES_BUCKET"
 bucket_name = "animals-vida-digna-images"
+
+[[unsafe.bindings]]
+name = "FORM_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 5, period = 60 }
