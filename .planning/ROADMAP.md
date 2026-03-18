@@ -12,7 +12,7 @@ Rebuild the Animals Vida Digna cat shelter website from Next.js + Payload CMS to
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation, CMS & i18n** - Astro + Keystatic + Cloudflare skeleton with content model and bilingual routing
+- [x] **Phase 1: Foundation, CMS & i18n** - Astro + Keystatic + Cloudflare skeleton with content model and bilingual routing (completed 2026-03-18)
 - [ ] **Phase 2: Public Pages & Cats Directory** - Landing page sections, cat listing/detail pages, and donation CTAs
 - [ ] **Phase 3: Forms, Images & Media** - Contact/adoption forms via Resend, R2 image pipeline, and gallery component
 - [ ] **Phase 4: SEO, Accessibility & Performance** - Full SEO markup, WCAG AA compliance, and Lighthouse 95+ scores
@@ -92,7 +92,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation, CMS & i18n | 0/3 | Not started | - |
+| 1. Foundation, CMS & i18n | 3/3 | Complete   | 2026-03-18 |
 | 2. Public Pages & Cats Directory | 0/3 | Not started | - |
 | 3. Forms, Images & Media | 0/2 | Not started | - |
 | 4. SEO, Accessibility & Performance | 0/2 | Not started | - |

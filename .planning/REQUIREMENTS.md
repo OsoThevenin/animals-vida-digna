@@ -14,11 +14,11 @@
 
 ### Internationalization
 
-- [ ] **I18N-01**: Catalan content served at root paths (/, /cats, /cat/[slug])
-- [ ] **I18N-02**: Spanish content served under /es paths (/es, /es/cats, /es/cat/[slug])
-- [ ] **I18N-03**: Language switcher deep-links to the alternate locale's equivalent page/slug
-- [ ] **I18N-04**: UI strings localized via TypeScript translation dictionaries (CA/ES)
-- [ ] **I18N-05**: No automatic language redirect — user chooses explicitly
+- [x] **I18N-01**: Catalan content served at root paths (/, /cats, /cat/[slug])
+- [x] **I18N-02**: Spanish content served under /es paths (/es, /es/cats, /es/cat/[slug])
+- [x] **I18N-03**: Language switcher deep-links to the alternate locale's equivalent page/slug
+- [x] **I18N-04**: UI strings localized via TypeScript translation dictionaries (CA/ES)
+- [x] **I18N-05**: No automatic language redirect — user chooses explicitly
 
 ### CMS Content Model
 
@@ -132,11 +132,11 @@
 | FOUND-02 | Phase 1 | Complete |
 | FOUND-03 | Phase 1 | Pending |
 | FOUND-04 | Phase 1 | Complete |
-| I18N-01 | Phase 1 | Pending |
-| I18N-02 | Phase 1 | Pending |
-| I18N-03 | Phase 1 | Pending |
-| I18N-04 | Phase 1 | Pending |
-| I18N-05 | Phase 1 | Pending |
+| I18N-01 | Phase 1 | Complete |
+| I18N-02 | Phase 1 | Complete |
+| I18N-03 | Phase 1 | Complete |
+| I18N-04 | Phase 1 | Complete |
+| I18N-05 | Phase 1 | Complete |
 | CMS-01 | Phase 1 | Pending |
 | CMS-02 | Phase 1 | Pending |
 | CMS-03 | Phase 1 | Pending |
