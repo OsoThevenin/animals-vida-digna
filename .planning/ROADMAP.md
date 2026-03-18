@@ -49,7 +49,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Landing page with all CMS section components, donate URL wiring, sticky CTA, and featured cats
+- [x] 02-01-PLAN.md — Landing page with all CMS section components, donate URL wiring, sticky CTA, and featured cats
 - [ ] 02-02-PLAN.md — Cats listing with SSR and Preact filter island, cat detail pages with gallery lightbox
 
 ### Phase 3: Forms, Images & Media
@@ -92,6 +92,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation, CMS & i18n | 3/3 | Complete    | 2026-03-18 |
-| 2. Public Pages & Cats Directory | 0/2 | Not started | - |
+| 2. Public Pages & Cats Directory | 1/2 | In progress | - |
 | 3. Forms, Images & Media | 0/2 | Not started | - |
 | 4. SEO, Accessibility & Performance | 0/2 | Not started | - |

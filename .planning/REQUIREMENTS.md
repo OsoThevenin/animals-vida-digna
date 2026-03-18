@@ -34,23 +34,23 @@
 - [ ] **CATS-02**: SSR base for cats listing ensuring SEO crawlability of all cat entries
 - [ ] **CATS-03**: Cat detail pages at /cat/[slug_ca] and /es/cat/[slug_es] with cover image, gallery, traits, and MDX description
 - [ ] **CATS-04**: Lightbox/gallery component with keyboard navigation and reduced-motion support
-- [ ] **CATS-05**: Featured cats displayed on homepage from CMS-flagged entries
+- [x] **CATS-05**: Featured cats displayed on homepage from CMS-flagged entries
 
 ### Landing Page
 
-- [ ] **LAND-01**: Landing page renders all CMS-configured sections in editor-defined order
-- [ ] **LAND-02**: Hero section with CTA (donate + adopt) and hero image
-- [ ] **LAND-03**: About/Qui Som section with shelter mission and team info
-- [ ] **LAND-04**: Stats/impact section with CMS-editable numbers
-- [ ] **LAND-05**: Colony information section
-- [ ] **LAND-06**: Collaboration/volunteer section with CTA
-- [ ] **LAND-07**: Contact section with form or CTA
+- [x] **LAND-01**: Landing page renders all CMS-configured sections in editor-defined order
+- [x] **LAND-02**: Hero section with CTA (donate + adopt) and hero image
+- [x] **LAND-03**: About/Qui Som section with shelter mission and team info
+- [x] **LAND-04**: Stats/impact section with CMS-editable numbers
+- [x] **LAND-05**: Colony information section
+- [x] **LAND-06**: Collaboration/volunteer section with CTA
+- [x] **LAND-07**: Contact section with form or CTA
 
 ### Donations
 
-- [ ] **DONA-01**: Teaming donation link visible in header, hero, and footer
-- [ ] **DONA-02**: Donate URL is CMS-configurable in site settings
-- [ ] **DONA-03**: Sticky donate CTA on scroll (interactive island)
+- [x] **DONA-01**: Teaming donation link visible in header, hero, and footer
+- [x] **DONA-02**: Donate URL is CMS-configurable in site settings
+- [x] **DONA-03**: Sticky donate CTA on scroll (interactive island)
 
 ### Forms & Email
 
@@ -146,17 +146,17 @@
 | CATS-02 | Phase 2 | Pending |
 | CATS-03 | Phase 2 | Pending |
 | CATS-04 | Phase 2 | Pending |
-| CATS-05 | Phase 2 | Pending |
-| LAND-01 | Phase 2 | Pending |
-| LAND-02 | Phase 2 | Pending |
-| LAND-03 | Phase 2 | Pending |
-| LAND-04 | Phase 2 | Pending |
-| LAND-05 | Phase 2 | Pending |
-| LAND-06 | Phase 2 | Pending |
-| LAND-07 | Phase 2 | Pending |
-| DONA-01 | Phase 2 | Pending |
-| DONA-02 | Phase 2 | Pending |
-| DONA-03 | Phase 2 | Pending |
+| CATS-05 | Phase 2 | Complete |
+| LAND-01 | Phase 2 | Complete |
+| LAND-02 | Phase 2 | Complete |
+| LAND-03 | Phase 2 | Complete |
+| LAND-04 | Phase 2 | Complete |
+| LAND-05 | Phase 2 | Complete |
+| LAND-06 | Phase 2 | Complete |
+| LAND-07 | Phase 2 | Complete |
+| DONA-01 | Phase 2 | Complete |
+| DONA-02 | Phase 2 | Complete |
+| DONA-03 | Phase 2 | Complete |
 | FORM-01 | Phase 3 | Pending |
 | FORM-02 | Phase 3 | Pending |
 | FORM-03 | Phase 3 | Pending |
