@@ -32,9 +32,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Scaffold Astro 5 project with Cloudflare adapter, Tailwind v4 brand theme, R2 config, and Vitest infrastructure
-- [ ] 01-02-PLAN.md — Define all Keystatic CMS content schemas (settings, cats, landing, pages) with bilingual fields and reader API
-- [ ] 01-03-PLAN.md — Implement bilingual i18n routing, language switcher, base layout with header/footer
+- [x] 01-01-PLAN.md — Scaffold Astro 5 project with Cloudflare adapter, Tailwind v4 brand theme, R2 config, and Vitest infrastructure
+- [x] 01-02-PLAN.md — Define all Keystatic CMS content schemas (settings, cats, landing, pages) with bilingual fields and reader API
+- [x] 01-03-PLAN.md — Implement bilingual i18n routing, language switcher, base layout with header/footer
 
 ### Phase 2: Public Pages & Cats Directory
 **Goal**: Visitors can browse the full website -- landing page with all configurable sections, cat listing with filters, cat detail pages with galleries, and prominent donation CTAs
@@ -46,12 +46,11 @@ Plans:
   3. Cat detail pages show cover image, gallery with lightbox, traits, and full MDX description in the correct locale
   4. Teaming donation link appears in header, hero, and footer, plus a sticky donate CTA appears on scroll -- all with CMS-configurable URL
   5. Featured cats flagged in the CMS appear on the homepage
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md — Landing page with all CMS section components, donate URL wiring, sticky CTA, and featured cats
+- [ ] 02-02-PLAN.md — Cats listing with SSR and Preact filter island, cat detail pages with gallery lightbox
 
 ### Phase 3: Forms, Images & Media
 **Goal**: Visitors can submit contact and adoption forms that deliver emails via Resend, and all images flow through the R2 storage and Cloudflare Image Resizing pipeline
@@ -93,6 +92,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation, CMS & i18n | 3/3 | Complete    | 2026-03-18 |
-| 2. Public Pages & Cats Directory | 0/3 | Not started | - |
+| 2. Public Pages & Cats Directory | 0/2 | Not started | - |
 | 3. Forms, Images & Media | 0/2 | Not started | - |
 | 4. SEO, Accessibility & Performance | 0/2 | Not started | - |
