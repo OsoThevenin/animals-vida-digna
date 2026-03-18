@@ -62,11 +62,12 @@ Plans:
   3. Shelter staff can upload images through Keystatic that are stored in R2 via Worker-signed URLs
   4. Public images are served through Cloudflare Image Resizing with responsive srcsets, AVIF/WebP auto-format, and long-lived cache headers
   5. Below-fold images and gallery thumbnails lazy-load
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md — Contact form with shared validation/email infrastructure, Resend delivery, honeypot, and rate limiting
+- [ ] 03-02-PLAN.md — Adoption inquiry form inline on cat detail pages with cat name pre-fill
+- [ ] 03-03-PLAN.md — OptimizedImage component with Cloudflare Image Resizing and R2 sync script
 
 ### Phase 4: SEO, Accessibility & Performance
 **Goal**: The site meets all SEO, accessibility, and performance standards -- full hreflang/structured data, WCAG AA compliance, and Lighthouse 95+ on all categories
@@ -93,5 +94,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Foundation, CMS & i18n | 3/3 | Complete    | 2026-03-18 |
 | 2. Public Pages & Cats Directory | 2/2 | Complete    | 2026-03-18 |
-| 3. Forms, Images & Media | 0/2 | Not started | - |
+| 3. Forms, Images & Media | 0/3 | Not started | - |
 | 4. SEO, Accessibility & Performance | 0/2 | Not started | - |
