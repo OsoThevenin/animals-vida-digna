@@ -54,12 +54,12 @@
 
 ### Forms & Email
 
-- [ ] **FORM-01**: Contact form posts to Cloudflare Worker endpoint with Resend delivery
+- [x] **FORM-01**: Contact form posts to Cloudflare Worker endpoint with Resend delivery
 - [ ] **FORM-02**: Adoption inquiry form pre-fills cat name and posts to Worker with Resend
-- [ ] **FORM-03**: Form validation (client + server) with honeypot spam protection
-- [ ] **FORM-04**: Basic rate limiting on form submission endpoints
-- [ ] **FORM-05**: Localized success/error messages returned based on submission locale
-- [ ] **FORM-06**: Email templates with CA/ES variants
+- [x] **FORM-03**: Form validation (client + server) with honeypot spam protection
+- [x] **FORM-04**: Basic rate limiting on form submission endpoints
+- [x] **FORM-05**: Localized success/error messages returned based on submission locale
+- [x] **FORM-06**: Email templates with CA/ES variants
 
 ### SEO
 
@@ -157,12 +157,12 @@
 | DONA-01 | Phase 2 | Complete |
 | DONA-02 | Phase 2 | Complete |
 | DONA-03 | Phase 2 | Complete |
-| FORM-01 | Phase 3 | Pending |
+| FORM-01 | Phase 3 | Complete |
 | FORM-02 | Phase 3 | Pending |
-| FORM-03 | Phase 3 | Pending |
-| FORM-04 | Phase 3 | Pending |
-| FORM-05 | Phase 3 | Pending |
-| FORM-06 | Phase 3 | Pending |
+| FORM-03 | Phase 3 | Complete |
+| FORM-04 | Phase 3 | Complete |
+| FORM-05 | Phase 3 | Complete |
+| FORM-06 | Phase 3 | Complete |
 | IMG-01 | Phase 3 | Complete |
 | IMG-02 | Phase 3 | Complete |
 | IMG-03 | Phase 3 | Complete |

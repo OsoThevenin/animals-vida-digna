@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-03-PLAN.md
-last_updated: "2026-03-18T11:50:32.682Z"
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-03-18T11:53:01.398Z"
 last_activity: 2026-03-18 -- Plan 03-03 executed (image pipeline, OptimizedImage component, R2 sync)
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
   percent: 75
 ---
 
@@ -52,6 +52,7 @@ Progress: [████████░░] 75%
 
 *Updated after each plan completion*
 | Phase 03 P03 | 2min | 2 tasks | 5 files |
+| Phase 03 P01 | 4min | 2 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,9 @@ Recent decisions affecting current work:
 - [Phase 03-03]: Pure image URL logic in src/lib/image-utils.ts for testability, imported by Astro component
 - [Phase 03-03]: No picture element needed -- Cloudflare format=auto handles AVIF/WebP negotiation
 - [Phase 03-03]: sync-images uses wrangler CLI (execSync) rather than aws4fetch SDK for simplicity
+- [Phase 03-01]: Resend SDK dynamically imported in API endpoint to avoid build-time bundling issues
+- [Phase 03-01]: Validation returns error keys not locale strings for API/client flexibility
+- [Phase 03-01]: API endpoint pattern: prerender=false, FormData, honeypot, rate limiting, JSON response
 
 ### Pending Todos
 
@@ -89,6 +93,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T11:50:32.679Z
-Stopped at: Completed 03-03-PLAN.md
+Last session: 2026-03-18T11:53:01.395Z
+Stopped at: Completed 03-01-PLAN.md
 Resume file: None
