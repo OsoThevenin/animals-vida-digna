@@ -1,6 +1,7 @@
 ---
 import type { Locale } from '../../i18n/index';
 import { t } from '../../i18n/index';
+import OptimizedImage from '../OptimizedImage.astro';
 
 interface CatData {
   name: string;
@@ -38,11 +39,12 @@ const statusColor = statusColors[cat.status] ?? 'bg-gray-100 text-gray-600';
 >
   {cat.coverImage?.src ? (
     <div class="aspect-[4/3] overflow-hidden">
-      <img
+      <OptimizedImage
         src={cat.coverImage.src}
         alt={cat.coverImage.alt || cat.name}
         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         loading="lazy"
+        sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, 33vw"
       />
     </div>
   ) : (

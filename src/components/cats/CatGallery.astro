@@ -1,4 +1,6 @@
 ---
+import OptimizedImage from '../OptimizedImage.astro';
+
 interface Props {
   images: Array<{ src: string; alt: string }>;
   catName: string;
@@ -16,11 +18,12 @@ const { images, catName } = Astro.props;
           class="lightbox group overflow-hidden rounded-lg"
           data-group="cat-gallery"
         >
-          <img
+          <OptimizedImage
             src={img.src}
             alt={img.alt || `${catName} - ${i + 1}`}
             loading="lazy"
             class="aspect-square h-full w-full rounded-lg object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 768px) 50vw, 25vw"
           />
         </a>
       ))}

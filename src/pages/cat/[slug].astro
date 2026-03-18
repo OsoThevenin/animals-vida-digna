@@ -8,6 +8,7 @@ import { getLocalizedCat } from '../../i18n/content';
 import { t } from '../../i18n/index';
 import { renderMarkdoc } from '../../lib/markdoc';
 import { generateCatPathsCa } from '../../lib/cat-routes';
+import OptimizedImage from '../../components/OptimizedImage.astro';
 
 const locale = 'ca' as const;
 
@@ -77,10 +78,12 @@ const adoptionFormTranslations = {
     {/* Cover image */}
     {cat.coverImage?.src && (
       <div class="mb-8 overflow-hidden rounded-2xl">
-        <img
+        <OptimizedImage
           src={cat.coverImage.src}
           alt={cat.coverImage.alt || cat.name}
           class="h-64 w-full object-cover sm:h-80 lg:h-96"
+          loading="eager"
+          sizes="100vw"
         />
       </div>
     )}
