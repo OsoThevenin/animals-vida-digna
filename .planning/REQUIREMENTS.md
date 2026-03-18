@@ -55,7 +55,7 @@
 ### Forms & Email
 
 - [x] **FORM-01**: Contact form posts to Cloudflare Worker endpoint with Resend delivery
-- [ ] **FORM-02**: Adoption inquiry form pre-fills cat name and posts to Worker with Resend
+- [x] **FORM-02**: Adoption inquiry form pre-fills cat name and posts to Worker with Resend
 - [x] **FORM-03**: Form validation (client + server) with honeypot spam protection
 - [x] **FORM-04**: Basic rate limiting on form submission endpoints
 - [x] **FORM-05**: Localized success/error messages returned based on submission locale
@@ -158,7 +158,7 @@
 | DONA-02 | Phase 2 | Complete |
 | DONA-03 | Phase 2 | Complete |
 | FORM-01 | Phase 3 | Complete |
-| FORM-02 | Phase 3 | Pending |
+| FORM-02 | Phase 3 | Complete |
 | FORM-03 | Phase 3 | Complete |
 | FORM-04 | Phase 3 | Complete |
 | FORM-05 | Phase 3 | Complete |
