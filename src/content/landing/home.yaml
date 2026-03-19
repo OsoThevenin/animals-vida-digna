@@ -1,0 +1,86 @@
+sections:
+  - discriminant: hero
+    value:
+      title_ca: Doneu una llar a un gat
+      title_es: Dale un hogar a un gato
+      subtitle_ca: >-
+        Som una protectora dedicada al rescat i cura de gats abandonats a
+        Catalunya. Cada gat mereix una vida digna.
+      subtitle_es: >-
+        Somos una protectora dedicada al rescate y cuidado de gatos abandonados
+        en Catalunya. Cada gato merece una vida digna.
+      image:
+        src: null
+        alt_ca: ''
+        alt_es: ''
+      ctaAdoptText_ca: Adopta'm
+      ctaAdoptText_es: Adoptame
+      ctaDonateText_ca: Fes un donatiu
+      ctaDonateText_es: Haz un donativo
+  - discriminant: about
+    value:
+      title_ca: Qui som
+      title_es: Quienes somos
+      content_ca: null
+      content_es: null
+      image:
+        src: null
+        alt_ca: ''
+        alt_es: ''
+  - discriminant: stats
+    value:
+      title_ca: En xifres
+      title_es: En cifras
+      items:
+        - label_ca: Gats rescatats
+          label_es: Gatos rescatados
+          value: '+120'
+        - label_ca: Adopcions
+          label_es: Adopciones
+          value: '85'
+        - label_ca: Voluntaris
+          label_es: Voluntarios
+          value: '30'
+        - label_ca: Colonies gestionades
+          label_es: Colonias gestionadas
+          value: '8'
+  - discriminant: colonies
+    value:
+      title_ca: Colonies felines
+      title_es: Colonias felinas
+      content_ca: null
+      content_es: null
+      image:
+        src: null
+        alt_ca: ''
+        alt_es: ''
+  - discriminant: adopt
+    value:
+      title_ca: Adopta un gat
+      title_es: Adopta un gato
+      subtitle_ca: >-
+        Dona una segona oportunitat a un gat que necessita una llar. Tots els
+        nostres gats estan vacunats, esterilitzats i microxipats.
+      subtitle_es: >-
+        Dale una segunda oportunidad a un gato que necesita un hogar. Todos
+        nuestros gatos estan vacunados, esterilizados y con microchip.
+  - discriminant: collaborate
+    value:
+      title_ca: Col-labora
+      title_es: Colabora
+      content_ca: null
+      content_es: null
+      ctaText_ca: Contacta'ns
+      ctaText_es: Contactanos
+  - discriminant: contactCta
+    value:
+      title_ca: Contacta'ns
+      title_es: Contactanos
+      subtitle_ca: >-
+        Tens alguna pregunta o vols col-laborar amb nosaltres? No dubtis en
+        posar-te en contacte.
+      subtitle_es: >-
+        Tienes alguna pregunta o quieres colaborar con nosotros? No dudes en
+        ponerte en contacto.
+      ctaText_ca: Envia un missatge
+      ctaText_es: Envia un mensaje

@@ -1,0 +1,23 @@
+siteName_ca: Animals Vida Digna
+siteName_es: Animals Vida Digna
+logo: null
+primaryColor: '#8B6F47'
+donateUrl: 'https://www.teaming.net/animalsvidadigna'
+contactEmail: info@animalsvidadigna.org
+social:
+  facebook: 'https://facebook.com/animalsvidadigna'
+  instagram: 'https://instagram.com/animalsvidadigna'
+  twitter: null
+seo:
+  title_ca: Animals Vida Digna - Protectora de gats a Catalunya
+  title_es: Animals Vida Digna - Protectora de gatos en Catalunya
+  description_ca: >-
+    Protectora d'animals dedicada al rescat, cura i adopcio de gats abandonats a
+    Catalunya. Ajuda'ns a donar-los una vida digna.
+  description_es: >-
+    Protectora de animales dedicada al rescate, cuidado y adopcion de gatos
+    abandonados en Catalunya. Ayudanos a darles una vida digna.
+  image:
+    src: null
+    alt_ca: ''
+    alt_es: ''
