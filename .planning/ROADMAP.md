@@ -77,14 +77,15 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Every page has correct localized meta tags, Open Graph tags, and hreflang tags pointing to both CA and ES variants
   2. Sitemap.xml includes all pages in both locales with hreflang alternate links, and robots.txt is correctly generated
-  3. JSON-LD structured data (Organization, per-cat Animal) renders with correct inLanguage values
+  3. JSON-LD structured data (Organization, per-cat Thing) renders with correct inLanguage values
   4. All text/background combinations pass WCAG AA contrast, all interactive elements have visible focus states, and the entire site is keyboard-navigable including modals and gallery
   5. Lighthouse scores >= 95 on Performance, Accessibility, Best Practices, and SEO for mobile in both locales
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md — SEO markup: canonical, OG tags, hreflang, @astrojs/sitemap, robots.txt, JSON-LD structured data
+- [ ] 04-02-PLAN.md — Accessibility: WCAG AA contrast fixes, focus-visible styles, skip-to-content, mobile menu ARIA, OptimizedImage dimensions
+- [ ] 04-03-PLAN.md — Performance: font stack cleanup, manual Lighthouse 95+ verification checkpoint
 
 ## Progress
 
@@ -96,4 +97,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Foundation, CMS & i18n | 3/3 | Complete    | 2026-03-18 |
 | 2. Public Pages & Cats Directory | 2/2 | Complete    | 2026-03-18 |
 | 3. Forms, Images & Media | 4/4 | Complete   | 2026-03-18 |
-| 4. SEO, Accessibility & Performance | 0/2 | Not started | - |
+| 4. SEO, Accessibility & Performance | 0/3 | Not started | - |
