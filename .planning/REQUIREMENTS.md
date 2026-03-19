@@ -63,12 +63,12 @@
 
 ### SEO
 
-- [ ] **SEO-01**: Per-page and per-cat meta tags (title, description, canonical) with localized values
-- [ ] **SEO-02**: Open Graph tags with localized title/description/image per page and per cat
-- [ ] **SEO-03**: hreflang tags (ca, es, x-default) on every page
-- [ ] **SEO-04**: Sitemap.xml with xhtml:link rel="alternate" hreflang entries for both locales
-- [ ] **SEO-05**: robots.txt generated correctly
-- [ ] **SEO-06**: JSON-LD structured data (Organization, per-cat Animal/Product) with inLanguage
+- [x] **SEO-01**: Per-page and per-cat meta tags (title, description, canonical) with localized values
+- [x] **SEO-02**: Open Graph tags with localized title/description/image per page and per cat
+- [x] **SEO-03**: hreflang tags (ca, es, x-default) on every page
+- [x] **SEO-04**: Sitemap.xml with xhtml:link rel="alternate" hreflang entries for both locales
+- [x] **SEO-05**: robots.txt generated correctly
+- [x] **SEO-06**: JSON-LD structured data (Organization, per-cat Animal/Product) with inLanguage
 
 ### Images & Performance
 
@@ -168,12 +168,12 @@
 | IMG-03 | Phase 3 | Complete |
 | IMG-04 | Phase 3 | Complete |
 | IMG-05 | Phase 3 | Complete |
-| SEO-01 | Phase 4 | Pending |
-| SEO-02 | Phase 4 | Pending |
-| SEO-03 | Phase 4 | Pending |
-| SEO-04 | Phase 4 | Pending |
-| SEO-05 | Phase 4 | Pending |
-| SEO-06 | Phase 4 | Pending |
+| SEO-01 | Phase 4 | Complete |
+| SEO-02 | Phase 4 | Complete |
+| SEO-03 | Phase 4 | Complete |
+| SEO-04 | Phase 4 | Complete |
+| SEO-05 | Phase 4 | Complete |
+| SEO-06 | Phase 4 | Complete |
 | A11Y-01 | Phase 4 | Pending |
 | A11Y-02 | Phase 4 | Pending |
 | A11Y-03 | Phase 4 | Pending |
