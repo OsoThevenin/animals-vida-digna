@@ -68,7 +68,7 @@ Plans:
 - [x] 03-01-PLAN.md — Contact form with shared validation/email infrastructure, Resend delivery, honeypot, and rate limiting
 - [x] 03-02-PLAN.md — Adoption inquiry form inline on cat detail pages with cat name pre-fill
 - [x] 03-03-PLAN.md — OptimizedImage component with Cloudflare Image Resizing and R2 sync script
-- [ ] 03-04-PLAN.md — Wire OptimizedImage into all cat image rendering (gap closure)
+- [x] 03-04-PLAN.md — Wire OptimizedImage into all cat image rendering (gap closure)
 
 ### Phase 4: SEO, Accessibility & Performance
 **Goal**: The site meets all SEO, accessibility, and performance standards -- full hreflang/structured data, WCAG AA compliance, and Lighthouse 95+ on all categories
@@ -80,12 +80,14 @@ Plans:
   3. JSON-LD structured data (Organization, per-cat Thing) renders with correct inLanguage values
   4. All text/background combinations pass WCAG AA contrast, all interactive elements have visible focus states, and the entire site is keyboard-navigable including modals and gallery
   5. Lighthouse scores >= 95 on Performance, Accessibility, Best Practices, and SEO for mobile in both locales
-**Plans**: 3 plans
+**Plans**: 5 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — SEO markup: canonical, OG tags, hreflang, @astrojs/sitemap, robots.txt, JSON-LD structured data
-- [ ] 04-02-PLAN.md — Accessibility: WCAG AA contrast fixes, focus-visible styles, skip-to-content, mobile menu ARIA, OptimizedImage dimensions
-- [ ] 04-03-PLAN.md — Performance: font stack cleanup, manual Lighthouse 95+ verification checkpoint
+- [x] 04-01-PLAN.md — SEO markup: canonical, OG tags, hreflang, @astrojs/sitemap, robots.txt, JSON-LD structured data
+- [x] 04-02-PLAN.md — Accessibility: WCAG AA contrast fixes, focus-visible styles, skip-to-content, mobile menu ARIA, OptimizedImage dimensions
+- [x] 04-03-PLAN.md — Performance: font stack cleanup, manual Lighthouse 95+ verification checkpoint
+- [ ] 04-04-PLAN.md — Create missing robots.txt (gap closure)
+- [ ] 04-05-PLAN.md — Lighthouse score confirmation checkpoint (gap closure)
 
 ## Progress
 
@@ -97,4 +99,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Foundation, CMS & i18n | 3/3 | Complete    | 2026-03-18 |
 | 2. Public Pages & Cats Directory | 2/2 | Complete    | 2026-03-18 |
 | 3. Forms, Images & Media | 4/4 | Complete   | 2026-03-18 |
-| 4. SEO, Accessibility & Performance | 0/3 | Not started | - |
+| 4. SEO, Accessibility & Performance | 3/5 | In progress | - |
