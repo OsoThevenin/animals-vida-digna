@@ -8,6 +8,8 @@ interface Props {
   sizes?: string;
   class?: string;
   loading?: 'lazy' | 'eager';
+  width?: number;
+  height?: number;
 }
 
 const {
@@ -17,6 +19,8 @@ const {
   sizes = DEFAULT_SIZES,
   class: className,
   loading = 'lazy',
+  width = widths[widths.length - 1],
+  height,
 } = Astro.props;
 
 const isDev = import.meta.env.DEV;
@@ -32,4 +36,6 @@ const fallbackSrc = imageUrl(src, widths[widths.length - 1], isDev);
   class={className}
   loading={loading}
   decoding="async"
+  width={width}
+  {...(height ? { height } : {})}
 />

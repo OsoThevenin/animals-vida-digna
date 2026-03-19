@@ -106,6 +106,9 @@ const es: Record<TranslationKey, string> = {
   'contact.title': 'Contacto',
   'contact.subtitle': 'Tienes alguna pregunta o quieres saber mas sobre nosotros? Escribenos!',
 
+  // Accessibility
+  'a11y.skipToContent': 'Saltar al contenido',
+
   // Footer
   'footer.shelter': 'Protectora de animales',
   'footer.socialLinks': 'Redes sociales',

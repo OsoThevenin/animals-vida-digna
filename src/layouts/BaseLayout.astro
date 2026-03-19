@@ -61,8 +61,14 @@ const orgSchema = buildOrganizationSchema({
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body class="flex min-h-screen flex-col bg-surface font-sans text-text">
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-surface focus:outline-none"
+    >
+      {t(locale, 'a11y.skipToContent')}
+    </a>
     <Header locale={locale} currentUrl={currentUrl} donateUrl={donateUrl} />
-    <main class="flex-1">
+    <main id="main-content" class="flex-1">
       <slot />
     </main>
     <Footer locale={locale} donateUrl={donateUrl} />

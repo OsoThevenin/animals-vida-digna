@@ -104,6 +104,9 @@ const ca = {
   'contact.title': 'Contacte',
   'contact.subtitle': 'Tens alguna pregunta o vols saber mes sobre nosaltres? Escriu-nos!',
 
+  // Accessibility
+  'a11y.skipToContent': 'Saltar al contingut',
+
   // Footer
   'footer.shelter': 'Protectora d\'animals',
   'footer.socialLinks': 'Xarxes socials',
