@@ -102,7 +102,7 @@ const weightText = cat.weight != null ? `${cat.weight} ${t(locale, 'cat.kg')}` :
         {cat.personality.map((trait) => {
           const traitKey = `cat.personality.${trait}` as const;
           return (
-            <span class="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
+            <span class="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-primary-dark">
               {t(locale, traitKey as any)}
             </span>
           );
