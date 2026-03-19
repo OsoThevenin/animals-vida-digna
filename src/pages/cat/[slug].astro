@@ -3,9 +3,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import CatTraits from '../../components/cats/CatTraits.astro';
 import CatGallery from '../../components/cats/CatGallery.astro';
 import AdoptionForm from '../../components/forms/AdoptionForm.tsx';
+import { buildCanonicalUrl, buildCatSchema } from '../../lib/seo';
 import { reader } from '../../lib/keystatic';
 import { getLocalizedCat } from '../../i18n/content';
-import { t } from '../../i18n/index';
+import { t, getAlternateUrl } from '../../i18n/index';
 import { renderMarkdoc } from '../../lib/markdoc';
 import { generateCatPathsCa } from '../../lib/cat-routes';
 import OptimizedImage from '../../components/OptimizedImage.astro';
@@ -47,6 +48,19 @@ const donateUrl = settings?.donateUrl ?? '#';
 const seoTitle = cat.seo?.title || cat.name;
 const seoDescription = cat.seo?.description || cat.shortDescription || '';
 
+const site = Astro.site?.href?.replace(/\/$/, '') || 'https://animalsvidadigna.org';
+const canonicalUrl = buildCanonicalUrl(Astro.url.pathname, site);
+const alternateUrl = buildCanonicalUrl(getAlternateUrl(Astro.url, 'es'), site);
+const catJsonLd = buildCatSchema({
+  name: cat.name,
+  description: seoDescription,
+  image: cat.coverImage?.src
+    ? new URL(`/cdn-cgi/image/format=auto,width=1200/${cat.coverImage.src.replace(/^\//, '')}`, site).href
+    : '',
+  url: canonicalUrl,
+  inLanguage: locale,
+});
+
 const adoptionFormTranslations = {
   name: t(locale, 'form.name'),
   email: t(locale, 'form.email'),
@@ -68,7 +82,7 @@ const adoptionFormTranslations = {
 };
 ---
 
-<BaseLayout title={seoTitle} description={seoDescription} donateUrl={donateUrl}>
+<BaseLayout title={seoTitle} description={seoDescription} donateUrl={donateUrl} canonicalUrl={canonicalUrl} alternateUrl={alternateUrl} jsonLd={catJsonLd}>
   <article class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
     {/* Back link */}
     <a href="/cats" class="mb-6 inline-flex items-center gap-1 text-sm text-accent hover:text-accent/80">

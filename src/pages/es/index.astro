@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { buildCanonicalUrl } from '../../lib/seo';
+import { getAlternateUrl } from '../../i18n/index';
 import { reader } from '../../lib/keystatic';
 import { getLocalizedField } from '../../i18n/content';
 import HeroSection from '../../components/landing/HeroSection.astro';
@@ -21,9 +23,13 @@ const seoTitle = settings?.seo?.title_es || 'Inicio';
 const seoDescription = settings?.seo?.description_es || 'Protectora de animales en Catalunya';
 
 const sections = landing?.sections ?? [];
+
+const site = Astro.site?.href?.replace(/\/$/, '') || 'https://animalsvidadigna.org';
+const canonicalUrl = buildCanonicalUrl(Astro.url.pathname, site);
+const alternateUrl = buildCanonicalUrl(getAlternateUrl(Astro.url, 'ca'), site);
 ---
 
-<BaseLayout title={seoTitle} description={seoDescription} donateUrl={donateUrl}>
+<BaseLayout title={seoTitle} description={seoDescription} donateUrl={donateUrl} canonicalUrl={canonicalUrl} alternateUrl={alternateUrl}>
   {sections.map((section) => {
     switch (section.discriminant) {
       case 'hero':

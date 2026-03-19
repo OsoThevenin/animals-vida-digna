@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import tailwindcss from '@tailwindcss/vite';
 import preact from '@astrojs/preact';
+import sitemap from '@astrojs/sitemap';
 
 const integrations = [];
 
@@ -13,6 +14,18 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 integrations.push(preact());
+
+integrations.push(
+  sitemap({
+    i18n: {
+      defaultLocale: 'ca',
+      locales: {
+        ca: 'ca',
+        es: 'es',
+      },
+    },
+  })
+);
 
 export default defineConfig({
   adapter: cloudflare(),

@@ -2,9 +2,10 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CatCard from '../../components/cats/CatCard.astro';
 import CatFilters from '../../components/cats/CatFilters.tsx';
+import { buildCanonicalUrl } from '../../lib/seo';
 import { reader } from '../../lib/keystatic';
 import { getLocalizedCat } from '../../i18n/content';
-import { t } from '../../i18n/index';
+import { t, getAlternateUrl } from '../../i18n/index';
 import type { CatFilterData } from '../../lib/cat-filters';
 
 const locale = 'ca' as const;
@@ -67,9 +68,13 @@ const translations = {
   personalityProtective: t(locale, 'cat.personality.protective'),
   catsLabel: t(locale, 'cats.title'),
 };
+
+const site = Astro.site?.href?.replace(/\/$/, '') || 'https://animalsvidadigna.org';
+const canonicalUrl = buildCanonicalUrl(Astro.url.pathname, site);
+const alternateUrl = buildCanonicalUrl(getAlternateUrl(Astro.url, 'es'), site);
 ---
 
-<BaseLayout title={t(locale, 'cats.title')} donateUrl={donateUrl}>
+<BaseLayout title={t(locale, 'cats.title')} description={t(locale, 'cats.subtitle')} donateUrl={donateUrl} canonicalUrl={canonicalUrl} alternateUrl={alternateUrl}>
   <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
     <h1 class="mb-2 font-display text-3xl font-bold text-primary md:text-4xl">
       {t(locale, 'cats.title')}

@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
-import { getLocaleFromUrl, t } from '../i18n/index';
+import { getLocaleFromUrl, t, getAlternateUrl } from '../i18n/index';
+import { buildCanonicalUrl, buildOgMeta, buildHreflangLinks, buildOrganizationSchema } from '../lib/seo';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import DonateSticky from '../components/DonateSticky.tsx';
@@ -9,11 +10,36 @@ interface Props {
   title: string;
   description?: string;
   donateUrl?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+  alternateUrl?: string;
+  jsonLd?: object;
 }
 
-const { title, description, donateUrl = '#' } = Astro.props;
+const { title, description, donateUrl = '#', canonicalUrl, ogImage, alternateUrl, jsonLd } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url);
 const currentUrl = Astro.url.href;
+const site = Astro.site?.href?.replace(/\/$/, '') || 'https://animalsvidadigna.org';
+const resolvedCanonical = canonicalUrl || buildCanonicalUrl(Astro.url.pathname, site);
+const resolvedAlternate = alternateUrl || buildCanonicalUrl(
+  getAlternateUrl(Astro.url, locale === 'ca' ? 'es' : 'ca'),
+  site,
+);
+const hreflangLinks = buildHreflangLinks(resolvedCanonical, resolvedAlternate, locale);
+const ogMeta = description
+  ? buildOgMeta({
+      title,
+      description,
+      url: resolvedCanonical,
+      locale,
+      image: ogImage,
+    })
+  : null;
+const orgSchema = buildOrganizationSchema({
+  name: 'Animals Vida Digna',
+  url: site,
+  logo: new URL('/images/logo.webp', site).href,
+});
 ---
 
 <!doctype html>
@@ -24,6 +50,15 @@ const currentUrl = Astro.url.href;
     <title>{title} | {t(locale, 'common.siteName')}</title>
     {description && <meta name="description" content={description} />}
     <link rel="icon" type="image/webp" href="/images/logo.webp" />
+    <link rel="canonical" href={resolvedCanonical} />
+    {hreflangLinks.map(link => (
+      <link rel="alternate" hreflang={link.hreflang} href={link.href} />
+    ))}
+    {ogMeta && Object.entries(ogMeta).map(([property, content]) => (
+      <meta property={property} content={content} />
+    ))}
+    <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body class="flex min-h-screen flex-col bg-surface font-sans text-text">
     <Header locale={locale} currentUrl={currentUrl} donateUrl={donateUrl} />
@@ -32,7 +67,7 @@ const currentUrl = Astro.url.href;
     </main>
     <Footer locale={locale} donateUrl={donateUrl} />
     {donateUrl !== '#' && (
-      <DonateSticky client:idle url={donateUrl} text={t(locale, 'cta.donate')} />
+      <DonateSticky client:only="preact" url={donateUrl} text={t(locale, 'cta.donate')} />
     )}
   </body>
 </html>
