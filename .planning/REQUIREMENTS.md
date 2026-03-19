@@ -88,10 +88,10 @@
 
 ### Performance
 
-- [ ] **PERF-01**: Lighthouse >= 95 on Performance (mobile) in both locales
-- [ ] **PERF-02**: Lighthouse >= 95 on Accessibility (mobile) in both locales
-- [ ] **PERF-03**: Lighthouse >= 95 on Best Practices (mobile) in both locales
-- [ ] **PERF-04**: Lighthouse >= 95 on SEO (mobile) in both locales
+- [x] **PERF-01**: Lighthouse >= 95 on Performance (mobile) in both locales
+- [x] **PERF-02**: Lighthouse >= 95 on Accessibility (mobile) in both locales
+- [x] **PERF-03**: Lighthouse >= 95 on Best Practices (mobile) in both locales
+- [x] **PERF-04**: Lighthouse >= 95 on SEO (mobile) in both locales
 
 ## v2 Requirements
 
@@ -179,10 +179,10 @@
 | A11Y-03 | Phase 4 | Complete |
 | A11Y-04 | Phase 4 | Complete |
 | A11Y-05 | Phase 4 | Complete |
-| PERF-01 | Phase 4 | Pending |
-| PERF-02 | Phase 4 | Pending |
-| PERF-03 | Phase 4 | Pending |
-| PERF-04 | Phase 4 | Pending |
+| PERF-01 | Phase 4 | Complete |
+| PERF-02 | Phase 4 | Complete |
+| PERF-03 | Phase 4 | Complete |
+| PERF-04 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 45 total
