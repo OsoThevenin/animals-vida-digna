@@ -1,6 +1,7 @@
 ---
 import type { Locale } from '../../i18n/index';
 import { getLocalizedField } from '../../i18n/content';
+import OptimizedImage from '../OptimizedImage.astro';
 
 interface Props {
   data: Record<string, unknown>;
@@ -51,11 +52,15 @@ const adoptHref = locale === 'ca' ? '/#gats' : '/es/#gatos';
     </div>
     {image?.src && (
       <div class="flex-1">
-        <img
+        <OptimizedImage
           src={image.src}
           alt={imageAlt || ''}
           class="mx-auto max-h-96 w-full rounded-2xl object-cover shadow-xl lg:max-h-[28rem]"
           loading="eager"
+          fetchpriority="high"
+          width={1280}
+          height={448}
+          sizes="(max-width: 1024px) 100vw, 50vw"
         />
       </div>
     )}

@@ -10,6 +10,7 @@ interface Props {
   loading?: 'lazy' | 'eager';
   width?: number;
   height?: number;
+  fetchpriority?: 'high' | 'low' | 'auto';
 }
 
 const {
@@ -21,6 +22,7 @@ const {
   loading = 'lazy',
   width = widths[widths.length - 1],
   height,
+  fetchpriority,
 } = Astro.props;
 
 const isDev = import.meta.env.DEV;
@@ -38,4 +40,5 @@ const fallbackSrc = imageUrl(src, widths[widths.length - 1], isDev);
   decoding="async"
   width={width}
   {...(height ? { height } : {})}
+  {...(fetchpriority ? { fetchpriority } : {})}
 />
