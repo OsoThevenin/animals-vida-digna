@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://animalsvidadigna.org/sitemap-index.xml
