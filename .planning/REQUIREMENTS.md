@@ -80,11 +80,11 @@
 
 ### Accessibility
 
-- [ ] **A11Y-01**: WCAG AA contrast ratios on all text/background combinations
-- [ ] **A11Y-02**: Visible focus states on all interactive elements
-- [ ] **A11Y-03**: Full keyboard navigation support (tabs, modals, gallery, forms)
-- [ ] **A11Y-04**: Alt text required in both CA and ES for all images (enforced by CMS schema)
-- [ ] **A11Y-05**: Reduced-motion support for gallery/carousel animations
+- [x] **A11Y-01**: WCAG AA contrast ratios on all text/background combinations
+- [x] **A11Y-02**: Visible focus states on all interactive elements
+- [x] **A11Y-03**: Full keyboard navigation support (tabs, modals, gallery, forms)
+- [x] **A11Y-04**: Alt text required in both CA and ES for all images (enforced by CMS schema)
+- [x] **A11Y-05**: Reduced-motion support for gallery/carousel animations
 
 ### Performance
 
@@ -174,11 +174,11 @@
 | SEO-04 | Phase 4 | Complete |
 | SEO-05 | Phase 4 | Complete |
 | SEO-06 | Phase 4 | Complete |
-| A11Y-01 | Phase 4 | Pending |
-| A11Y-02 | Phase 4 | Pending |
-| A11Y-03 | Phase 4 | Pending |
-| A11Y-04 | Phase 4 | Pending |
-| A11Y-05 | Phase 4 | Pending |
+| A11Y-01 | Phase 4 | Complete |
+| A11Y-02 | Phase 4 | Complete |
+| A11Y-03 | Phase 4 | Complete |
+| A11Y-04 | Phase 4 | Complete |
+| A11Y-05 | Phase 4 | Complete |
 | PERF-01 | Phase 4 | Pending |
 | PERF-02 | Phase 4 | Pending |
 | PERF-03 | Phase 4 | Pending |
