@@ -73,7 +73,7 @@ const orgSchema = buildOrganizationSchema({
     </main>
     <Footer locale={locale} donateUrl={donateUrl} />
     {donateUrl !== '#' && (
-      <DonateSticky client:only="preact" url={donateUrl} text={t(locale, 'cta.donate')} />
+      <DonateSticky client:idle url={donateUrl} text={t(locale, 'cta.donate')} />
     )}
   </body>
 </html>

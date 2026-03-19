@@ -139,6 +139,8 @@ export default function CatFilters({ cats, locale, translations: t }: Props) {
                     class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
                     decoding="async"
+                    width={1280}
+                    height={960}
                   />
                 </div>
               ) : (

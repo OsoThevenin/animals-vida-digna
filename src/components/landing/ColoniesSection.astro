@@ -2,6 +2,7 @@
 import type { Locale } from '../../i18n/index';
 import { getLocalizedField } from '../../i18n/content';
 import { renderMarkdoc } from '../../lib/markdoc';
+import OptimizedImage from '../OptimizedImage.astro';
 
 interface Props {
   data: Record<string, unknown>;
@@ -31,11 +32,14 @@ const sectionId = locale === 'ca' ? 'colonies' : 'colonias';
     <div class="grid items-center gap-10 lg:grid-cols-2">
       {image?.src && (
         <div>
-          <img
+          <OptimizedImage
             src={image.src}
             alt={imageAlt || ''}
             class="rounded-2xl object-cover shadow-md"
             loading="lazy"
+            width={640}
+            height={480}
+            sizes="(max-width: 1024px) 100vw, 50vw"
           />
         </div>
       )}

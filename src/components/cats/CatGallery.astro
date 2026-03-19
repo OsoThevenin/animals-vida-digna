@@ -40,19 +40,22 @@ const { images, catName } = Astro.props;
 </style>
 
 <script>
-  import Tobii from '@midzer/tobii';
-  import '@midzer/tobii/dist/tobii.min.css';
-
-  document.addEventListener('astro:page-load', () => {
+  async function initLightbox() {
     const lightboxLinks = document.querySelectorAll('.lightbox');
     if (lightboxLinks.length > 0) {
+      const [{ default: Tobii }, _css] = await Promise.all([
+        import('@midzer/tobii'),
+        import('@midzer/tobii/dist/tobii.min.css'),
+      ]);
       new Tobii({ captions: true, zoom: false });
     }
-  });
-
-  // Also initialize on first load (non-SPA navigation)
-  const lightboxLinks = document.querySelectorAll('.lightbox');
-  if (lightboxLinks.length > 0) {
-    new Tobii({ captions: true, zoom: false });
   }
+
+  // Initialize on first load
+  initLightbox();
+
+  // Also handle Astro SPA page-load events
+  document.addEventListener('astro:page-load', () => {
+    initLightbox();
+  });
 </script>
