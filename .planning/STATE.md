@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-04-PLAN.md
-last_updated: "2026-03-19T13:22:43.316Z"
+stopped_at: Completed 04-05-PLAN.md
+last_updated: "2026-03-19T13:26:53.642Z"
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 15
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # Project State
@@ -56,6 +56,7 @@ Plan: 1 of 6
 | Phase 04 P02 | 3min | 2 tasks | 10 files |
 | Phase 04 P03 | 1min | 2 tasks | 1 files |
 | Phase 04 P04 | 1min | 1 tasks | 1 files |
+| Phase 04 P05 | 3min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,8 @@ Recent decisions affecting current work:
 - [Phase 04]: HTML hidden attribute for mobile menu accessibility instead of CSS hidden class
 - [Phase 04]: System-ui font stack with -apple-system, Segoe UI, Roboto fallbacks for cross-platform consistency
 - [Phase 04]: Static robots.txt in public/ directory for Cloudflare SSR adapter crawler discoverability
+- [Phase 04]: Hero image dimensions 1280x448 matching lg:max-h-[28rem] aspect ratio with fetchpriority=high
+- [Phase 04]: DonateSticky changed from client:only to client:idle since SSR renders null (visible starts false)
 
 ### Pending Todos
 
@@ -111,6 +114,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T13:22:43.313Z
-Stopped at: Completed 04-04-PLAN.md
+Last session: 2026-03-19T13:26:53.640Z
+Stopped at: Completed 04-05-PLAN.md
 Resume file: None
