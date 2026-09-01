@@ -30,14 +30,14 @@ export function Section({
   const heading =
     tone === 'dark'
       ? 'font-display text-3xl font-bold sm:text-4xl'
-      : 'font-display text-3xl font-bold text-primary sm:text-4xl';
+      : 'mb-12 text-center font-display text-3xl font-bold text-primary sm:text-4xl';
 
   return (
     <section className={`py-16 sm:py-24 ${TONES[tone]}`} id={id}>
       <div
         className={`mx-auto px-4 sm:px-6 ${inner} ${centered ? 'text-center' : ''}`}
       >
-        {title ? <h2 className={`mb-12 text-center ${heading}`}>{title}</h2> : null}
+        {title ? <h2 className={heading}>{title}</h2> : null}
         {children}
       </div>
     </section>

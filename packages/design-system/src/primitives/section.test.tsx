@@ -30,4 +30,26 @@ describe('Section', () => {
     const html = renderMarkup(<Section id="gats">Body</Section>);
     expect(html).toContain('id="gats"');
   });
+
+  it('omits mb-12 from the heading on the dark tone', () => {
+    const html = renderMarkup(
+      <Section title="Contacta amb nosaltres" tone="dark">
+        Body
+      </Section>
+    );
+    const h2Match = html.match(/<h2[^>]*>/);
+    expect(h2Match).not.toBeNull();
+    expect(h2Match?.[0]).not.toContain('mb-12');
+  });
+
+  it('keeps mb-12 on the heading for the light tones', () => {
+    const html = renderMarkup(
+      <Section title="Les nostres colònies" tone="tint">
+        Body
+      </Section>
+    );
+    const h2Match = html.match(/<h2[^>]*>/);
+    expect(h2Match).not.toBeNull();
+    expect(h2Match?.[0]).toContain('mb-12');
+  });
 });
