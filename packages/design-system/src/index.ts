@@ -12,3 +12,9 @@ export {
 } from './primitives/section';
 export { Field, type FieldProps } from './primitives/field';
 export { Input, type InputProps } from './primitives/input';
+export { CatCard, type CatCardProps } from './patterns/cat-card';
+export {
+  CatTraits,
+  type CatTrait,
+  type CatTraitsProps,
+} from './patterns/cat-traits';
