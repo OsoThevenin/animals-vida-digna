@@ -26,3 +26,5 @@ export {
   type Stat,
   type StatsSectionProps,
 } from './patterns/stats-section';
+export { Footer, type FooterProps } from './patterns/footer';
+export { Header, type HeaderProps, type NavLink } from './patterns/header';
