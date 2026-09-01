@@ -1,3 +1,4 @@
+import { LOGO_DATA_URI } from '../assets/logo';
 import { Button } from '../primitives/button';
 import type { CtaLink } from './hero';
 import type { NavLink } from './header';
@@ -19,7 +20,7 @@ const COLUMN_TITLE =
 
 export function Footer({
   brand = 'Animals Vida Digna',
-  logoSrc = '/images/logo.webp',
+  logoSrc = LOGO_DATA_URI,
   homeHref = '/',
   tagline,
   navTitle,

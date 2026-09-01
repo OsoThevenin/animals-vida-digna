@@ -1,3 +1,4 @@
+import { LOGO_DATA_URI } from '../assets/logo';
 import { Button } from '../primitives/button';
 import type { CtaLink } from './hero';
 
@@ -18,7 +19,7 @@ export interface HeaderProps {
 
 export function Header({
   brand = 'Animals Vida Digna',
-  logoSrc = '/images/logo.webp',
+  logoSrc = LOGO_DATA_URI,
   homeHref = '/',
   links,
   donate,

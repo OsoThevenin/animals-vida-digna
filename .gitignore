@@ -72,3 +72,11 @@ apps/web/.playwright/
 
 # Generated seed data — regenerate with `pnpm --filter @avd/content run seed:generate`
 packages/content/seed.sql
+
+# design-sync
+.design-sync/sb-reference/
+.design-sync/learnings/
+.design-sync/.cache/
+.design-sync/node_modules
+.ds-sync/
+ds-bundle/
