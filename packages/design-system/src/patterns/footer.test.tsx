@@ -37,4 +37,20 @@ describe('Footer', () => {
     const html = renderMarkup(<Footer links={links} />);
     expect(html).toContain('brightness-200');
   });
+
+  it('renders the donate button in accent', () => {
+    const html = renderMarkup(
+      <Footer donate={{ label: 'Donatiu', href: '#' }} links={links} />
+    );
+    expect(html).toContain('Donatiu');
+    expect(html).toContain('href="#"');
+    expect(html).toContain('px-4 py-2');
+    expect(html).toContain('text-sm');
+    expect(html).toContain('bg-accent');
+  });
+
+  it('omits the donate button when not given', () => {
+    const html = renderMarkup(<Footer links={links} />);
+    expect(html).not.toContain('bg-accent');
+  });
 });

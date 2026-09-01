@@ -33,6 +33,14 @@ describe('Hero', () => {
     expect(html).toContain('alt="Gats al refugi"');
   });
 
+  it('renders the image with explicit width and height', () => {
+    const html = renderMarkup(
+      <Hero imageAlt="Gats al refugi" imageSrc="/hero.webp" title="Hola" />
+    );
+    expect(html).toContain('width="1280"');
+    expect(html).toContain('height="448"');
+  });
+
   it('omits the subtitle paragraph when absent', () => {
     const html = renderMarkup(<Hero title="Hola" />);
     expect(html).not.toContain('text-surface/80');

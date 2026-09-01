@@ -4,7 +4,9 @@ export interface CardProps {
   children: ReactNode;
   /** Renders the whole card as a link. */
   href?: string;
+  /** Supplying either imageSrc or imageAlt renders the media slot: with imageSrc it renders the image, without it a placeholder icon. Omitting both renders no media area. */
   imageSrc?: string;
+  /** Supplying either imageSrc or imageAlt renders the media slot: with imageSrc it renders the image, without it a placeholder icon. Omitting both renders no media area. */
   imageAlt?: string;
 }
 

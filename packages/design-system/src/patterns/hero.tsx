@@ -52,7 +52,9 @@ export function Hero({
             <img
               alt={imageAlt ?? ''}
               className="mx-auto max-h-96 w-full rounded-2xl object-cover shadow-xl lg:max-h-[28rem]"
+              height={448}
               src={imageSrc}
+              width={1280}
             />
           </div>
         ) : null}
