@@ -6,7 +6,7 @@ export interface ButtonProps {
   children: ReactNode;
   /** Accent is the site's main CTA; outline sits on dark backgrounds. */
   variant?: ButtonVariant;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
   /** Renders an anchor instead of a button. */
   href?: string;
   type?: 'button' | 'submit';
@@ -26,6 +26,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
 const SIZES = {
   sm: 'px-4 py-2 text-sm',
   md: 'px-6 py-3',
+  lg: 'px-8 py-3',
 };
 
 export function Button({

@@ -25,4 +25,15 @@ describe('ContactCta', () => {
     const html = renderMarkup(<ContactCta title="Parlem" />);
     expect(html).not.toContain('<a');
   });
+
+  it('renders the CTA button at the wider lg padding', () => {
+    const html = renderMarkup(
+      <ContactCta
+        cta={{ label: 'Contacta', href: '/contact' }}
+        title="Parlem"
+      />
+    );
+    expect(html).toContain('px-8');
+    expect(html).not.toContain('px-6 py-3');
+  });
 });

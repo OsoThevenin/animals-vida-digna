@@ -38,4 +38,18 @@ describe('Button', () => {
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noopener noreferrer"');
   });
+
+  it('renders px-8 for the lg size', () => {
+    const html = renderMarkup(
+      <Button href="#" size="lg">
+        Donate
+      </Button>
+    );
+    expect(html).toContain('px-8');
+  });
+
+  it('defaults to px-6 (md size)', () => {
+    const html = renderMarkup(<Button href="#">Donate</Button>);
+    expect(html).toContain('px-6');
+  });
 });

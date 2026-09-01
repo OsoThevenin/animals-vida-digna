@@ -19,7 +19,9 @@ export function ContactCta({ title, subtitle, cta, id }: ContactCtaProps) {
       ) : null}
       {cta ? (
         <div className="mt-8">
-          <Button href={cta.href}>{cta.label}</Button>
+          <Button href={cta.href} size="lg">
+            {cta.label}
+          </Button>
         </div>
       ) : null}
     </Section>
