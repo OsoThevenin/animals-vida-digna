@@ -10,3 +10,5 @@ export {
   type SectionProps,
   type SectionTone,
 } from './primitives/section';
+export { Field, type FieldProps } from './primitives/field';
+export { Input, type InputProps } from './primitives/input';
