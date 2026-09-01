@@ -32,5 +32,11 @@ export const FullProfile: Story = {
     personality: ['Juganera', 'Tranquil·la', 'Afectuosa'],
     goodWithTitle: 'Compatible amb',
     goodWith: ['Nens', 'Altres gats'],
+    medical: [
+      { label: 'Vacunada', done: true },
+      { label: 'Microxip', done: true },
+      { label: 'Esterilitzada', done: false },
+    ],
+    specialNeeds: 'Necessita medicació diària per a una condició crònica.',
   },
 };

@@ -17,4 +17,5 @@ export {
   CatTraits,
   type CatTrait,
   type CatTraitsProps,
+  type MedicalFact,
 } from './patterns/cat-traits';

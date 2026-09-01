@@ -7,6 +7,12 @@ export interface CatTrait {
   value: string;
 }
 
+export interface MedicalFact {
+  /** Already-translated label, e.g. "Vacunada". */
+  label: string;
+  done: boolean;
+}
+
 export interface CatTraitsProps {
   statusLabel: string;
   status?: CatStatus;
@@ -15,9 +21,26 @@ export interface CatTraitsProps {
   personality?: string[];
   goodWithTitle?: string;
   goodWith?: string[];
+  medical?: MedicalFact[];
+  specialNeeds?: string;
 }
 
-function TagList({ title, tags }: { title?: string; tags?: string[] }) {
+type TagTone = 'accent' | 'green';
+
+const TAG_TONE_CLASSES: Record<TagTone, string> = {
+  accent: 'bg-accent/10 text-primary-dark',
+  green: 'bg-green-50 text-green-700',
+};
+
+function TagList({
+  title,
+  tags,
+  tone,
+}: {
+  title?: string;
+  tags?: string[];
+  tone: TagTone;
+}) {
   if (!title || !tags || tags.length === 0) {
     return null;
   }
@@ -28,7 +51,7 @@ function TagList({ title, tags }: { title?: string; tags?: string[] }) {
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => (
           <span
-            className="rounded-full bg-accent/10 px-3 py-1 font-medium text-primary-dark text-xs"
+            className={`rounded-full px-3 py-1 font-medium text-xs ${TAG_TONE_CLASSES[tone]}`}
             key={tag}
           >
             {tag}
@@ -47,6 +70,8 @@ export function CatTraits({
   personality,
   goodWithTitle,
   goodWith,
+  medical,
+  specialNeeds,
 }: CatTraitsProps) {
   return (
     <div className="rounded-xl bg-surface p-6 shadow-sm">
@@ -61,8 +86,27 @@ export function CatTraits({
           </div>
         ))}
       </dl>
-      <TagList tags={personality} title={personalityTitle} />
-      <TagList tags={goodWith} title={goodWithTitle} />
+      <TagList tags={personality} title={personalityTitle} tone="accent" />
+      <TagList tags={goodWith} title={goodWithTitle} tone="green" />
+      {medical && medical.length > 0 ? (
+        <div className="mt-4 border-primary/10 border-t pt-4">
+          <div className="flex flex-wrap gap-4 text-sm">
+            {medical.map((fact) => (
+              <span
+                className={fact.done ? 'text-green-700' : 'text-text-muted'}
+                key={fact.label}
+              >
+                {fact.done ? '✓' : '✗'} {fact.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      {specialNeeds ? (
+        <div className="mt-4 rounded-lg bg-amber-50 p-3">
+          <p className="text-sm text-amber-800">{specialNeeds}</p>
+        </div>
+      ) : null}
     </div>
   );
 }
