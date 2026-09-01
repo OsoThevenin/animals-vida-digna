@@ -19,3 +19,10 @@ export {
   type CatTraitsProps,
   type MedicalFact,
 } from './patterns/cat-traits';
+export { ContactCta, type ContactCtaProps } from './patterns/contact-cta';
+export { Hero, type CtaLink, type HeroProps } from './patterns/hero';
+export {
+  StatsSection,
+  type Stat,
+  type StatsSectionProps,
+} from './patterns/stats-section';
