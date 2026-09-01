@@ -46,3 +46,6 @@ next-env.d.ts
 dist/
 .astro/
 node_modules/
+
+# claude code worktrees
+.claude/worktrees/
