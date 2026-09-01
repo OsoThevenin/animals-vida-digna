@@ -4,3 +4,9 @@ export {
   type ButtonProps,
   type ButtonVariant,
 } from './primitives/button';
+export { Card, type CardProps } from './primitives/card';
+export {
+  Section,
+  type SectionProps,
+  type SectionTone,
+} from './primitives/section';
