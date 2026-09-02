@@ -34,9 +34,15 @@ describe('Astro config', () => {
     expect(config).toContain('tailwindcss()');
   });
 
-  it('FOUND-01: conditionally loads Keystatic in non-production', () => {
-    expect(config).toContain("process.env.NODE_ENV !== 'production'");
+  it('loads Keystatic in every build, production included', () => {
+    // The admin UI at /keystatic is how volunteers edit content, so it must
+    // exist on the deployed Worker. Gating it on NODE_ENV is what previously
+    // forced storage into 'local' mode, which cannot work on Cloudflare.
     expect(config).toContain('@keystatic/astro');
+    expect(config).toContain(
+      'integrations.push(react(), markdoc(), keystatic())'
+    );
+    expect(config).not.toContain("process.env.NODE_ENV !== 'production'");
   });
 });
 

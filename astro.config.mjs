@@ -1,17 +1,22 @@
-import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
-import tailwindcss from '@tailwindcss/vite';
+import markdoc from '@astrojs/markdoc';
 import preact from '@astrojs/preact';
+import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
+import keystatic from '@keystatic/astro';
+import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from 'astro/config';
 
 const integrations = [];
 
-if (process.env.NODE_ENV !== 'production') {
-  const react = (await import('@astrojs/react')).default;
-  const markdoc = (await import('@astrojs/markdoc')).default;
-  const keystatic = (await import('@keystatic/astro')).default;
-  integrations.push(react(), markdoc(), keystatic());
-}
+// Keystatic ships in every build, production included: the admin UI at
+// /keystatic is how shelter volunteers edit content, so it has to exist on the
+// deployed Worker. It was previously dev-only, which is why storage was stuck
+// in 'local' mode -- see src/lib/keystatic-storage.ts.
+//
+// react() and markdoc() are Keystatic's own dependencies (its UI is React, its
+// rich-text fields are Markdoc); the public site itself renders with preact.
+integrations.push(react(), markdoc(), keystatic());
 
 integrations.push(preact());
 

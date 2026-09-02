@@ -1,4 +1,5 @@
 import { collection, config, fields, singleton } from '@keystatic/core';
+import { resolveKeystaticStorage } from './src/lib/keystatic-storage';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -410,7 +411,7 @@ const pages = collection({
 // ---------------------------------------------------------------------------
 
 export default config({
-  storage: { kind: 'local' },
+  storage: resolveKeystaticStorage(import.meta.env),
   singletons: {
     settings,
     landing,

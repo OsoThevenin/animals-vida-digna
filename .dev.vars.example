@@ -1,1 +1,6 @@
 RESEND_API_KEY=re_xxxxxxxxxxxx
+
+# Note: the KEYSTATIC_* secrets are deliberately absent here. Local development
+# uses Keystatic's `local` storage, which writes to the filesystem and needs no
+# credentials. They are only required by the deployed Worker -- set there with
+# `wrangler secret put`. See docs/keystatic-admin-setup.md.
