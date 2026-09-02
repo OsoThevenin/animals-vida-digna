@@ -109,12 +109,18 @@ describe('wrangler.toml', () => {
     }
   });
 
-  it('the ratelimit binding name matches what the API routes read (env.FORM_RATE_LIMITER)', () => {
+  it('the ratelimit binding name matches the shared rate-limit helper default, and both API routes use it', () => {
+    // contact.ts and adopt.ts no longer read env.FORM_RATE_LIMITER
+    // directly — the lookup is shared via src/lib/rate-limit.ts
+    // (checkRateLimit), so assert the default binding name there matches
+    // wrangler.toml, and that both routes call the shared helper.
+    const rateLimitLib = readFile('src/lib/rate-limit.ts');
     const contact = readFile('src/pages/api/contact.ts');
     const adopt = readFile('src/pages/api/adopt.ts');
     const limiterName = config.ratelimits?.find((r) => r.name)?.name;
 
-    expect(contact).toContain(`env.${limiterName}`);
-    expect(adopt).toContain(`env.${limiterName}`);
+    expect(rateLimitLib).toContain(`bindingName = '${limiterName}'`);
+    expect(contact).toContain('checkRateLimit(context)');
+    expect(adopt).toContain('checkRateLimit(context)');
   });
 });

@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest';
-import { getLocaleFromUrl, getAlternateUrl, t } from '../src/i18n/index';
-import { getLocalizedField } from '../src/i18n/content';
 import fs from 'node:fs';
+import { describe, expect, it } from 'vitest';
+import { getLocalizedField } from '../src/i18n/content';
+import { getAlternateUrl, getLocaleFromUrl, t } from '../src/i18n/index';
 
 // ---------------------------------------------------------------------------
 // I18N-01: Root paths resolve to Catalan
@@ -50,11 +50,15 @@ describe('I18N-03: Alternate URL mapping', () => {
   });
 
   it('/cats/misi -> /es/cats/misi', () => {
-    expect(getAlternateUrl(new URL('https://x.com/cats/misi'), 'es')).toBe('/es/cats/misi');
+    expect(getAlternateUrl(new URL('https://x.com/cats/misi'), 'es')).toBe(
+      '/es/cats/misi'
+    );
   });
 
   it('/es/cats/misi -> /cats/misi', () => {
-    expect(getAlternateUrl(new URL('https://x.com/es/cats/misi'), 'ca')).toBe('/cats/misi');
+    expect(getAlternateUrl(new URL('https://x.com/es/cats/misi'), 'ca')).toBe(
+      '/cats/misi'
+    );
   });
 
   it('same locale returns same path', () => {
@@ -120,10 +124,14 @@ describe('Content helpers: getLocalizedField', () => {
   });
 
   it('reads _es field', () => {
-    expect(getLocalizedField(entry, 'shortDescription', 'es')).toBe('Un gato muy dulce');
+    expect(getLocalizedField(entry, 'shortDescription', 'es')).toBe(
+      'Un gato muy dulce'
+    );
   });
 
   it('reads _ca description field', () => {
-    expect(getLocalizedField(entry, 'shortDescription', 'ca')).toBe('Un gat molt dolc');
+    expect(getLocalizedField(entry, 'shortDescription', 'ca')).toBe(
+      'Un gat molt dolc'
+    );
   });
 });

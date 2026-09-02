@@ -3,12 +3,39 @@ main = "dist/_worker.js/index.js"
 compatibility_date = "2025-08-15"
 compatibility_flags = ["nodejs_compat"]
 
+# Production is served only from the custom domain below, so the workers.dev
+# route stays off. Declared explicitly rather than left to inference: adding a
+# `routes` block silently implies workers_dev = false, and since Wrangler 4.44
+# preview_urls defaults to matching workers_dev — which quietly disabled PR
+# preview URLs. Preview URLs are opted into deliberately here so Workers Builds
+# can produce a preview per pull request.
+#
+# Note: preview URLs are public (<version>-animals-vida-digna.<subdomain>.workers.dev).
+# Acceptable for a public brochure site with no private data; revisit if that changes.
+workers_dev = false
+preview_urls = true
+
 [assets]
 binding = "ASSETS"
 directory = "./dist"
 
 [observability]
 enabled = true
+
+# The apex is canonical — it matches `site` in astro.config.mjs and the
+# sitemap/canonical/hreflang tags, so it is the only hostname bound to this
+# Worker.
+#
+# www is deliberately NOT a Custom Domain here. It is redirected to the apex by
+# a zone-level Redirect Rule instead, because Workers Assets serves a matching
+# static asset *before* invoking the Worker — every prerendered page (/, /cats,
+# /contact, /cat/*, /es/*) would bypass any Worker-side redirect entirely.
+# Handling it in the Worker would require assets.run_worker_first = true, which
+# bills a Worker invocation on every request (including images and CSS) just to
+# perform one host redirect.
+[[routes]]
+pattern = "animalsvidadigna.org"
+custom_domain = true
 
 [[ratelimits]]
 name = "FORM_RATE_LIMITER"
