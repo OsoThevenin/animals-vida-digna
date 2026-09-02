@@ -40,7 +40,9 @@ export interface RateLimitCheckContext {
  * adapter shape — without throwing if any part of the chain is missing
  * (e.g. running under `astro dev` without the Cloudflare runtime).
  */
-function extractRuntimeEnv(locals: unknown): Record<string, unknown> | undefined {
+function extractRuntimeEnv(
+  locals: unknown
+): Record<string, unknown> | undefined {
   if (!locals || typeof locals !== 'object' || !('runtime' in locals)) {
     return undefined;
   }

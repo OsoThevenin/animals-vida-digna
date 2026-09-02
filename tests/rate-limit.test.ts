@@ -56,7 +56,10 @@ describe('checkRateLimit', () => {
   });
 
   it('fails open and logs an explicit warning when the binding is absent (e.g. local astro dev)', async () => {
-    const decision = await checkRateLimit({ locals: {}, request: makeRequest() });
+    const decision = await checkRateLimit({
+      locals: {},
+      request: makeRequest(),
+    });
 
     expect(decision).toEqual({ allowed: true });
     expect(warnSpy).toHaveBeenCalledTimes(1);
