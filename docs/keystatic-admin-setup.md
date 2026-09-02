@@ -48,6 +48,20 @@ Repository permissions:
 Install the App on the `OsoThevenin/animals-vida-digna` repository, then
 generate a client secret.
 
+> **Sign-in only works on the apex domain.** GitHub Apps accept exact callback
+> URLs with no wildcards, and Cloudflare gives each preview build a distinct
+> `<version>-animals-vida-digna.<subdomain>.workers.dev` hostname — so a preview
+> URL can never be registered here. On a preview the admin UI renders fine but
+> sign-in fails with "The redirect_uri is not associated with this
+> application." That is expected, not a misconfiguration.
+>
+> Previews are still useful for checking that `/keystatic` builds and renders;
+> sign-in itself has to be verified on the live apex after merging.
+>
+> To test sign-in *before* deploying, create a second GitHub App for
+> development with callback
+> `http://127.0.0.1:4321/api/keystatic/github/oauth/callback`.
+
 ### 2. Set the secrets in Cloudflare
 
 Keystatic reads its credentials from the Cloudflare **runtime** environment
