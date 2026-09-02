@@ -12,9 +12,7 @@ describe('Astro config', () => {
   const config = readFile('astro.config.mjs');
 
   it('FOUND-01: imports cloudflare adapter', () => {
-    expect(config).toContain(
-      "import cloudflare from '@astrojs/cloudflare'"
-    );
+    expect(config).toContain("import cloudflare from '@astrojs/cloudflare'");
   });
 
   it('FOUND-01: uses cloudflare adapter', () => {
@@ -32,7 +30,7 @@ describe('Astro config', () => {
   });
 
   it('FOUND-01: uses @tailwindcss/vite plugin', () => {
-    expect(config).toContain("@tailwindcss/vite");
+    expect(config).toContain('@tailwindcss/vite');
     expect(config).toContain('tailwindcss()');
   });
 
@@ -45,14 +43,9 @@ describe('Astro config', () => {
 describe('Wrangler config', () => {
   const wrangler = readFile('wrangler.toml');
 
-  it('FOUND-04: has R2 bucket binding named IMAGES_BUCKET', () => {
-    expect(wrangler).toContain('binding = "IMAGES_BUCKET"');
-  });
-
-  it('FOUND-04: has R2 bucket name', () => {
-    expect(wrangler).toContain(
-      'bucket_name = "animals-vida-digna-images"'
-    );
+  it('FOUND-04: does not declare an R2 bucket binding (no matching bucket on the account)', () => {
+    expect(wrangler).not.toContain('r2_buckets');
+    expect(wrangler).not.toContain('IMAGES_BUCKET');
   });
 
   it('FOUND-04: has nodejs_compat flag', () => {

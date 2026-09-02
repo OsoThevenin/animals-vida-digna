@@ -1,8 +1,11 @@
 import type { APIRoute } from 'astro';
-import { validateContactForm } from '../../lib/validation';
-import { sendContactNotification, sendContactConfirmation } from '../../lib/email';
-import { reader } from '../../lib/keystatic';
+import { siteSettings } from '../../generated/settings';
 import type { Locale } from '../../i18n/index';
+import {
+  sendContactConfirmation,
+  sendContactNotification,
+} from '../../lib/email';
+import { validateContactForm } from '../../lib/validation';
 
 export const prerender = false;
 
@@ -27,17 +30,24 @@ export const POST: APIRoute = async (context) => {
     // Rate limiting via Cloudflare binding
     try {
       const env = (context.locals as Record<string, unknown>).runtime
-        ? ((context.locals as Record<string, { env: Record<string, unknown> }>).runtime.env as Record<string, unknown>)
+        ? ((context.locals as Record<string, { env: Record<string, unknown> }>)
+            .runtime.env as Record<string, unknown>)
         : {};
-      const rateLimiter = env.FORM_RATE_LIMITER as { limit: (opts: { key: string }) => Promise<{ success: boolean }> } | undefined;
+      const rateLimiter = env.FORM_RATE_LIMITER as
+        | { limit: (opts: { key: string }) => Promise<{ success: boolean }> }
+        | undefined;
       if (rateLimiter) {
-        const clientIp = context.request.headers.get('cf-connecting-ip') || 'unknown';
+        const clientIp =
+          context.request.headers.get('cf-connecting-ip') || 'unknown';
         const result = await rateLimiter.limit({ key: clientIp });
         if (!result.success) {
-          return new Response(JSON.stringify({ success: false, error: 'rate_limited' }), {
-            status: 429,
-            headers: { 'Content-Type': 'application/json' },
-          });
+          return new Response(
+            JSON.stringify({ success: false, error: 'rate_limited' }),
+            {
+              status: 429,
+              headers: { 'Content-Type': 'application/json' },
+            }
+          );
         }
       }
     } catch {
@@ -51,21 +61,27 @@ export const POST: APIRoute = async (context) => {
       message: message ?? undefined,
     });
     if (!validation.valid) {
-      return new Response(JSON.stringify({ success: false, errors: validation.errors }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ success: false, errors: validation.errors }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
-    // Read shelter contact email from Keystatic settings
-    const settings = await reader.singletons.settings.read();
-    const contactEmail = (settings as Record<string, unknown>)?.contactEmail as string || 'info@animalsvidadigna.org';
+    // Shelter contact email, generated at build time from Keystatic settings
+    // (see scripts/generate-settings.ts) — avoids pulling the Keystatic
+    // filesystem reader / node:fs into the Cloudflare Worker bundle.
+    const contactEmail =
+      siteSettings.contactEmail || 'info@animalsvidadigna.org';
 
     // Get Resend API key from env binding
     let resendApiKey: string | undefined;
     try {
       const env = (context.locals as Record<string, unknown>).runtime
-        ? ((context.locals as Record<string, { env: Record<string, unknown> }>).runtime.env as Record<string, unknown>)
+        ? ((context.locals as Record<string, { env: Record<string, unknown> }>)
+            .runtime.env as Record<string, unknown>)
         : {};
       resendApiKey = (env.RESEND_API_KEY as string) || undefined;
     } catch {
@@ -77,10 +93,13 @@ export const POST: APIRoute = async (context) => {
 
     if (!resendApiKey) {
       console.error('RESEND_API_KEY not configured');
-      return new Response(JSON.stringify({ success: false, error: 'server_error' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ success: false, error: 'server_error' }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     // Dynamic import Resend to avoid bundling issues
@@ -110,9 +129,12 @@ export const POST: APIRoute = async (context) => {
     });
   } catch (error) {
     console.error('Contact form error:', error);
-    return new Response(JSON.stringify({ success: false, error: 'server_error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ success: false, error: 'server_error' }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 };

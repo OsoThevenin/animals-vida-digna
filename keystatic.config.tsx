@@ -1,4 +1,4 @@
-import { config, fields, singleton, collection } from '@keystatic/core';
+import { collection, config, fields, singleton } from '@keystatic/core';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -16,7 +16,7 @@ function bilingualImage(label: string, directory: string) {
       alt_ca: fields.text({ label: `${label} alt (CA)` }),
       alt_es: fields.text({ label: `${label} alt (ES)` }),
     },
-    { label },
+    { label }
   );
 }
 
@@ -26,10 +26,16 @@ function seoFields() {
     {
       title_ca: fields.text({ label: 'Meta title (CA)' }),
       title_es: fields.text({ label: 'Meta title (ES)' }),
-      description_ca: fields.text({ label: 'Meta description (CA)', multiline: true }),
-      description_es: fields.text({ label: 'Meta description (ES)', multiline: true }),
+      description_ca: fields.text({
+        label: 'Meta description (CA)',
+        multiline: true,
+      }),
+      description_es: fields.text({
+        label: 'Meta description (ES)',
+        multiline: true,
+      }),
     },
-    { label: 'SEO' },
+    { label: 'SEO' }
   );
 }
 
@@ -41,8 +47,14 @@ const settings = singleton({
   label: 'Configuracio general',
   path: 'src/content/settings/global',
   schema: {
-    siteName_ca: fields.text({ label: 'Nom del lloc (CA)', validation: { isRequired: true } }),
-    siteName_es: fields.text({ label: 'Nom del lloc (ES)', validation: { isRequired: true } }),
+    siteName_ca: fields.text({
+      label: 'Nom del lloc (CA)',
+      validation: { isRequired: true },
+    }),
+    siteName_es: fields.text({
+      label: 'Nom del lloc (ES)',
+      validation: { isRequired: true },
+    }),
     logo: fields.image({
       label: 'Logo',
       directory: 'public/images',
@@ -57,17 +69,23 @@ const settings = singleton({
         instagram: fields.url({ label: 'Instagram' }),
         twitter: fields.url({ label: 'Twitter / X' }),
       },
-      { label: 'Xarxes socials' },
+      { label: 'Xarxes socials' }
     ),
     seo: fields.object(
       {
         title_ca: fields.text({ label: 'Meta title (CA)' }),
         title_es: fields.text({ label: 'Meta title (ES)' }),
-        description_ca: fields.text({ label: 'Meta description (CA)', multiline: true }),
-        description_es: fields.text({ label: 'Meta description (ES)', multiline: true }),
+        description_ca: fields.text({
+          label: 'Meta description (CA)',
+          multiline: true,
+        }),
+        description_es: fields.text({
+          label: 'Meta description (ES)',
+          multiline: true,
+        }),
         image: bilingualImage('Imatge SEO', 'public/images'),
       },
-      { label: 'SEO' },
+      { label: 'SEO' }
     ),
   },
 });
@@ -83,8 +101,14 @@ const cats = collection({
   schema: {
     slug_ca: fields.slug({ name: { label: 'Slug (CA)' } }),
     slug_es: fields.text({ label: 'Slug (ES)' }),
-    name_ca: fields.text({ label: 'Nom (CA)', validation: { isRequired: true } }),
-    name_es: fields.text({ label: 'Nom (ES)', validation: { isRequired: true } }),
+    name_ca: fields.text({
+      label: 'Nom (CA)',
+      validation: { isRequired: true },
+    }),
+    name_es: fields.text({
+      label: 'Nom (ES)',
+      validation: { isRequired: true },
+    }),
     race_ca: fields.text({ label: 'Raca (CA)' }),
     race_es: fields.text({ label: 'Raza (ES)' }),
     status: fields.select({
@@ -152,22 +176,43 @@ const cats = collection({
     weight: fields.number({ label: 'Pes (kg)' }),
     rescueDate: fields.date({ label: 'Data de Rescat' }),
     adoptionDate: fields.date({ label: "Data d'Adopcio" }),
-    specialNeeds_ca: fields.text({ label: 'Necessitats especials (CA)', multiline: true }),
-    specialNeeds_es: fields.text({ label: 'Necesidades especiales (ES)', multiline: true }),
-    observations_ca: fields.text({ label: 'Observacions (CA)', multiline: true }),
-    observations_es: fields.text({ label: 'Observaciones (ES)', multiline: true }),
+    specialNeeds_ca: fields.text({
+      label: 'Necessitats especials (CA)',
+      multiline: true,
+    }),
+    specialNeeds_es: fields.text({
+      label: 'Necesidades especiales (ES)',
+      multiline: true,
+    }),
+    observations_ca: fields.text({
+      label: 'Observacions (CA)',
+      multiline: true,
+    }),
+    observations_es: fields.text({
+      label: 'Observaciones (ES)',
+      multiline: true,
+    }),
     coverImage: bilingualImage('Imatge principal', 'public/images/cats'),
-    gallery: fields.array(
-      bilingualImage('Imatge', 'public/images/cats'),
-      {
-        label: 'Galeria',
-        itemLabel: (props) => props.fields.alt_ca.value || 'Imatge',
-      },
-    ),
-    shortDescription_ca: fields.text({ label: 'Descripcio curta (CA)', multiline: true }),
-    shortDescription_es: fields.text({ label: 'Descripcion corta (ES)', multiline: true }),
-    description_ca: fields.markdoc({ label: 'Descripcio (CA)', extension: 'mdoc' }),
-    description_es: fields.markdoc({ label: 'Descripcion (ES)', extension: 'mdoc' }),
+    gallery: fields.array(bilingualImage('Imatge', 'public/images/cats'), {
+      label: 'Galeria',
+      itemLabel: (props) => props.fields.alt_ca.value || 'Imatge',
+    }),
+    shortDescription_ca: fields.text({
+      label: 'Descripcio curta (CA)',
+      multiline: true,
+    }),
+    shortDescription_es: fields.text({
+      label: 'Descripcion corta (ES)',
+      multiline: true,
+    }),
+    description_ca: fields.markdoc({
+      label: 'Descripcio (CA)',
+      extension: 'mdoc',
+    }),
+    description_es: fields.markdoc({
+      label: 'Descripcion (ES)',
+      extension: 'mdoc',
+    }),
     featured: fields.checkbox({ label: 'Destacat', defaultValue: false }),
     order: fields.integer({ label: 'Ordre', defaultValue: 0 }),
     seo: seoFields(),
@@ -197,18 +242,24 @@ const landing = singleton({
             ctaDonateText_ca: fields.text({ label: 'Text CTA dona (CA)' }),
             ctaDonateText_es: fields.text({ label: 'Texto CTA dona (ES)' }),
           }),
-          itemLabel: 'Hero',
+          itemLabel: () => 'Hero',
         },
         about: {
           label: 'Qui som',
           schema: fields.object({
             title_ca: fields.text({ label: 'Titol (CA)' }),
             title_es: fields.text({ label: 'Titulo (ES)' }),
-            content_ca: fields.markdoc({ label: 'Contingut (CA)', extension: 'mdoc' }),
-            content_es: fields.markdoc({ label: 'Contenido (ES)', extension: 'mdoc' }),
+            content_ca: fields.markdoc({
+              label: 'Contingut (CA)',
+              extension: 'mdoc',
+            }),
+            content_es: fields.markdoc({
+              label: 'Contenido (ES)',
+              extension: 'mdoc',
+            }),
             image: bilingualImage('Imatge', 'public/images'),
           }),
-          itemLabel: 'Qui som',
+          itemLabel: () => 'Qui som',
         },
         stats: {
           label: 'Estadistiques',
@@ -223,22 +274,29 @@ const landing = singleton({
               }),
               {
                 label: 'Estadistiques',
-                itemLabel: (props) => props.fields.label_ca.value || 'Estadistica',
-              },
+                itemLabel: (props) =>
+                  props.fields.label_ca.value || 'Estadistica',
+              }
             ),
           }),
-          itemLabel: 'Estadistiques',
+          itemLabel: () => 'Estadistiques',
         },
         colonies: {
           label: 'Colonies',
           schema: fields.object({
             title_ca: fields.text({ label: 'Titol (CA)' }),
             title_es: fields.text({ label: 'Titulo (ES)' }),
-            content_ca: fields.markdoc({ label: 'Contingut (CA)', extension: 'mdoc' }),
-            content_es: fields.markdoc({ label: 'Contenido (ES)', extension: 'mdoc' }),
+            content_ca: fields.markdoc({
+              label: 'Contingut (CA)',
+              extension: 'mdoc',
+            }),
+            content_es: fields.markdoc({
+              label: 'Contenido (ES)',
+              extension: 'mdoc',
+            }),
             image: bilingualImage('Imatge', 'public/images'),
           }),
-          itemLabel: 'Colonies',
+          itemLabel: () => 'Colonies',
         },
         adopt: {
           label: 'Adopta',
@@ -248,19 +306,25 @@ const landing = singleton({
             subtitle_ca: fields.text({ label: 'Subtitol (CA)' }),
             subtitle_es: fields.text({ label: 'Subtitulo (ES)' }),
           }),
-          itemLabel: 'Adopta',
+          itemLabel: () => 'Adopta',
         },
         collaborate: {
-          label: "Col\u00B7labora",
+          label: 'Col\u00B7labora',
           schema: fields.object({
             title_ca: fields.text({ label: 'Titol (CA)' }),
             title_es: fields.text({ label: 'Titulo (ES)' }),
-            content_ca: fields.markdoc({ label: 'Contingut (CA)', extension: 'mdoc' }),
-            content_es: fields.markdoc({ label: 'Contenido (ES)', extension: 'mdoc' }),
+            content_ca: fields.markdoc({
+              label: 'Contingut (CA)',
+              extension: 'mdoc',
+            }),
+            content_es: fields.markdoc({
+              label: 'Contenido (ES)',
+              extension: 'mdoc',
+            }),
             ctaText_ca: fields.text({ label: 'Text CTA (CA)' }),
             ctaText_es: fields.text({ label: 'Texto CTA (ES)' }),
           }),
-          itemLabel: "Col\u00B7labora",
+          itemLabel: () => 'Col\u00B7labora',
         },
         contactCta: {
           label: 'Contacte CTA',
@@ -272,7 +336,7 @@ const landing = singleton({
             ctaText_ca: fields.text({ label: 'Text CTA (CA)' }),
             ctaText_es: fields.text({ label: 'Texto CTA (ES)' }),
           }),
-          itemLabel: 'Contacte CTA',
+          itemLabel: () => 'Contacte CTA',
         },
         newsletter: {
           label: 'Newsletter',
@@ -282,7 +346,7 @@ const landing = singleton({
             subtitle_ca: fields.text({ label: 'Subtitol (CA)' }),
             subtitle_es: fields.text({ label: 'Subtitulo (ES)' }),
           }),
-          itemLabel: 'Newsletter',
+          itemLabel: () => 'Newsletter',
         },
         faq: {
           label: 'FAQ',
@@ -293,19 +357,26 @@ const landing = singleton({
               fields.object({
                 question_ca: fields.text({ label: 'Pregunta (CA)' }),
                 question_es: fields.text({ label: 'Pregunta (ES)' }),
-                answer_ca: fields.text({ label: 'Resposta (CA)', multiline: true }),
-                answer_es: fields.text({ label: 'Respuesta (ES)', multiline: true }),
+                answer_ca: fields.text({
+                  label: 'Resposta (CA)',
+                  multiline: true,
+                }),
+                answer_es: fields.text({
+                  label: 'Respuesta (ES)',
+                  multiline: true,
+                }),
               }),
               {
                 label: 'Preguntes',
-                itemLabel: (props) => props.fields.question_ca.value || 'Pregunta',
-              },
+                itemLabel: (props) =>
+                  props.fields.question_ca.value || 'Pregunta',
+              }
             ),
           }),
-          itemLabel: 'FAQ',
+          itemLabel: () => 'FAQ',
         },
       },
-      { label: 'Seccions' },
+      { label: 'Seccions' }
     ),
   },
 });
@@ -320,8 +391,14 @@ const pages = collection({
   path: 'src/content/pages/*',
   schema: {
     slug: fields.slug({ name: { label: 'Slug' } }),
-    title_ca: fields.text({ label: 'Titol (CA)', validation: { isRequired: true } }),
-    title_es: fields.text({ label: 'Titulo (ES)', validation: { isRequired: true } }),
+    title_ca: fields.text({
+      label: 'Titol (CA)',
+      validation: { isRequired: true },
+    }),
+    title_es: fields.text({
+      label: 'Titulo (ES)',
+      validation: { isRequired: true },
+    }),
     content_ca: fields.markdoc({ label: 'Contingut (CA)', extension: 'mdoc' }),
     content_es: fields.markdoc({ label: 'Contenido (ES)', extension: 'mdoc' }),
     seo: seoFields(),

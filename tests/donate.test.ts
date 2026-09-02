@@ -59,7 +59,7 @@ describe('DONA-02: Donate URL wiring', () => {
   });
 
   it('fallback # is used when no donateUrl configured', () => {
-    const settings = null;
+    const settings = null as { donateUrl?: string } | null;
     const donateUrl = settings?.donateUrl ?? '#';
 
     expect(donateUrl).toBe('#');
