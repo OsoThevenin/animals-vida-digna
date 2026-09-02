@@ -3,6 +3,18 @@ main = "dist/_worker.js/index.js"
 compatibility_date = "2025-08-15"
 compatibility_flags = ["nodejs_compat"]
 
+# Production is served only from the custom domain below, so the workers.dev
+# route stays off. Declared explicitly rather than left to inference: adding a
+# `routes` block silently implies workers_dev = false, and since Wrangler 4.44
+# preview_urls defaults to matching workers_dev — which quietly disabled PR
+# preview URLs. Preview URLs are opted into deliberately here so Workers Builds
+# can produce a preview per pull request.
+#
+# Note: preview URLs are public (<version>-animals-vida-digna.<subdomain>.workers.dev).
+# Acceptable for a public brochure site with no private data; revisit if that changes.
+workers_dev = false
+preview_urls = true
+
 [assets]
 binding = "ASSETS"
 directory = "./dist"

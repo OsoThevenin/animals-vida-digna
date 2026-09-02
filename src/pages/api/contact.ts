@@ -5,6 +5,7 @@ import {
   sendContactConfirmation,
   sendContactNotification,
 } from '../../lib/email';
+import { checkRateLimit } from '../../lib/rate-limit';
 import { validateContactForm } from '../../lib/validation';
 
 export const prerender = false;
@@ -27,31 +28,17 @@ export const POST: APIRoute = async (context) => {
       });
     }
 
-    // Rate limiting via Cloudflare binding
-    try {
-      const env = (context.locals as Record<string, unknown>).runtime
-        ? ((context.locals as Record<string, { env: Record<string, unknown> }>)
-            .runtime.env as Record<string, unknown>)
-        : {};
-      const rateLimiter = env.FORM_RATE_LIMITER as
-        | { limit: (opts: { key: string }) => Promise<{ success: boolean }> }
-        | undefined;
-      if (rateLimiter) {
-        const clientIp =
-          context.request.headers.get('cf-connecting-ip') || 'unknown';
-        const result = await rateLimiter.limit({ key: clientIp });
-        if (!result.success) {
-          return new Response(
-            JSON.stringify({ success: false, error: 'rate_limited' }),
-            {
-              status: 429,
-              headers: { 'Content-Type': 'application/json' },
-            }
-          );
+    // Rate limiting via Cloudflare binding — see src/lib/rate-limit.ts for
+    // the fail-open reasoning and why every non-limiting path is logged.
+    const rateLimitDecision = await checkRateLimit(context);
+    if (!rateLimitDecision.allowed) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'rate_limited' }),
+        {
+          status: rateLimitDecision.status,
+          headers: { 'Content-Type': 'application/json' },
         }
-      }
-    } catch {
-      // Rate limiter not available (local dev) — continue
+      );
     }
 
     // Validate
