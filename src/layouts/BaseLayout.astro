@@ -5,6 +5,7 @@ import { buildCanonicalUrl, buildOgMeta, buildHreflangLinks, buildOrganizationSc
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import DonateSticky from '../components/DonateSticky.tsx';
+import ConstructionBanner from '../components/ConstructionBanner.astro';
 
 interface Props {
   title: string;
@@ -61,6 +62,7 @@ const orgSchema = buildOrganizationSchema({
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body class="flex min-h-screen flex-col bg-surface font-sans text-text">
+    <ConstructionBanner />
     <a
       href="#main-content"
       class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-surface focus:outline-none"
