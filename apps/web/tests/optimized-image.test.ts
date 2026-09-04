@@ -114,6 +114,79 @@ describe('resolveOptimizedImageSource', () => {
     });
     expect(result.src.startsWith('https://images.animalsvidadigna.org/')).toBe(true);
   });
+
+  // C2 regression: real stored intrinsic widths (Phase 5 bounds uploads at
+  // MAX_UPLOAD_EDGE = 2000) are never one of the four widths the production
+  // WAF rule allowlists (320/640/960/1280). The transform `src` must always
+  // use an allowlisted width -- never the raw intrinsic width -- while the
+  // `width` returned (used for the HTML width attribute, to reserve layout
+  // and prevent CLS) must keep the real intrinsic value.
+  it('maps a non-allowlisted intrinsic width (1500) to the largest allowlisted width in src, while keeping the intrinsic width for the width attribute', () => {
+    const result = resolveOptimizedImageSource({
+      r2Key: 'cats/abc123/img1.webp',
+      isDev: false,
+      width: 1500,
+      imagesOrigin: 'https://images.animalsvidadigna.org',
+    });
+    expect(result.src).toBe(
+      'https://images.animalsvidadigna.org/cdn-cgi/image/width=1280,fit=scale-down,quality=80,format=auto,onerror=redirect/cats/abc123/img1.webp',
+    );
+    expect(result.width).toBe(1500);
+  });
+
+  it('maps a non-allowlisted intrinsic width (2000, the MAX_UPLOAD_EDGE bound) to the largest allowlisted width in src', () => {
+    const result = resolveOptimizedImageSource({
+      r2Key: 'cats/abc123/img1.webp',
+      isDev: false,
+      width: 2000,
+      imagesOrigin: 'https://images.animalsvidadigna.org',
+    });
+    expect(result.src).toBe(
+      'https://images.animalsvidadigna.org/cdn-cgi/image/width=1280,fit=scale-down,quality=80,format=auto,onerror=redirect/cats/abc123/img1.webp',
+    );
+    expect(result.width).toBe(2000);
+  });
+
+  it('maps an intrinsic width below the smallest allowlisted width (200) up to the smallest allowlisted width (320)', () => {
+    const result = resolveOptimizedImageSource({
+      r2Key: 'cats/abc123/img1.webp',
+      isDev: false,
+      width: 200,
+      imagesOrigin: 'https://images.animalsvidadigna.org',
+    });
+    expect(result.src).toBe(
+      'https://images.animalsvidadigna.org/cdn-cgi/image/width=320,fit=scale-down,quality=80,format=auto,onerror=redirect/cats/abc123/img1.webp',
+    );
+    expect(result.width).toBe(200);
+  });
+
+  it('maps an intrinsic width between allowlisted steps (700) up to the next allowlisted width (960)', () => {
+    const result = resolveOptimizedImageSource({
+      r2Key: 'cats/abc123/img1.webp',
+      isDev: false,
+      width: 700,
+      imagesOrigin: 'https://images.animalsvidadigna.org',
+    });
+    expect(result.src).toBe(
+      'https://images.animalsvidadigna.org/cdn-cgi/image/width=960,fit=scale-down,quality=80,format=auto,onerror=redirect/cats/abc123/img1.webp',
+    );
+    expect(result.width).toBe(700);
+  });
+
+  it('never emits a non-allowlisted width in src across a sweep of realistic intrinsic widths', () => {
+    const ALLOWED = new Set([320, 640, 960, 1280]);
+    for (const width of [321, 500, 799, 961, 1279, 1281, 1600, 1800, 2000]) {
+      const result = resolveOptimizedImageSource({
+        r2Key: 'cats/abc123/img1.webp',
+        isDev: false,
+        width,
+        imagesOrigin: 'https://images.animalsvidadigna.org',
+      });
+      const widthMatch = result.src.match(/width=(\d+)/);
+      expect(widthMatch).not.toBeNull();
+      expect(ALLOWED.has(Number(widthMatch?.[1]))).toBe(true);
+    }
+  });
 });
 
 describe('defaults', () => {
