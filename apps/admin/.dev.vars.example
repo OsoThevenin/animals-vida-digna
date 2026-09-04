@@ -1,0 +1,14 @@
+BETTER_AUTH_SECRET=dev-only-not-a-real-secret-please-rotate-in-prod
+BETTER_AUTH_URL=http://localhost:4322
+RESEND_API_KEY=re_xxxxxxxxxxxx
+AUTH_EMAIL_FROM=Animals Vida Digna <no-reply@animalsvidadigna.org>
+ADMIN_ALLOWED_EMAILS=you@example.com
+AUTH_INSECURE_COOKIES=1
+AUTH_DEV_LOG_OTP=1
+
+# AUTH_INSECURE_COOKIES=1 disables the Secure cookie flag, required because
+# `astro dev` serves http://localhost, not https. AUTH_DEV_LOG_OTP=1 logs
+# the sign-in code to the terminal instead of calling Resend, so local
+# testing needs no real inbox. Neither is set in the deployed Worker's
+# secrets (Task 9 Step 2 of the phase doc) — production always uses secure
+# cookies and always emails the code.
