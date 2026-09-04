@@ -110,7 +110,7 @@ Phase 2 (`phase-2-content-package.md` Task 8) already created `apps/web/src/lib/
 - Consumes: `getDb(locals: unknown): Db | undefined` (Phase 2, unchanged), `Db` from `@avd/content/cats`.
 - Produces: `requireDb(locals: unknown): Db` — used by every later task in this phase to read D1. Throws `Error('D1 binding "DB" is not available')` when `getDb` returns `undefined`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to the existing `apps/web/tests/db.test.ts` (Phase 2's five `getDb` cases — undefined locals, no runtime, no env, no DB binding, and the happy path — stay exactly as Phase 2 wrote them; add a new `describe` block below them):
 
@@ -131,12 +131,12 @@ describe('requireDb', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm --filter web exec vitest run tests/db.test.ts`
 Expected: FAIL — `requireDb is not a function` / `does not provide an export named 'requireDb'` (Phase 2's five `getDb` tests still pass; only the two new cases fail).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Append to the existing `apps/web/src/lib/db.ts` (Phase 2's `extractRuntimeEnv` and `getDb` stay exactly as Phase 2 wrote them):
 
@@ -198,12 +198,12 @@ wrangler d1 execute avd-content --local --file ../../packages/content/seed.sql
 
 `packages/content/seed.sql` is gitignored (Phase 2 Task 9) — a fresh clone has no such file, so `seed:generate` must run first. Expected output of `seed:generate`: `Wrote <absolute-path-to>/packages/content/seed.sql` (Phase 2 Task 7's script logs `` `Wrote ${OUT_FILE}` `` with the resolved absolute path). Run the `wrangler d1 execute` command from `apps/web` too — its `--file` path is relative to the current working directory, hence `../../packages/content/seed.sql`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm --filter web exec vitest run tests/db.test.ts`
 Expected: PASS (Phase 2's five `getDb` tests plus the two new `requireDb` tests, seven total)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/astro.config.mjs apps/web/src/lib/db.ts apps/web/src/env.d.ts apps/web/tests/db.test.ts
@@ -221,7 +221,7 @@ git commit -m "feat(web): add requireDb(locals) and local D1 dev setup"
 **Interfaces:**
 - Produces: `renderMarkdocSource(src: string): string` — used by Task 5's cat detail pages to render `LocalizedCat.description`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `apps/web/tests/markdoc.test.ts` (the file already has `describe('renderMarkdoc', ...)` blocks — leave those exactly as they are and add a new `describe` block below them):
 
@@ -256,12 +256,12 @@ describe('renderMarkdocSource', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm --filter web exec vitest run tests/markdoc.test.ts`
 Expected: FAIL — `renderMarkdocSource is not a function` / `does not provide an export named 'renderMarkdocSource'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```ts
 // apps/web/src/lib/markdoc.ts (append below the existing renderMarkdoc export)
@@ -287,12 +287,12 @@ export function renderMarkdocSource(src: string): string {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm --filter web exec vitest run tests/markdoc.test.ts`
 Expected: PASS (all `renderMarkdoc` and `renderMarkdocSource` tests green)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/lib/markdoc.ts apps/web/tests/markdoc.test.ts
@@ -314,7 +314,7 @@ git commit -m "feat(web): add renderMarkdocSource for D1-stored Markdoc text"
 
 The Astro template itself is thin and not unit-tested directly (Astro components aren't invoked by Vitest in this repo); all branching logic lives in the pure function below, which the tests exercise.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `apps/web/tests/optimized-image.test.ts`:
 
@@ -397,12 +397,12 @@ describe('resolveOptimizedImageSource', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm --filter web exec vitest run tests/optimized-image.test.ts`
 Expected: FAIL — `Cannot find module '../src/lib/optimized-image-url'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```ts
 // apps/web/src/lib/optimized-image-url.ts
@@ -530,12 +530,12 @@ const resolved = resolveOptimizedImageSource({
 />
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm --filter web exec vitest run tests/optimized-image.test.ts`
 Expected: PASS (existing `imageUrl`/`generateSrcset`/defaults tests and the new `resolveOptimizedImageSource` tests all green)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/lib/optimized-image-url.ts apps/web/src/components/OptimizedImage.astro apps/web/tests/optimized-image.test.ts
@@ -1288,7 +1288,7 @@ git commit -m "feat(web): cats listing pages read from D1"
 
 There is no new pure logic to unit-test in this task — `getCatBySlug`, `localizeCat` and `renderMarkdocSource` are already tested (by Phase 2 and Task 2 respectively); this task is wiring. Verification is the build + curl/Lighthouse pass in Task 10. Because there is no isolated RED step, write the pages directly and confirm with `pnpm --filter web exec tsc --noEmit` that they type-check against the Task 1–3 contracts before moving on.
 
-- [ ] **Step 1: Update `CatGallery.astro` to the R2-key gallery shape**
+- [x] **Step 1: Update `CatGallery.astro` to the R2-key gallery shape**
 
 ```astro
 ---
@@ -1366,7 +1366,7 @@ const imagesOrigin = import.meta.env.PUBLIC_IMAGES_ORIGIN ?? DEFAULT_IMAGES_ORIG
 </script>
 ```
 
-- [ ] **Step 2: Rewrite the Catalan detail page**
+- [x] **Step 2: Rewrite the Catalan detail page**
 
 ```astro
 ---
@@ -1530,7 +1530,7 @@ const adoptionFormTranslations = {
 </BaseLayout>
 ```
 
-- [ ] **Step 3: Rewrite the Spanish detail page (mirror, `es` locale, alternate points back to `slugCa`)**
+- [x] **Step 3: Rewrite the Spanish detail page (mirror, `es` locale, alternate points back to `slugCa`)**
 
 ```astro
 ---
@@ -1691,12 +1691,12 @@ const adoptionFormTranslations = {
 </BaseLayout>
 ```
 
-- [ ] **Step 4: Type-check**
+- [x] **Step 4: Type-check**
 
 Run: `pnpm --filter web exec tsc --noEmit`
 Expected: no new errors from these three files (pre-existing unrelated errors, if any, are not this task's concern).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/components/cats/CatGallery.astro apps/web/src/pages/cat/\[slug\].astro apps/web/src/pages/es/cat/\[slug\].astro
@@ -1717,7 +1717,7 @@ git commit -m "feat(web): cat detail pages read from D1"
 
 `tests/landing.test.ts` only asserts the static `SECTION_MAP` (discriminant → component name) used by `index.astro`'s `sections.map()` switch, which this task does not touch — it stays green with no changes.
 
-- [ ] **Step 1: Rewrite `FeaturedCatsSection.astro` as a D1-backed server island**
+- [x] **Step 1: Rewrite `FeaturedCatsSection.astro` as a D1-backed server island**
 
 ```astro
 ---
@@ -1767,7 +1767,7 @@ const catsHref = locale === 'ca' ? '/cats' : '/es/cats';
 )}
 ```
 
-- [ ] **Step 2: Render it as a server island with a static fallback on both home pages**
+- [x] **Step 2: Render it as a server island with a static fallback on both home pages**
 
 ```astro
 <!-- apps/web/src/pages/index.astro: replace the final line -->
@@ -1809,17 +1809,17 @@ const catsHref = locale === 'ca' ? '/cats' : '/es/cats';
 </BaseLayout>
 ```
 
-- [ ] **Step 3: Verify `landing.test.ts` is still green (no code under test changed)**
+- [x] **Step 3: Verify `landing.test.ts` is still green (no code under test changed)**
 
 Run: `pnpm --filter web exec vitest run tests/landing.test.ts`
 Expected: PASS (unchanged — confirms this task did not accidentally touch the section-map logic it covers)
 
-- [ ] **Step 4: Verify the pages still build (server islands require a build, not just `tsc`)**
+- [x] **Step 4: Verify the pages still build (server islands require a build, not just `tsc`)**
 
 Run: `pnpm --filter web build`
 Expected: build succeeds; `index.astro` and `es/index.astro` stay static (no `export const prerender = false` needed on them — `server:defer` makes only the island dynamic), and Astro emits a `_server-islands` endpoint for `FeaturedCatsSection`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/components/landing/FeaturedCatsSection.astro apps/web/src/pages/index.astro apps/web/src/pages/es/index.astro
@@ -1842,7 +1842,7 @@ git commit -m "feat(web): featured cats render as a D1-backed server island"
 
 `@astrojs/sitemap` (unchanged, still configured in `astro.config.mjs`) only sees **prerendered** routes; since the cat pages are now `prerender = false`, it silently stops listing them in `sitemap-index.xml` — this is exactly why cat URLs need their own dynamic sitemap. `tests/seo-meta.test.ts` does not assert anything about sitemap content (confirmed: it only covers `buildCanonicalUrl`/`buildHreflangLinks`/`buildOgMeta`), so it needs no changes.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // apps/web/tests/sitemap-cats.test.ts
@@ -1904,12 +1904,12 @@ describe('buildCatsSitemap', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm --filter web exec vitest run tests/sitemap-cats.test.ts`
 Expected: FAIL — `Cannot find module '../src/lib/sitemap-cats'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```ts
 // apps/web/src/lib/sitemap-cats.ts
@@ -1992,12 +1992,12 @@ Sitemap: https://animalsvidadigna.org/sitemap-index.xml
 Sitemap: https://animalsvidadigna.org/sitemap-cats.xml
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm --filter web exec vitest run tests/sitemap-cats.test.ts`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/lib/sitemap-cats.ts apps/web/src/pages/sitemap-cats.xml.ts apps/web/public/robots.txt apps/web/tests/sitemap-cats.test.ts
@@ -2019,7 +2019,7 @@ git commit -m "feat(web): dynamic sitemap-cats.xml, list it in robots.txt"
 **Interfaces:**
 - Removes: `getLocalizedCat` (superseded by `localizeCat` from `@avd/content/localize`, used exclusively since Tasks 4–6), `generateCatPathsCa`/`generateCatPathsEs` (superseded by dynamic `[slug].astro` routes with no `getStaticPaths`, Task 5).
 
-- [ ] **Step 1: Remove the `cats` collection from `keystatic.config.tsx`**
+- [x] **Step 1: Remove the `cats` collection from `keystatic.config.tsx`**
 
 Delete this block (the entire `cats` collection definition, including its comment header):
 
@@ -2056,7 +2056,7 @@ export default config({
 
 (`bilingualImage` and `seoFields` helpers stay — `settings`, `landing` and `pages` still use them.)
 
-- [ ] **Step 2: Delete the Keystatic cat content and the now-dead route helpers**
+- [x] **Step 2: Delete the Keystatic cat content and the now-dead route helpers**
 
 ```bash
 rm -rf apps/web/src/content/cats
@@ -2064,7 +2064,7 @@ rm apps/web/src/lib/cat-routes.ts
 rm apps/web/tests/cats-routes.test.ts
 ```
 
-- [ ] **Step 3: Remove `getLocalizedCat` from `src/i18n/content.ts`, keeping `getLocalizedField`**
+- [x] **Step 3: Remove `getLocalizedCat` from `src/i18n/content.ts`, keeping `getLocalizedField`**
 
 ```ts
 // apps/web/src/i18n/content.ts
@@ -2085,7 +2085,7 @@ export function getLocalizedField<T>(
 
 (`getLocalizedCat` and everything below it in the old file is deleted — landing sections only ever imported `getLocalizedField`, confirmed by `grep -rn "getLocalizedField\|getLocalizedCat" src` before this task, which showed every landing component using only `getLocalizedField`.)
 
-- [ ] **Step 4: Fix `tests/schemas.test.ts`**
+- [x] **Step 4: Fix `tests/schemas.test.ts`**
 
 Remove the entire `describe('CMS-02: Cats collection', ...)` block. In `describe('CMS-05: Bilingual alt text on all image fields', ...)`, remove the `'cats coverImage has alt_ca and alt_es'` and `'cats gallery items have alt_ca and alt_es'` tests, keeping only `'settings seo image has alt_ca and alt_es'`:
 
@@ -2110,7 +2110,7 @@ describe('CMS-05: Bilingual alt text on all image fields', () => {
 
 (`CMS-01: Settings singleton`, `CMS-03: Landing singleton` and `CMS-04: Pages collection` blocks are untouched.)
 
-- [ ] **Step 5: Run the full test suite and grep for leftovers**
+- [x] **Step 5: Run the full test suite and grep for leftovers**
 
 Run: `pnpm --filter web test`
 Expected: PASS, with `tests/cats-routes.test.ts` gone from the run and `tests/schemas.test.ts` no longer referencing `collections.cats`.
@@ -2123,7 +2123,7 @@ grep -rn "collections\.cats\|getLocalizedCat\|generateCatPaths" apps/web/src app
 
 Expected: no matches.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add keystatic.config.tsx apps/web/src/i18n/content.ts apps/web/tests/schemas.test.ts
@@ -2141,7 +2141,7 @@ git commit -m "chore(web): remove Keystatic cats collection and dead route helpe
 **Interfaces:**
 - Consumes: `collectModuleGraph` (existing helper in this file, unchanged).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to the end of `apps/web/tests/worker-bundle-no-keystatic.test.ts` (after the existing `describeIfBuilt('Worker API route bundles ...)` block, leaving it untouched).
 
@@ -2187,12 +2187,12 @@ describeCatsIfBuilt('Public cats listing bundle (dist/_worker.js/pages/cats)', (
 });
 ```
 
-- [ ] **Step 2: Build and run to verify the assertion holds**
+- [x] **Step 2: Build and run to verify the assertion holds**
 
 Run: `pnpm --filter web build && pnpm --filter web exec vitest run tests/worker-bundle-no-keystatic.test.ts`
 Expected: PASS — both the pre-existing `contact`/`adopt` checks and the two new `cats`/`es/cats` checks (Keystatic's `settings` reader stays filesystem-backed only in non-production `storage` modes per `src/lib/keystatic-storage.ts`; in production it is GitHub-storage-backed, not `node:fs` — confirm this still holds by reading `src/lib/keystatic-storage.ts` if the assertion above fails).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add apps/web/tests/worker-bundle-no-keystatic.test.ts
@@ -2205,7 +2205,7 @@ git commit -m "test(web): guard cats listing routes against node:fs in their bun
 
 **Files:** none (verification only).
 
-- [ ] **Step 1: Full workspace test + build**
+- [x] **Step 1: Full workspace test + build**
 
 ```bash
 pnpm turbo test
@@ -2214,7 +2214,7 @@ pnpm turbo build
 
 Expected: both green. `pnpm turbo build` runs `apps/web`'s `prebuild` (`generate-settings.ts`), then `astro build`; confirm `dist/_worker.js/index.js` and `dist/_worker.js/pages/cats/index.astro.mjs` / `dist/_worker.js/pages/cat/[slug].astro.mjs` (and `es/` equivalents) exist, and that `dist/_worker.js/pages/sitemap-cats.xml.astro.mjs` (or equivalent SSR endpoint output) exists too.
 
-- [ ] **Step 2: Worker preview + curl the on-demand routes**
+- [x] **Step 2: Worker preview + curl the on-demand routes**
 
 `preview:worker` runs `wrangler dev` against the same local D1 state Task 1 set up. Regenerate and (re-)apply the seed first — `packages/content/seed.sql` is gitignored, so it will not exist on a fresh clone, and local D1 state may be stale or absent in CI:
 
@@ -2243,7 +2243,7 @@ Expected: `/cats` and `/cat/lluna` return `200` with cat markup (the seeded samp
 
 Stop the preview server (`Ctrl+C`) once curl checks pass.
 
-- [ ] **Step 3: Lighthouse mobile audit on all four required pages, both locales**
+- [x] **Step 3: Lighthouse mobile audit on all four required pages, both locales**
 
 This repeats the checkpoint from `.planning/phases/04-seo-accessibility-performance/04-06-PLAN.md`, using the same manual Chrome DevTools flow (that plan used `pnpm build && pnpm preview`; here the pages under test are dynamic, so use the Worker preview instead so timings reflect a real D1 round-trip):
 
@@ -2274,7 +2274,45 @@ Record the six scores in the PR description in this format:
 /es/cat/luna: Perf=XX, A11y=XX, BP=XX, SEO=XX
 ```
 
+**Actual results** (headless Lighthouse via `npx lighthouse` against
+`wrangler dev`, mobile emulation, no interactive Chrome DevTools available in
+this environment):
+
+```
+/ (ca): Perf=100, A11y=95, BP=100, SEO=100
+/cats (ca): Perf=100, A11y=93, BP=100, SEO=100
+/cat/lluna (ca): Perf=100, A11y=94, BP=100, SEO=100
+/es/: Perf=100, A11y=95, BP=100, SEO=100
+/es/cats: Perf=100, A11y=93, BP=100, SEO=100
+/es/cat/luna: Perf=100, A11y=94, BP=100, SEO=100
+```
+
+Performance/BP/SEO all meet the ≥95 bar. Accessibility on `/cats`, `/es/cats`
+(93) and `/cat/lluna`, `/es/cat/luna` (94) is below it. Root-caused, not
+guessed at: `color-contrast` (Footer's `text-surface/50`/`/40` labels) and
+`image-redundant-alt` (logo `alt="Animals Vida Digna"` next to visible site
+name text) are pre-existing in `Footer.astro`/`Header.astro`, unchanged by
+this phase, and already present on `/` (which scores exactly 95, i.e. already
+at the edge). `heading-order` (`CatCard.astro`'s `<h3>` cat name) is also
+byte-for-byte unchanged from the pre-Phase-3 file
+(`git show 5a2dead^:apps/web/src/components/cats/CatCard.astro`) — it is what
+pushes cat pages from 95 to 93/94, since the home page's `FeaturedCatsSection`
+is a deferred server island not yet resolved at Lighthouse's single-navigation
+snapshot. This is a pre-existing accessibility gap this phase did not
+introduce and does not regress further; fixing `Footer`/`Header` contrast and
+`CatCard`'s heading hierarchy is outside "public cat pages render from D1"
+and is flagged here rather than fixed silently.
+
 - [ ] **Step 4: Ordering rule before merge — D1 seeded in production first**
+
+**Blocked.** No `--remote` D1 command was run (repo constraint: local D1
+only). The coordinator confirmed mid-task that production D1 has **not**
+been migrated or seeded, correcting an earlier assumption otherwise. This
+step cannot be satisfied by this agent — the maintainer must run the
+production migration + seed and confirm a non-zero `count(*)` before this
+phase's changes are deployed, per the check this step documents.
+
+- [ ] **Step 5: Preview URL check on the PR**
 
 Per the plan README's ordering rules ("Seed D1 (end of Phase 2) before deploying Phase 3"), confirm before merging this phase's PR:
 
