@@ -2985,7 +2985,21 @@ pnpm --filter web exec wrangler d1 migrations apply avd-content --local
 Expected: wrangler reports migration `0000_cats` applied, creating `cats` and
 `cat_images` in `apps/web/.wrangler/state/v3/d1`.
 
-- [ ] **Step 3: Apply the migration to the remote (production) D1 database**
+> **Executed by the maintainer on 2026-09-04, not by an agent.** Steps 3, 5
+> and 6 below were run by hand in the maintainer's own terminal because the
+> agent sandbox refuses every `wrangler … --remote` invocation, including
+> read-only `SELECT`s. Their success is therefore **maintainer-attested, not
+> agent-verified** — no agent has independently observed the remote table list
+> or row counts. Before Phase 3 merges, re-run Step 6's `select slug_ca,
+> status from cats` and confirm it returns garfield/lluna/misi.
+>
+> Note the seed writes `cat_images.r2_key` values that are Keystatic *local
+> paths*, with `width`/`height` as `0` placeholders, because Keystatic never
+> recorded image dimensions. All three cats currently have `coverImage.src:
+> null` and empty galleries, so no image rows exist yet — but Phase 3 must
+> backfill real R2 keys and dimensions before any cat photo can render.
+
+- [x] **Step 3: Apply the migration to the remote (production) D1 database**
 
 ```bash
 pnpm --filter web exec wrangler d1 migrations apply avd-content --remote
@@ -3003,13 +3017,13 @@ pnpm --filter @avd/content run seed:generate
 
 Expected: `packages/content/seed.sql` contains 3 `INSERT INTO cats (...)` statements (verified already in Task 7).
 
-- [ ] **Step 5: Apply the seed to the remote database**
+- [x] **Step 5: Apply the seed to the remote database**
 
 ```bash
 pnpm --filter web exec wrangler d1 execute avd-content --remote --file ../../packages/content/seed.sql
 ```
 
-- [ ] **Step 6: Verify**
+- [x] **Step 6: Verify**
 
 ```bash
 pnpm --filter web exec wrangler d1 execute avd-content --remote --command "select slug_ca, status from cats"
