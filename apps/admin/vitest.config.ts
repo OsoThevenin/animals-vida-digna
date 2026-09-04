@@ -13,6 +13,12 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // Vitest never loads Astro's Vite plugin, so the `astro:middleware`
+      // virtual module it normally provides does not exist here. See
+      // tests/support/astro-middleware-shim.ts.
+      'astro:middleware': fileURLToPath(
+        new URL('./tests/support/astro-middleware-shim.ts', import.meta.url)
+      ),
     },
   },
   test: {
