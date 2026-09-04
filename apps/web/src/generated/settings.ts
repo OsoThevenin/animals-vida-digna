@@ -7,8 +7,10 @@
 
 export interface GeneratedSiteSettings {
   contactEmail: string;
+  donateUrl: string;
 }
 
 export const siteSettings: GeneratedSiteSettings = {
-  "contactEmail": "info@animalsvidadigna.org"
+  "contactEmail": "info@animalsvidadigna.org",
+  "donateUrl": "https://www.teaming.net/animalsvidadigna"
 };

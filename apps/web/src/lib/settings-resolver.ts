@@ -13,10 +13,12 @@
  */
 
 export const DEFAULT_CONTACT_EMAIL = 'info@animalsvidadigna.org';
+export const DEFAULT_DONATE_URL = '#';
 
 /** Minimal shape of the Keystatic `settings` singleton relevant here. */
 export interface RawSettingsInput {
   contactEmail?: string | null;
+  donateUrl?: string | null;
 }
 
 /**
@@ -28,4 +30,15 @@ export function resolveContactEmail(
   settings: RawSettingsInput | null | undefined
 ): string {
   return settings?.contactEmail || DEFAULT_CONTACT_EMAIL;
+}
+
+/**
+ * Resolve the donation URL from a (possibly partial/missing) settings
+ * object, falling back to DEFAULT_DONATE_URL when donateUrl is missing,
+ * null, or an empty string.
+ */
+export function resolveDonateUrl(
+  settings: RawSettingsInput | null | undefined
+): string {
+  return settings?.donateUrl || DEFAULT_DONATE_URL;
 }

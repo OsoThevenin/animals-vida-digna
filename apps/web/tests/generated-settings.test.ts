@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CONTACT_EMAIL } from '../src/lib/settings-resolver';
+import {
+  DEFAULT_CONTACT_EMAIL,
+  DEFAULT_DONATE_URL,
+} from '../src/lib/settings-resolver';
 
 /**
  * Shape/contract tests for the build-time-generated settings module
@@ -23,6 +26,16 @@ describe('generated settings module', () => {
     // The generator uses resolveContactEmail with the same fallback constant,
     // so an empty/missing settings.yaml value must resolve to this default.
     expect(DEFAULT_CONTACT_EMAIL).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+  });
+
+  it('exports a siteSettings object with a non-empty string donateUrl', async () => {
+    const { siteSettings } = await import('../src/generated/settings');
+    expect(typeof siteSettings.donateUrl).toBe('string');
+    expect(siteSettings.donateUrl.length).toBeGreaterThan(0);
+  });
+
+  it('falls back to DEFAULT_DONATE_URL shape when the source has no override', () => {
+    expect(DEFAULT_DONATE_URL).toBe('#');
   });
 
   it('does not import @keystatic/core (module graph stays fs-free)', async () => {
