@@ -12,10 +12,7 @@ import { type CatInput, catInputSchema } from '../src/validate';
 // fixtures/cats) rather than deleted, so `pnpm run seed:generate` keeps
 // working for local dev bootstrap (Task 1/Task 10's documented workflow)
 // until Phase 6 retires this script entirely.
-const DEFAULT_CATS_DIR = resolve(
-  import.meta.dirname,
-  '../tests/fixtures/cats'
-);
+const DEFAULT_CATS_DIR = resolve(import.meta.dirname, '../tests/fixtures/cats');
 const OUT_FILE = resolve(import.meta.dirname, '../seed.sql');
 
 function sqlString(value: string | null): string {
