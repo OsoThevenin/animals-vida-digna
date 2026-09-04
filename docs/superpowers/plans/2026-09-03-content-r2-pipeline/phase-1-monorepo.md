@@ -60,7 +60,7 @@ which get real TDD cycles.
   (a package's own `test`/`build`/`lint`/`check` script name is what Turborepo
   invokes per-package).
 
-- [ ] **Step 1: Write `pnpm-workspace.yaml`**
+- [x] **Step 1: Write `pnpm-workspace.yaml`**
 
 ```yaml
 packages:
@@ -68,7 +68,7 @@ packages:
   - 'packages/*'
 ```
 
-- [ ] **Step 2: Write `turbo.json`**
+- [x] **Step 2: Write `turbo.json`**
 
 ```json
 {
@@ -99,7 +99,7 @@ package's own files. Linting is deliberately **not** a Turborepo task: Biome
 walks the whole tree in one invocation from the root (`pnpm lint`), per the
 spec's Workspace contract.
 
-- [ ] **Step 3: Write `tsconfig.base.json`**
+- [x] **Step 3: Write `tsconfig.base.json`**
 
 Content is the current root `tsconfig.json` (see repo-map.md and the file
 read at plan-writing time), generalized to a base every workspace member
@@ -124,7 +124,7 @@ hoisted and package-local copies of the same library. `apps/web/tsconfig.json`
 (Task 2) extends this file and adds back its own `jsxImportSource` and
 `include`/`exclude`.
 
-- [ ] **Step 4: Rewrite root `package.json`**
+- [x] **Step 4: Rewrite root `package.json`**
 
 ```json
 {
@@ -177,7 +177,7 @@ from a workspace member's `package.json`, so they cannot move into
 `apps/web/package.json` even though `sharp`/`workerd`/`esbuild` and the
 `@preact/preset-vite` override exist because of `apps/web`'s dependencies.
 
-- [ ] **Step 5: Confirm `.npmrc` stays as-is at the root**
+- [x] **Step 5: Confirm `.npmrc` stays as-is at the root**
 
 `.npmrc` already lives at the repo root and pnpm only ever reads `.npmrc`
 from the workspace root (or a directory pnpm is invoked from, which will
@@ -194,7 +194,7 @@ onlyBuiltDependenciesFile: ""=true
 only-built-dependencies="[]"
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add pnpm-workspace.yaml turbo.json tsconfig.base.json package.json
