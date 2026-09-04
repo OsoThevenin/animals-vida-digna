@@ -121,6 +121,56 @@ must be written with `starts_with` alternatives rather than a pattern, and
 there is no *Log* action available to trial it safely — it must be verified
 with live requests immediately after deployment.
 
+### 5. WAF custom rules DO intercept `/cdn-cgi/image/` — quota is now capped
+
+It was not documented anywhere whether Cloudflare's WAF evaluates custom rules
+before the `/cdn-cgi/image/` handler, or whether that path bypasses the WAF
+entirely. **It intercepts.** Verified live on 2026-09-04 after the maintainer
+deployed the rule below.
+
+Free-plan constraints that shaped the rule: **no regex support** in custom
+rules (so `matches` is unavailable and the allowlist is written as
+`starts_with` alternatives), a 5-rule limit, and no *Log* action — meaning the
+rule cannot be trialled in observation mode and must be verified with live
+requests immediately after deployment.
+
+Deployed rule — action **Block**, scoped to the images host only so the apex's
+legacy `format=auto,fit=cover,width=W,quality=80` path for static assets is
+untouched:
+
+```
+(http.host eq "images.animalsvidadigna.org"
+ and starts_with(http.request.uri.path, "/cdn-cgi/image/")
+ and not starts_with(http.request.uri.path, "/cdn-cgi/image/width=320,fit=scale-down,quality=80,format=auto,onerror=redirect/")
+ and not starts_with(http.request.uri.path, "/cdn-cgi/image/width=640,fit=scale-down,quality=80,format=auto,onerror=redirect/")
+ and not starts_with(http.request.uri.path, "/cdn-cgi/image/width=960,fit=scale-down,quality=80,format=auto,onerror=redirect/")
+ and not starts_with(http.request.uri.path, "/cdn-cgi/image/width=1280,fit=scale-down,quality=80,format=auto,onerror=redirect/"))
+```
+
+Measured behaviour against `cats/spike/test.webp`:
+
+| Request | Status |
+|---|---|
+| `width=320,fit=scale-down,quality=80,format=auto,onerror=redirect` | 200 |
+| `width=640,…` / `width=960,…` / `width=1280,…` (same shape) | 200 |
+| `width=321,…` (walked width) | **403** |
+| `width=7,format=auto` (walked width) | **403** |
+| `format=auto,width=320,fit=scale-down,quality=80` (reordered) | **403** |
+| `width=320` (bare) | **403** |
+| `cats/spike/test.webp` (untransformed original) | 200 |
+
+Monthly unique transformations are therefore bounded by 4 × the number of real
+images, not by attacker input, and the untransformed original still serves —
+so `onerror=redirect` degradation continues to work if the quota is ever
+exhausted.
+
+**Consequence for every later phase:** the URL contract is now enforced in
+production. Any deviation — a reordered parameter, a fifth width, a dropped
+`onerror=redirect` — returns 403 to real visitors. Phase 3's Playwright suite
+asserts that rendered cat-image URLs use `fit=scale-down` and one of the four
+allowed widths; keep that assertion, and update the WAF rule *first* if the
+width set ever changes.
+
 ## Plan state
 
 | Check | Result |
@@ -265,7 +315,7 @@ model is that two *widths* of the same object count as two uniques and that
 | `animalsvidadigna.org` verified in Resend | yes — implied by the accepted send below |
 | `RESEND_API_KEY` present (`wrangler secret list`) | **yes** — present on Worker `animals-vida-digna` alongside `KEYSTATIC_SECRET` |
 | Test email sent from `no-reply@animalsvidadigna.org` | **yes** — the maintainer ran Task 7 Step 3 from their own shell on 2026-09-04 (the key is not retrievable by an agent and must never enter a session). The API returned a JSON body containing an `"id"` UUID and no `"statusCode"` error field, which is the documented success shape. |
-| Test email received | not separately confirmed — API acceptance is not proof of inbox delivery. Phase 4's better-auth `emailOTP` login depends on this sender, so confirm arrival before Phase 4 rather than after. |
+| Test email received | **yes** — maintainer confirmed arrival on 2026-09-04. Phase 4 better-auth `emailOTP` login can rely on this sender. |
 
 ## Admin hostname reservation
 
