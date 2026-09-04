@@ -1,8 +1,9 @@
 ---
-import { imageUrl, generateSrcset, DEFAULT_WIDTHS, DEFAULT_SIZES } from '../lib/image-utils';
+import { resolveOptimizedImageSource } from '../lib/optimized-image-url';
 
 interface Props {
-  src: string;
+  src?: string;
+  r2Key?: string;
   alt: string;
   widths?: number[];
   sizes?: string;
@@ -15,30 +16,37 @@ interface Props {
 
 const {
   src,
+  r2Key,
   alt,
-  widths = DEFAULT_WIDTHS,
-  sizes = DEFAULT_SIZES,
+  widths,
+  sizes,
   class: className,
   loading = 'lazy',
-  width = widths[widths.length - 1],
+  width,
   height,
   fetchpriority,
 } = Astro.props;
 
-const isDev = import.meta.env.DEV;
-const srcset = generateSrcset(src, widths, isDev);
-const fallbackSrc = imageUrl(src, widths[widths.length - 1], isDev);
+const resolved = resolveOptimizedImageSource({
+  src,
+  r2Key,
+  widths,
+  sizes,
+  width,
+  isDev: import.meta.env.DEV,
+  imagesOrigin: import.meta.env.PUBLIC_IMAGES_ORIGIN,
+});
 ---
 
 <img
-  src={fallbackSrc}
-  srcset={srcset}
-  sizes={sizes}
+  src={resolved.src}
+  srcset={resolved.srcset}
+  sizes={resolved.sizes}
   alt={alt}
   class={className}
   loading={loading}
   decoding="async"
-  width={width}
+  width={resolved.width}
   {...(height ? { height } : {})}
   {...(fetchpriority ? { fetchpriority } : {})}
 />
