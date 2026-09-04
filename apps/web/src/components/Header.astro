@@ -23,15 +23,26 @@ const navLinks = [
 <header class="sticky top-0 z-50 border-b border-primary/10 bg-surface/80 backdrop-blur-md">
   <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
     <!-- Logo -->
-    <a href={locale === 'ca' ? '/' : '/es'} class="flex items-center gap-2">
+    <a
+      href={locale === 'ca' ? '/' : '/es'}
+      class="flex items-center gap-2"
+      aria-label="Animals Vida Digna"
+    >
+      {/* alt="" (decorative): the link's aria-label already names the
+          destination, and the visible span (on sm+ viewports) repeats it --
+          an img alt duplicating the adjacent visible text triggers axe's
+          image-redundant-alt rule. */}
       <img
         src="/images/logo.webp"
-        alt="Animals Vida Digna"
+        alt=""
         class="h-10 w-auto"
         width="40"
         height="40"
       />
-      <span class="hidden font-display text-lg font-bold text-primary sm:inline">
+      <span
+        class="hidden font-display text-lg font-bold text-primary sm:inline"
+        aria-hidden="true"
+      >
         Animals Vida Digna
       </span>
     </a>
