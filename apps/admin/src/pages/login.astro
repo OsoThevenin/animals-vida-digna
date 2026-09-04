@@ -1,0 +1,27 @@
+---
+import '../styles/admin.css';
+import { LoginForm } from '../components/login-form';
+
+export const prerender = false;
+
+if (Astro.locals.user) {
+  return Astro.redirect('/cats');
+}
+---
+
+<!doctype html>
+<html lang="ca">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inicia sessió / Iniciar sesión | Animals Vida Digna — Admin</title>
+  </head>
+  <body class="flex min-h-screen items-center justify-center bg-surface font-sans text-text">
+    <div class="w-full max-w-sm px-6">
+      <h1 class="mb-6 font-semibold text-2xl text-primary">
+        Inicia sessió / Iniciar sesión
+      </h1>
+      <LoginForm client:load />
+    </div>
+  </body>
+</html>
