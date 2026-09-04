@@ -45,7 +45,14 @@ once Phase 2 is merged, in parallel with Phase 3, if two people/agents work at o
 1. **Phase 0 gates everything.** If `/cdn-cgi/image/` on `images.animalsvidadigna.org` does not return transformed images on the Free plan, stop and switch the image contract to "browser generates the 4 widths and uploads all of them" before writing Phase 2/5 code (the spec documents this fallback in *Why URL transformations…*).
 2. **Merge the `design-system` branch after Phase 1 and before Phase 4.** Phase 1 keeps `packages/design-system` as the package path so that branch rebases cleanly; its own "Task 1: Workspace conversion" becomes obsolete and is dropped during the rebase.
 3. **Seed D1 (end of Phase 2) before deploying Phase 3.** Phase 3's PR must not merge until `wrangler d1 execute avd-content --remote --file seed.sql` has run.
-4. **Every phase = one PR** to `main`, reviewed by the maintainer under the existing ruleset. Commit after every task (each phase doc gives the message).
+4. ~~**Every phase = one PR** to `main`~~ — **superseded 2026-09-04.** The
+   maintainer decided that nothing merges until the complete plan is closed:
+   all phases accumulate as task-level commits on one branch
+   (`worktree-content-r2-impl`) and ship as a single reviewed unit. Verification
+   gaps that would have blocked an individual phase's merge are recorded in
+   *Deferred verification owed by this phase* in `phase-5-admin-cats-images.md`
+   and settled at Phase 5. Still commit after every task (each phase doc gives
+   the message).
 5. **Do not skip the failing-test step.** Tasks are written RED → GREEN → commit.
 
 ## Definition of done (whole plan)

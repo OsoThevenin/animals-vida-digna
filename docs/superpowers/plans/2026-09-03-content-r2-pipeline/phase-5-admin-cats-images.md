@@ -23,6 +23,47 @@
 
 ---
 
+## Deferred verification owed by this phase (added 2026-09-04)
+
+**Nothing in this plan merges to `main` until every phase is complete.** The
+maintainer decided on 2026-09-04 that the whole branch ships as one reviewed
+unit, so gaps that would normally block an individual phase's merge are instead
+collected here and settled at Phase 5.
+
+Phase 5 is the first phase that produces a **real cat image**. Until it runs,
+the image path has never been exercised end-to-end with real data: the three
+seeded cats all have `coverImage.src: null` and empty galleries, so
+`cat_images` is empty, the seed's placeholder rows carry Keystatic local paths
+with `width`/`height` of `0`, and two specs in `apps/web/e2e/cat-detail.spec.ts`
+remain `test.fixme` for want of anything to assert against.
+
+**The Phase 5 verification (Opus reviewer) must explicitly confirm all of the
+following, and must not accept "the unit tests pass" as evidence for any of
+them:**
+
+1. **The full chain works with a real photo**: upload through the admin →
+   object lands in R2 under `cats/<catId>/<imageId>.webp` → a `cat_images` row
+   records the correct `r2_key`, real non-zero `width`/`height`, and alt text →
+   the public cat page renders an `<img>` whose `src`/`srcset` resolve to
+   **HTTP 200** against `images.animalsvidadigna.org`.
+2. **The rendered URLs survive the production WAF rule.** The allowlist deployed
+   on 2026-09-04 blocks any transform string that is not character-for-character
+   canonical — see `phase-0-results.md` *Findings* §5 for the measured 200/403
+   matrix. Assert the four canonical widths, and assert that a deviation is
+   rejected, so contract drift fails our tests rather than the live site.
+3. **The seeded placeholder rows are reconciled.** Either backfilled with real
+   R2 keys and dimensions, or deliberately removed. Zero dimensions mean no CLS
+   reservation, which works against the Lighthouse ≥ 95 constraint above.
+4. **The two `test.fixme` specs in `apps/web/e2e/cat-detail.spec.ts` are
+   re-enabled and passing**, or their continued absence is justified in writing.
+5. **Remote D1 is re-verified.** The Phase 2 migration and seed were applied by
+   the maintainer by hand and are attested, not agent-verified — the agent
+   sandbox refuses every `wrangler … --remote` call, including read-only
+   `SELECT`s. Confirm `select slug_ca, status from cats` returns
+   garfield/lluna/misi before the branch merges.
+
+Treat this section as part of Phase 5's definition of done.
+
 ## Contract assumptions carried into this phase
 
 `packages/content`'s `package.json` (Phase 2, Task 1) declares both a barrel
