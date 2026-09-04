@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   KEYSTATIC_GITHUB_BRANCH_PREFIX,
+  KEYSTATIC_GITHUB_PATH_PREFIX,
   KEYSTATIC_GITHUB_REPO,
   resolveKeystaticStorage,
 } from '../src/lib/keystatic-storage';
@@ -18,13 +19,14 @@ describe('resolveKeystaticStorage', () => {
     expect(decision).toEqual({ kind: 'local' });
   });
 
-  it('returns github storage in production', () => {
+  it('returns github storage in production, scoped to the apps/web path prefix', () => {
     const decision = resolveKeystaticStorage({ PROD: true });
 
     expect(decision).toEqual({
       kind: 'github',
       repo: KEYSTATIC_GITHUB_REPO,
       branchPrefix: KEYSTATIC_GITHUB_BRANCH_PREFIX,
+      pathPrefix: KEYSTATIC_GITHUB_PATH_PREFIX,
     });
   });
 
@@ -38,6 +40,7 @@ describe('resolveKeystaticStorage', () => {
       kind: 'github',
       repo: KEYSTATIC_GITHUB_REPO,
       branchPrefix: KEYSTATIC_GITHUB_BRANCH_PREFIX,
+      pathPrefix: KEYSTATIC_GITHUB_PATH_PREFIX,
     });
   });
 
@@ -52,9 +55,10 @@ describe('resolveKeystaticStorage', () => {
     ).not.toThrow();
   });
 
-  it('exposes the expected repo and branch prefix constants', () => {
+  it('exposes the expected repo, branch prefix, and path prefix constants', () => {
     expect(KEYSTATIC_GITHUB_REPO).toBe('OsoThevenin/animals-vida-digna');
     expect(KEYSTATIC_GITHUB_BRANCH_PREFIX).toBe('content/');
+    expect(KEYSTATIC_GITHUB_PATH_PREFIX).toBe('apps/web');
   });
 
   it('never mutates the input env object', () => {

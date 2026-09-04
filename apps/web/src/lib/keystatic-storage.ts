@@ -29,14 +29,31 @@
  * of protecting it. Do not re-add that validation — if credential
  * misconfiguration needs to be surfaced, do it at request time, where the
  * runtime env is actually available.
+ *
+ * `pathPrefix` was added when the repo became a monorepo (this app moved to
+ * `apps/web`, plan: docs/superpowers/plans/2026-09-03-content-r2-pipeline).
+ * Keystatic's GitHub storage mode reads and writes content relative to the
+ * repo root by default; `pathPrefix` scopes every read/write to a
+ * subdirectory of the repo instead — see
+ * https://keystatic.com/docs/github-mode (monorepo / path prefix section)
+ * and the `pathPrefix?: string` field on `CommonRemoteStorageConfig` in
+ * `@keystatic/core`'s `src/config.ts`, shared by the `github` storage kind.
+ * Without it, a volunteer's content PR would try to write to
+ * `src/content/cats/...` at the repo root, which no longer exists.
  */
 
 export const KEYSTATIC_GITHUB_REPO = 'OsoThevenin/animals-vida-digna';
 export const KEYSTATIC_GITHUB_BRANCH_PREFIX = 'content/';
+export const KEYSTATIC_GITHUB_PATH_PREFIX = 'apps/web';
 
 export type KeystaticStorage =
   | { kind: 'local' }
-  | { kind: 'github'; repo: string; branchPrefix: string };
+  | {
+      kind: 'github';
+      repo: string;
+      branchPrefix: string;
+      pathPrefix: string;
+    };
 
 /**
  * Extracts a usable env record from `unknown`, without throwing if it is
@@ -73,5 +90,6 @@ export function resolveKeystaticStorage(env: unknown): KeystaticStorage {
     kind: 'github',
     repo: KEYSTATIC_GITHUB_REPO,
     branchPrefix: KEYSTATIC_GITHUB_BRANCH_PREFIX,
+    pathPrefix: KEYSTATIC_GITHUB_PATH_PREFIX,
   };
 }

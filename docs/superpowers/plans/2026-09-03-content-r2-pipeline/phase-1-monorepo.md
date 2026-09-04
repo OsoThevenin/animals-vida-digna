@@ -696,7 +696,7 @@ git commit -m "feat(web): consume @avd/content as a workspace dependency"
   `KEYSTATIC_GITHUB_BRANCH_PREFIX` is already a fixed constant, not derived
   from `env`).
 
-- [ ] **Step 1: Verify the option name against the installed package**
+- [x] **Step 1: Verify the option name against the installed package**
 
 Confirmed for this plan against the installed `@keystatic/core@0.5.48`:
 
@@ -715,7 +715,7 @@ exactly this move: `apps/web/src/content/**` instead of `src/content/**`).
 If a future `@keystatic/core` upgrade removes or renames this field, rerun
 the grep above against the then-installed version before trusting this task.
 
-- [ ] **Step 2: Write the failing test — extend the existing `github` storage assertions**
+- [x] **Step 2: Write the failing test — extend the existing `github` storage assertions**
 
 Edit `apps/web/tests/keystatic-storage.test.ts`: update every existing
 `toEqual({ kind: 'github', repo: ..., branchPrefix: ... })` assertion to
@@ -815,7 +815,7 @@ describe('resolveKeystaticStorage', () => {
 });
 ```
 
-- [ ] **Step 3: Run the test to verify it fails**
+- [x] **Step 3: Run the test to verify it fails**
 
 ```bash
 pnpm --filter web test -- keystatic-storage
@@ -825,7 +825,7 @@ Expected: FAIL — `KEYSTATIC_GITHUB_PATH_PREFIX` is not exported yet, and the
 `toEqual` assertions are missing the `pathPrefix` key the implementation
 does not yet produce.
 
-- [ ] **Step 4: Modify `apps/web/src/lib/keystatic-storage.ts`**
+- [x] **Step 4: Modify `apps/web/src/lib/keystatic-storage.ts`**
 
 Add the new constant and thread it into the `github` branch's return value
 and type. Full modified file:
@@ -928,7 +928,7 @@ export function resolveKeystaticStorage(env: unknown): KeystaticStorage {
 }
 ```
 
-- [ ] **Step 5: Run the test to verify it passes**
+- [x] **Step 5: Run the test to verify it passes**
 
 ```bash
 pnpm --filter web test -- keystatic-storage
@@ -936,7 +936,7 @@ pnpm --filter web test -- keystatic-storage
 
 Expected: PASS.
 
-- [ ] **Step 6: Confirm `keystatic.config.tsx`'s call site needs no change**
+- [x] **Step 6: Confirm `keystatic.config.tsx`'s call site needs no change**
 
 `apps/web/keystatic.config.tsx:414` calls
 `storage: resolveKeystaticStorage(import.meta.env)` and spreads whatever
@@ -950,7 +950,7 @@ verification (this task does not re-run `tsc` on its own — Task 8's
 `.astro`/`.ts` files it touches, and Keystatic's admin UI page imports the
 config).
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/web/src/lib/keystatic-storage.ts apps/web/tests/keystatic-storage.test.ts
