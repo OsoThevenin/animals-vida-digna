@@ -1,11 +1,104 @@
 @import "tailwindcss";
-@import "@avd/design-system/styles.css";
 
-/* Tailwind's automatic content detection scans this package's own source
-   tree, but a workspace dependency loaded through a symlink is outside
-   that scan root by default. This `@source` is Tailwind 4's documented way
-   to add an extra directory to scan, so utility classes used inside
-   @avd/design-system's .tsx files (e.g. Badge's status colors) are not
-   purged from the admin build.
-   https://tailwindcss.com/docs/detecting-classes-in-source-files#explicitly-registering-sources */
-@source "../../node_modules/@avd/design-system/src";
+/* shadcn/ui components carry `dark:` utilities inline. Tailwind 4's default
+   `dark` variant is `prefers-color-scheme`, which would fire those on a
+   volunteer's dark-mode OS while the tokens below stay light. The admin has
+   no dark theme, so pin the variant to an opt-in `.dark` class that nothing
+   ever sets. https://tailwindcss.com/docs/dark-mode#using-a-data-attribute */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Brand palette. ORIGIN OF TRUTH: apps/web/src/styles/global.css.
+ * shadcn/ui ships a neutral-based token set; every semantic token below is
+ * re-pointed at these warm browns so the admin looks like the site it edits.
+ * Contrast for every rendered pair is asserted in tests/a11y-contrast.test.ts.
+ */
+:root {
+  --brand-primary: #8b5e3c;
+  --brand-primary-light: #a67c5b;
+  --brand-primary-dark: #6b4226;
+  --brand-accent: #e8a87c;
+  --brand-accent-light: #f0c4a8;
+  --brand-surface: #fff8f0;
+  --brand-text: #2d1b0e;
+  --brand-text-muted: #6b5b4f;
+
+  /* shadcn semantic tokens (light only). */
+  --radius: 0.625rem;
+  --background: #fff8f0;
+  --foreground: #2d1b0e;
+  --card: #ffffff;
+  --card-foreground: #2d1b0e;
+  --popover: #ffffff;
+  --popover-foreground: #2d1b0e;
+  --primary: #6b4226;
+  --primary-foreground: #fff8f0;
+  --secondary: #f0c4a8;
+  --secondary-foreground: #2d1b0e;
+  --muted: #f5e9dc;
+  --muted-foreground: #6b5b4f;
+  --accent: #f5e9dc;
+  --accent-foreground: #2d1b0e;
+  --destructive: #a02c1e;
+  --destructive-foreground: #ffffff;
+  --border: #a67c5b;
+  --input: #a67c5b;
+  --ring: #8b5e3c;
+
+  /* Cat status badges (Badge's four extra variants). */
+  --status-available: #dcfce7;
+  --status-available-foreground: #166534;
+  --status-adopted: #dbeafe;
+  --status-adopted-foreground: #1e40af;
+  --status-treatment: #fef3c7;
+  --status-treatment-foreground: #92400e;
+  --status-unavailable: #ede4da;
+  --status-unavailable-foreground: #4a3b2f;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-status-available: var(--status-available);
+  --color-status-available-foreground: var(--status-available-foreground);
+  --color-status-adopted: var(--status-adopted);
+  --color-status-adopted-foreground: var(--status-adopted-foreground);
+  --color-status-treatment: var(--status-treatment);
+  --color-status-treatment-foreground: var(--status-treatment-foreground);
+  --color-status-unavailable: var(--status-unavailable);
+  --color-status-unavailable-foreground: var(--status-unavailable-foreground);
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
