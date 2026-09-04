@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+  type AnySQLiteColumn,
   index,
   integer,
   real,
@@ -75,7 +76,7 @@ export const cats = sqliteTable(
       .notNull()
       .default(true),
     coverImageId: text('cover_image_id').references(
-      (): typeof catImages.id => catImages.id,
+      (): AnySQLiteColumn => catImages.id,
       { onDelete: 'set null' }
     ),
     createdAt: text('created_at').notNull(),
@@ -94,7 +95,7 @@ export const catImages = sqliteTable(
     id: text('id').primaryKey(),
     catId: text('cat_id')
       .notNull()
-      .references((): typeof cats.id => cats.id, { onDelete: 'cascade' }),
+      .references((): AnySQLiteColumn => cats.id, { onDelete: 'cascade' }),
     r2Key: text('r2_key').notNull(),
     altCa: text('alt_ca').notNull().default(''),
     altEs: text('alt_es').notNull().default(''),

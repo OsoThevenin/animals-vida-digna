@@ -1,3 +1,4 @@
+import type { D1Database } from '@cloudflare/workers-types';
 import { and, eq, inArray } from 'drizzle-orm';
 import { drizzle, type DrizzleD1Database } from 'drizzle-orm/d1';
 import { nanoid } from 'nanoid';

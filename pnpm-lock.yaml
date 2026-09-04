@@ -81,6 +81,9 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
     devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^5.20260904.1
+        version: 5.20260904.1
       '@playwright/test':
         specifier: ^1.62.1
         version: 1.62.1
@@ -89,7 +92,7 @@ importers:
         version: 4.1.0(@types/node@24.12.0)(vite@6.4.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.23.13)(yaml@2.9.0))
       wrangler:
         specifier: ^4.75.0
-        version: 4.75.0(@cloudflare/workers-types@4.20260317.1)
+        version: 4.75.0(@cloudflare/workers-types@5.20260904.1)
 
   packages/content:
     dependencies:
@@ -9483,23 +9486,6 @@ snapshots:
       path-to-regexp: 6.3.0
       unenv: 2.0.0-rc.24
       workerd: 1.20260114.0
-    optionalDependencies:
-      '@cloudflare/workers-types': 4.20260317.1
-      fsevents: 2.3.3
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
-  wrangler@4.75.0(@cloudflare/workers-types@4.20260317.1):
-    dependencies:
-      '@cloudflare/kv-asset-handler': 0.4.2
-      '@cloudflare/unenv-preset': 2.15.0(unenv@2.0.0-rc.24)(workerd@1.20260317.1)
-      blake3-wasm: 2.1.5
-      esbuild: 0.27.3
-      miniflare: 4.20260317.0
-      path-to-regexp: 6.3.0
-      unenv: 2.0.0-rc.24
-      workerd: 1.20260317.1
     optionalDependencies:
       '@cloudflare/workers-types': 4.20260317.1
       fsevents: 2.3.3
