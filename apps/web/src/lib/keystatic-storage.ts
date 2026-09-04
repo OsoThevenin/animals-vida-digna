@@ -42,7 +42,15 @@
  * `src/content/cats/...` at the repo root, which no longer exists.
  */
 
-export const KEYSTATIC_GITHUB_REPO = 'OsoThevenin/animals-vida-digna';
+/**
+ * `owner/name`, matching `@keystatic/core`'s `RepoConfig` (a
+ * `${string}/${string}` template literal). Typed as that literal template
+ * rather than plain `string` so a typo that drops the slash is a compile
+ * error here instead of an opaque failure inside Keystatic's own type
+ * checking of `config()`'s `storage.repo`.
+ */
+export const KEYSTATIC_GITHUB_REPO: `${string}/${string}` =
+  'OsoThevenin/animals-vida-digna';
 export const KEYSTATIC_GITHUB_BRANCH_PREFIX = 'content/';
 export const KEYSTATIC_GITHUB_PATH_PREFIX = 'apps/web';
 
@@ -50,7 +58,7 @@ export type KeystaticStorage =
   | { kind: 'local' }
   | {
       kind: 'github';
-      repo: string;
+      repo: `${string}/${string}`;
       branchPrefix: string;
       pathPrefix: string;
     };
