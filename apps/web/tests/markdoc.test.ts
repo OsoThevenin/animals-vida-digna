@@ -41,3 +41,31 @@ describe('renderMarkdoc', () => {
     expect(await renderMarkdoc(noNode as any)).toBe('');
   });
 });
+
+import { renderMarkdocSource } from '../src/lib/markdoc';
+
+describe('renderMarkdocSource', () => {
+  it('returns empty string for empty input', () => {
+    expect(renderMarkdocSource('')).toBe('');
+  });
+
+  it('renders a Markdoc source string to HTML', () => {
+    const html = renderMarkdocSource('Hello **world**');
+    expect(html).toContain('<p>');
+    expect(html).toContain('Hello');
+    expect(html).toContain('<strong>world</strong>');
+  });
+
+  it('renders multiple paragraphs', () => {
+    const html = renderMarkdocSource('First paragraph.\n\nSecond paragraph.');
+    expect(html).toContain('First paragraph.');
+    expect(html).toContain('Second paragraph.');
+    expect((html.match(/<p>/g) ?? []).length).toBe(2);
+  });
+
+  it('returns empty string on a parse/transform error rather than throwing', () => {
+    expect(() =>
+      renderMarkdocSource('{% unknown-tag %}broken{% /unknown-tag %}'),
+    ).not.toThrow();
+  });
+});

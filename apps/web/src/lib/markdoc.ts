@@ -38,3 +38,23 @@ export async function renderMarkdoc(
     return '';
   }
 }
+
+/**
+ * Render a raw Markdoc source string (as stored in D1's `description_ca` /
+ * `description_es` columns) to an HTML string.
+ *
+ * Unlike `renderMarkdoc`, this takes plain text directly — no Keystatic
+ * async-content wrapper. Returns empty string for empty/falsy input or on
+ * any parse/transform error.
+ */
+export function renderMarkdocSource(src: string): string {
+  if (!src) return '';
+
+  try {
+    const ast = Markdoc.parse(src);
+    const transformed = Markdoc.transform(ast);
+    return Markdoc.renderers.html(transformed) || '';
+  } catch {
+    return '';
+  }
+}
