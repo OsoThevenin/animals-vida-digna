@@ -69,3 +69,6 @@ dist-prod/
 apps/web/test-results/
 apps/web/playwright-report/
 apps/web/.playwright/
+
+# Generated seed data — regenerate with `pnpm --filter @avd/content run seed:generate`
+packages/content/seed.sql
