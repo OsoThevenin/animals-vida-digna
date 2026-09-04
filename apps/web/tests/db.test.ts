@@ -24,3 +24,17 @@ describe('getDb', () => {
     expect(db).toBeDefined();
   });
 });
+
+import { requireDb } from '../src/lib/db';
+
+describe('requireDb', () => {
+  it('returns the Db when the DB binding is present', () => {
+    const fakeD1 = {} as unknown;
+    const db = requireDb({ runtime: { env: { DB: fakeD1 } } });
+    expect(db).toBeDefined();
+  });
+
+  it('throws when the DB binding is not available', () => {
+    expect(() => requireDb({})).toThrow('D1 binding "DB" is not available');
+  });
+});

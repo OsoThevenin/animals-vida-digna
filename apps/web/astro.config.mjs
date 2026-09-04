@@ -33,7 +33,9 @@ integrations.push(
 );
 
 export default defineConfig({
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    platformProxy: { enabled: true, persist: true },
+  }),
   site: 'https://animalsvidadigna.org',
   i18n: {
     defaultLocale: 'ca',

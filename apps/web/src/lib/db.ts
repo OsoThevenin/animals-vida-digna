@@ -31,3 +31,18 @@ export function getDb(locals: unknown): Db | undefined {
   if (!d1) return undefined;
   return createDb(d1 as D1Database);
 }
+
+/**
+ * Same as getDb, but throws instead of returning undefined. Every on-demand
+ * page/island in Phase 3 runs inside a real Cloudflare Worker context where
+ * the DB binding is always configured, so a missing binding here means
+ * misconfiguration (wrangler.toml, or platformProxy in dev) -- fail loudly
+ * rather than let `undefined` propagate into a repository call.
+ */
+export function requireDb(locals: unknown): Db {
+  const db = getDb(locals);
+  if (!db) {
+    throw new Error('D1 binding "DB" is not available');
+  }
+  return db;
+}
