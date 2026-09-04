@@ -1,0 +1,37 @@
+{
+  "name": "admin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --port 4322",
+    "build": "astro build",
+    "preview": "wrangler dev",
+    "deploy": "astro build && wrangler deploy",
+    "test": "vitest run",
+    "check": "tsc --noEmit",
+    "types": "wrangler types"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^12.6.13",
+    "@astrojs/react": "^4.4.2",
+    "@avd/content": "workspace:*",
+    "@avd/design-system": "workspace:*",
+    "@better-auth/drizzle-adapter": "^1.7.2",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^5.18.2",
+    "better-auth": "^1.7.2",
+    "drizzle-orm": "^0.45.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "resend": "^6.9.4",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260903.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.75.0"
+  }
+}

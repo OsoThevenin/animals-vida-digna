@@ -1,0 +1,33 @@
+name = "animals-vida-digna-admin"
+main = "dist/_worker.js/index.js"
+compatibility_date = "2025-08-15"
+compatibility_flags = ["nodejs_compat"]
+
+# Cookies and better-auth's baseURL are bound to admin.animalsvidadigna.org.
+# workers.dev and per-deploy preview URLs are different hosts, so a session
+# started on one would never validate on the other — both stay off, unlike
+# apps/web where preview_urls = true is safe for a brochure site with no
+# session state.
+workers_dev = false
+preview_urls = false
+
+[assets]
+binding = "ASSETS"
+directory = "./dist"
+
+[observability]
+enabled = true
+
+[[routes]]
+pattern = "admin.animalsvidadigna.org"
+custom_domain = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "avd-content"
+database_id = "e2cda706-7e56-4679-91d9-5976b20e9722"
+migrations_dir = "../../packages/content/migrations"
+
+[[r2_buckets]]
+binding = "IMAGES_BUCKET"
+bucket_name = "animals-vida-digna-images"
