@@ -65,9 +65,12 @@ generate a client secret.
 ### 2. Set the secrets in Cloudflare
 
 Keystatic reads its credentials from the Cloudflare **runtime** environment
-(`locals.runtime.env`) on each request, so they are ordinary Worker secrets:
+(`locals.runtime.env`) on each request, so they are ordinary Worker secrets.
+Since the monorepo move, `wrangler.toml` lives in `apps/web`, so run these
+from `apps/web` (or pass `-c apps/web/wrangler.toml` from the repo root):
 
 ```sh
+cd apps/web
 wrangler secret put KEYSTATIC_GITHUB_CLIENT_ID
 wrangler secret put KEYSTATIC_GITHUB_CLIENT_SECRET
 wrangler secret put KEYSTATIC_SECRET

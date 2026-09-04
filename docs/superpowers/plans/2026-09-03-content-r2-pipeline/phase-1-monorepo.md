@@ -219,8 +219,9 @@ be redone anyway once `apps/web` and `packages/content` exist).
 - Create: `apps/web/package.json`
 - Stay at repo root (not moved): `biome.json`, `.gitignore`, `.npmrc`,
   `docs/`, `.planning/`, `README.md`, `.github/`, `.cursor/`, `.vscode/`,
-  `.dev.vars.example`, `pnpm-workspace.yaml`, `turbo.json`,
-  `tsconfig.base.json`, root `package.json`
+  `pnpm-workspace.yaml`, `turbo.json`, `tsconfig.base.json`, root `package.json`
+- Also move (via `git mv`): `.dev.vars.example` → `apps/web/.dev.vars.example`
+  (see rationale below — `wrangler dev` reads `apps/web/.dev.vars`)
 - Test: the entire existing `apps/web/tests/**/*.test.ts` suite (unchanged
   content, new location)
 
@@ -248,10 +249,12 @@ git mv tsconfig.json apps/web/tsconfig.json
 git mv .env.example apps/web/.env.example
 ```
 
-`.dev.vars.example` stays at the repo root for now: it is not referenced by
-any build or test path (it documents Cloudflare Worker secrets for local
-`wrangler dev`, which Phase 4 will need for `apps/admin` too), and moving it
-is not required by any test in this phase. Leave it in place.
+`.dev.vars.example` moves to `apps/web/.dev.vars.example`: `wrangler dev` runs
+with `apps/web` as its working directory (via `apps/web/package.json`'s
+`preview:worker`/`deploy` scripts) and reads `apps/web/.dev.vars`, so the
+example belongs next to the file it documents rather than at the repo root.
+Phase 4 will add a separate `apps/admin/.dev.vars.example` for that app's own
+secrets.
 
 - [x] **Step 2: Rewrite `apps/web/tsconfig.json` to extend the shared base**
 
