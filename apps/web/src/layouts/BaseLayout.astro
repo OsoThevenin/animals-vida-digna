@@ -69,7 +69,12 @@ const orgSchema = buildOrganizationSchema({
     >
       {t(locale, 'a11y.skipToContent')}
     </a>
-    <Header locale={locale} currentUrl={currentUrl} donateUrl={donateUrl} />
+    <Header
+      locale={locale}
+      currentUrl={currentUrl}
+      donateUrl={donateUrl}
+      alternateUrl={resolvedAlternate}
+    />
     <main id="main-content" class="flex-1">
       <slot />
     </main>

@@ -7,9 +7,16 @@ interface Props {
   locale: Locale;
   currentUrl: string;
   donateUrl?: string;
+  /**
+   * The correct absolute alternate-locale URL for the current page, computed
+   * by BaseLayout (per-cat slug_ca/slug_es for cat pages). Threaded through
+   * to LanguageSwitcher, which otherwise falls back to a generic /es
+   * path-prefix swap that is wrong whenever CA/ES slugs differ.
+   */
+  alternateUrl?: string;
 }
 
-const { locale, currentUrl, donateUrl = '#' } = Astro.props;
+const { locale, currentUrl, donateUrl = '#', alternateUrl } = Astro.props;
 
 const navLinks = [
   { key: 'nav.about' as const, href: locale === 'ca' ? '/#qui-som' : '/es/#quienes-somos' },
@@ -75,6 +82,7 @@ const navLinks = [
         client:load
         currentUrl={currentUrl}
         currentLocale={locale}
+        alternateUrl={alternateUrl}
       />
       <!-- Mobile menu button -->
       <button
