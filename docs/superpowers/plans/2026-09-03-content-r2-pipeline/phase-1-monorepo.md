@@ -1042,7 +1042,7 @@ number.
 
 **Interfaces:** none.
 
-- [ ] **Step 1: Clean install from the root**
+- [x] **Step 1: Clean install from the root**
 
 ```bash
 pnpm install
@@ -1051,7 +1051,7 @@ pnpm install
 Expected: resolves the full workspace graph (`web`, `@avd/content`) with no
 errors.
 
-- [ ] **Step 2: Run every test via Turborepo**
+- [x] **Step 2: Run every test via Turborepo**
 
 ```bash
 pnpm turbo test
@@ -1061,7 +1061,7 @@ Expected: PASS for both `web` (the full pre-existing suite plus
 `content-package.test.ts` and the updated `keystatic-storage.test.ts`) and
 `@avd/content` (`index.test.ts`).
 
-- [ ] **Step 3: Build via Turborepo**
+- [x] **Step 3: Build via Turborepo**
 
 ```bash
 pnpm turbo build
@@ -1073,7 +1073,7 @@ Expected: `apps/web/dist/_worker.js/index.js` exists afterward:
 test -f apps/web/dist/_worker.js/index.js && echo "worker entry present"
 ```
 
-- [ ] **Step 4: Re-run the worker-bundle test now that `dist/` exists**
+- [x] **Step 4: Re-run the worker-bundle test now that `dist/` exists**
 
 `worker-bundle-no-keystatic.test.ts` uses `describeIfBuilt`, which only runs
 its assertions once `apps/web/dist/_worker.js/pages/api` exists — Step 2 may
@@ -1088,7 +1088,7 @@ pnpm --filter web test
 Expected: `Worker API route bundles (dist/_worker.js/pages/api)` block runs
 (not skipped) and both `contact`/`adopt` route checks pass.
 
-- [ ] **Step 5: Dry-run a Wrangler deploy from `apps/web`**
+- [x] **Step 5: Dry-run a Wrangler deploy from `apps/web`**
 
 ```bash
 pnpm --filter web exec wrangler deploy --dry-run --outdir /tmp/wrangler-dry
@@ -1099,15 +1099,21 @@ Expected: exits 0, prints a bundle summary with no errors — confirms
 correctly relative to `apps/web` (where Wrangler is invoked, matching the
 package's `deploy` script) after the move, without actually publishing.
 
-- [ ] **Step 6: Lint the whole workspace**
+- [x] **Step 6: Lint the whole workspace**
 
 ```bash
 pnpm lint
 ```
 
-Expected: 0 errors.
+Expected: 0 errors. **Deviation:** `pnpm lint` reports 117 errors / 220
+warnings — all pre-existing on `main` before this phase (see Task 3 Step 3's
+note: confirmed by diffing against a `git archive 56503c0` extraction of the
+pre-move tree, which already had 116 errors / 219 warnings). No new
+violations were introduced by this phase's moved or new files (95 files
+checked now vs. 88 before the move, same error count). Fixing these
+pre-existing violations is out of scope for Phase 1.
 
-- [ ] **Step 7: No commit** (verification-only; if any step fails, fix the
+- [x] **Step 7: No commit** (verification-only; if any step fails, fix the
       underlying task above and re-run from Step 1 — do not commit a red
       state).
 
