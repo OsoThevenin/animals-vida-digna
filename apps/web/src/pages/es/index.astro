@@ -54,5 +54,18 @@ const alternateUrl = buildCanonicalUrl(getAlternateUrl(Astro.url, 'ca'), site);
         return null;
     }
   })}
-  <FeaturedCatsSection locale={locale} />
+  <FeaturedCatsSection server:defer locale={locale}>
+    <div slot="fallback" class="bg-surface py-16 sm:py-24">
+      <div class="mx-auto max-w-7xl px-4 text-center sm:px-6">
+        <h2 class="mb-10 font-display text-3xl font-bold text-primary sm:text-4xl">
+          Gatos destacados
+        </h2>
+        <div class="grid animate-pulse gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="aspect-[4/3] rounded-xl bg-primary/5"></div>
+          <div class="aspect-[4/3] rounded-xl bg-primary/5"></div>
+          <div class="aspect-[4/3] rounded-xl bg-primary/5"></div>
+        </div>
+      </div>
+    </div>
+  </FeaturedCatsSection>
 </BaseLayout>
