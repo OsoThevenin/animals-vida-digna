@@ -106,3 +106,5 @@ export const catImages = sqliteTable(
     index('cat_images_cat_id_idx').on(table.catId),
   ]
 );
+
+export * from './schema-auth';
