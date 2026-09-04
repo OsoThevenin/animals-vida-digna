@@ -12,6 +12,15 @@ export const ALL: APIRoute = async (ctx) => {
   // limiter (ipAddressHeaders: ['cf-connecting-ip']) sees it — without
   // this, IP-based limits silently degrade to "every request looks like
   // the same client" behind the Workers runtime.
-  ctx.request.headers.set('x-forwarded-for', ctx.clientAddress);
-  return auth.handler(ctx.request);
+  //
+  // ctx.request.headers is immutable under the real Workers runtime
+  // (workerd) — calling .set() on it throws `TypeError: Can't modify
+  // immutable headers.` in production and under `wrangler dev`, even
+  // though it silently "works" under the Node-based `astro dev` server.
+  // Cloning into a new Headers object (and a new Request that carries
+  // them) avoids mutating the original.
+  const headers = new Headers(ctx.request.headers);
+  headers.set('x-forwarded-for', ctx.clientAddress);
+  const request = new Request(ctx.request, { headers });
+  return auth.handler(request);
 };
