@@ -52,6 +52,12 @@ describe('wrangler.toml', () => {
     }>;
     unsafe?: unknown;
     r2_buckets?: unknown;
+    d1_databases?: Array<{
+      binding?: string;
+      database_name?: string;
+      database_id?: string;
+      migrations_dir?: string;
+    }>;
   };
 
   it('sets a worker entry point (main)', () => {
@@ -80,6 +86,17 @@ describe('wrangler.toml', () => {
     expect(config.r2_buckets).toBeUndefined();
   });
 
+  describe('D1 database binding', () => {
+    it('declares the DB binding for avd-content with the shared migrations_dir', () => {
+      const db = config.d1_databases?.find((d) => d.binding === 'DB');
+      expect(db).toBeDefined();
+      expect(db?.database_name).toBe('avd-content');
+      expect(typeof db?.database_id).toBe('string');
+      expect(db?.database_id?.length).toBeGreaterThan(0);
+      expect(db?.migrations_dir).toBe('../../packages/content/migrations');
+    });
+  });
+
   it('declares FORM_RATE_LIMITER via [[ratelimits]] with valid shape', () => {
     expect(Array.isArray(config.ratelimits)).toBe(true);
     const limiter = config.ratelimits?.find(
@@ -105,6 +122,13 @@ describe('wrangler.toml', () => {
       .map((r) => r.name)
       .filter(Boolean) as string[];
     for (const name of ratelimitNames) {
+      expect(sourceText.includes(name)).toBe(true);
+    }
+
+    const d1BindingNames = (config.d1_databases ?? [])
+      .map((d) => d.binding)
+      .filter(Boolean) as string[];
+    for (const name of d1BindingNames) {
       expect(sourceText.includes(name)).toBe(true);
     }
   });

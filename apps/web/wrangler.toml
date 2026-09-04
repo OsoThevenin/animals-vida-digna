@@ -43,3 +43,9 @@ namespace_id = "1001"
   [ratelimits.simple]
   limit = 5
   period = 60
+
+[[d1_databases]]
+binding = "DB"
+database_name = "avd-content"
+database_id = "e2cda706-7e56-4679-91d9-5976b20e9722"
+migrations_dir = "../../packages/content/migrations"
