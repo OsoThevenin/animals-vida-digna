@@ -16,7 +16,11 @@ describe('Astro config', () => {
   });
 
   it('FOUND-01: uses cloudflare adapter', () => {
-    expect(config).toContain('adapter: cloudflare()');
+    expect(config).toContain('adapter: cloudflare({');
+  });
+
+  it('enables platformProxy so local D1/R2/KV bindings work under astro dev', () => {
+    expect(config).toContain('platformProxy: { enabled: true, persist: true }');
   });
 
   it('FOUND-01: does not use output hybrid (removed in Astro 5)', () => {
