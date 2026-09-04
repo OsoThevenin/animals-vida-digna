@@ -4,6 +4,22 @@ export interface SitemapCat {
   updatedAt: string;
 }
 
+/**
+ * Escape the five XML-significant characters. Slugs and updatedAt are
+ * volunteer/CMS-controlled data interpolated straight into XML text nodes
+ * and attribute values below -- an apostrophe or ampersand in a slug would
+ * otherwise produce invalid XML (or, in an attribute value, prematurely
+ * close it).
+ */
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
 function urlEntry(
   loc: string,
   lastmod: string,
@@ -11,11 +27,11 @@ function urlEntry(
   esUrl: string
 ): string {
   return `  <url>
-    <loc>${loc}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <xhtml:link rel="alternate" hreflang="ca" href="${caUrl}" />
-    <xhtml:link rel="alternate" hreflang="es" href="${esUrl}" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${caUrl}" />
+    <loc>${escapeXml(loc)}</loc>
+    <lastmod>${escapeXml(lastmod)}</lastmod>
+    <xhtml:link rel="alternate" hreflang="ca" href="${escapeXml(caUrl)}" />
+    <xhtml:link rel="alternate" hreflang="es" href="${escapeXml(esUrl)}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(caUrl)}" />
   </url>`;
 }
 

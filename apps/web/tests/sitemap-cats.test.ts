@@ -41,6 +41,23 @@ describe('buildCatsSitemap', () => {
     expect(xml).toContain('<xhtml:link rel="alternate" hreflang="x-default" href="https://animalsvidadigna.org/cat/lluna" />');
   });
 
+  it('escapes XML-significant characters in slugs and updatedAt', () => {
+    const xml = buildCatsSitemap(
+      [
+        {
+          slugCa: "gat-d'or",
+          slugEs: 'gato&plata',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+      site,
+    );
+    expect(xml).not.toContain("d'or");
+    expect(xml).not.toContain('gato&plata');
+    expect(xml).toContain('gat-d&apos;or');
+    expect(xml).toContain('gato&amp;plata');
+  });
+
   it('handles multiple cats', () => {
     const xml = buildCatsSitemap(
       [
