@@ -17,8 +17,24 @@
 -- reseed (seed:generate/seed.sql assigns a fresh nanoid to each cat every
 -- run). Idempotent: INSERT OR IGNORE on a fixed image id, UPDATE is a no-op
 -- if already applied.
+--
+-- width/height are deliberately 1500x1125, NOT 1280x960: 1280 is the one
+-- intrinsic width that also happens to be an allowlisted Cloudflare Images
+-- transform width, which made the C2 defect (using the intrinsic width
+-- directly as the transform width) invisible to this suite. 1500 is a
+-- realistic stored width within Phase 5's MAX_UPLOAD_EDGE=2000 bound and is
+-- NOT one of the four widths the production WAF rule allowlists, so the
+-- rendered <img src> must differ from the intrinsic width (see
+-- optimized-image-url.ts's pickAllowlistedTransformWidth).
 INSERT OR IGNORE INTO cat_images (id, cat_id, r2_key, alt_ca, alt_es, width, height, position, created_at)
-SELECT 'e2e-test-img-1', id, 'cats/' || id || '/e2e-test-img-1.webp', 'Lluna, gata siames disponible per adopcio', 'Luna, gata siames disponible para adopcion', 1280, 960, 0, '2026-09-04T00:00:00.000Z'
+SELECT 'e2e-test-img-1', id, 'cats/' || id || '/e2e-test-img-1.webp', 'Lluna, gata siames disponible per adopcio', 'Luna, gata siames disponible para adopcion', 1500, 1125, 0, '2026-09-04T00:00:00.000Z'
+FROM cats WHERE slug_ca = 'lluna';
+
+-- A second, non-cover image so the gallery (which excludes the cover -- see
+-- packages/content/src/localize.ts) has something to assert an image URL
+-- against in e2e/cats-d1.spec.ts.
+INSERT OR IGNORE INTO cat_images (id, cat_id, r2_key, alt_ca, alt_es, width, height, position, created_at)
+SELECT 'e2e-test-img-2', id, 'cats/' || id || '/e2e-test-img-2.webp', 'Lluna jugant', 'Luna jugando', 640, 480, 1, '2026-09-04T00:00:00.000Z'
 FROM cats WHERE slug_ca = 'lluna';
 
 UPDATE cats SET cover_image_id = 'e2e-test-img-1' WHERE slug_ca = 'lluna';

@@ -17,16 +17,26 @@ import { expect, test } from '@playwright/test';
  * fixtures deliberately have none -- see that file for why).
  */
 
-const ALLOWED_WIDTHS = ['320', '640', '960', '1280'];
-
-function assertImagesOrigin(src: string) {
-  expect(src.startsWith('https://images.animalsvidadigna.org/cdn-cgi/image/')).toBe(
-    true
+/**
+ * Asserts the EXACT canonical transform URL string the production WAF rule
+ * enforces (see phase-0-results.md, Findings §5):
+ *   /cdn-cgi/image/width=<W>,fit=scale-down,quality=80,format=auto,onerror=redirect/<key>
+ * in exactly this parameter order and with the exact expected width. A
+ * reordered parameter list, a dropped parameter, or a non-allowlisted width
+ * all return 403 to real visitors -- a prefix/membership check (the
+ * previous version of this helper) would pass on any of those. The R2 key's
+ * cat-id segment is matched with a wildcard since it is a per-seed-run
+ * generated nanoid; everything else is pinned literally.
+ */
+function assertCanonicalTransformUrl(
+  src: string,
+  expectedWidth: 320 | 640 | 960 | 1280,
+  keySuffix: string
+) {
+  const pattern = new RegExp(
+    `^https://images\\.animalsvidadigna\\.org/cdn-cgi/image/width=${expectedWidth},fit=scale-down,quality=80,format=auto,onerror=redirect/cats/[^/]+/${keySuffix.replace('.', '\\.')}$`
   );
-  expect(src).toContain('fit=scale-down');
-  const widthMatch = src.match(/width=(\d+)/);
-  expect(widthMatch).not.toBeNull();
-  expect(ALLOWED_WIDTHS).toContain(widthMatch?.[1]);
+  expect(src).toMatch(pattern);
 }
 
 test.describe('/cats listing renders cats sourced from D1 (Catalan)', () => {
@@ -70,7 +80,8 @@ test.describe('cat detail page reached by clicking through (D1-backed)', () => {
   test('renders title, description and cover image for a cat with real image data', async ({
     page,
   }) => {
-    await page.goto('/cats');
+    const response = await page.goto('/cats');
+    expect(response?.status()).toBe(200);
     await page.getByRole('link', { name: /Lluna/ }).click();
 
     await expect(page).toHaveURL(/\/cat\/lluna\/?$/);
@@ -81,13 +92,69 @@ test.describe('cat detail page reached by clicking through (D1-backed)', () => {
     // Description (Markdoc source rendered via renderMarkdocSource).
     await expect(page.locator('.prose')).toBeVisible();
 
-    // Cover image, rendered through OptimizedImage's r2Key path.
+    // Cover image (seeded intrinsic width 1500, NOT allowlisted -- see
+    // e2e/fixtures/seed-e2e-image.sql), rendered through OptimizedImage's
+    // r2Key path. C2 fix: transform width must be 1280 (the smallest
+    // allowlisted width >= 1500 does not exist, so it falls back to the
+    // largest), never the raw 1500.
     const coverImg = page.getByRole('article').getByRole('img').first();
     await expect(coverImg).toBeVisible();
-    const src = await coverImg.getAttribute('src');
-    expect(src).not.toBeNull();
-    assertImagesOrigin(src as string);
+    const coverSrc = await coverImg.getAttribute('src');
+    expect(coverSrc).not.toBeNull();
+    assertCanonicalTransformUrl(coverSrc as string, 1280, 'e2e-test-img-1\\.webp');
+
+    // The intrinsic (non-allowlisted) width must still be exposed as the
+    // HTML width attribute, so the browser can reserve layout space.
+    expect(await coverImg.getAttribute('width')).toBe('1500');
+
+    // JSON-LD schema.org image (C1 fix): always width=1280.
+    const jsonLd = await page
+      .locator('script[type="application/ld+json"]')
+      .first()
+      .textContent();
+    expect(jsonLd).not.toBeNull();
+    const parsed = JSON.parse(jsonLd as string) as { image: string };
+    assertCanonicalTransformUrl(parsed.image, 1280, 'e2e-test-img-1\\.webp');
+
+    // Gallery image (seeded intrinsic width 640, already allowlisted --
+    // M8 fix: the gallery must exclude the cover image, so this is the
+    // *second* seeded image, not a duplicate of the cover).
+    const galleryImg = page.locator('.lightbox img').first();
+    await expect(galleryImg).toBeVisible();
+    const gallerySrc = await galleryImg.getAttribute('src');
+    expect(gallerySrc).not.toBeNull();
+    assertCanonicalTransformUrl(gallerySrc as string, 640, 'e2e-test-img-2\\.webp');
   });
+});
+
+test.describe('unknown or unpublished cat slug (M5 fix)', () => {
+  test('/cat/[slug] returns a real 404, not a redirect', async ({ page }) => {
+    const response = await page.goto('/cat/this-slug-does-not-exist');
+    expect(response?.status()).toBe(404);
+    await expect(page).toHaveURL(/\/cat\/this-slug-does-not-exist\/?$/);
+  });
+
+  test('/es/cat/[slug] returns a real 404, not a redirect', async ({
+    page,
+  }) => {
+    const response = await page.goto('/es/cat/this-slug-does-not-exist');
+    expect(response?.status()).toBe(404);
+    await expect(page).toHaveURL(/\/es\/cat\/this-slug-does-not-exist\/?$/);
+  });
+});
+
+test.describe('cache headers on the cat pages (M9 fix)', () => {
+  for (const path of ['/cats', '/es/cats', '/cat/lluna', '/es/cat/luna']) {
+    test(`${path} sets a short-TTL Cache-Control header`, async ({
+      page,
+    }) => {
+      const response = await page.goto(path);
+      expect(response?.status()).toBe(200);
+      const cacheControl = response?.headers()['cache-control'];
+      expect(cacheControl).toBeDefined();
+      expect(cacheControl).toMatch(/max-age=\d+/);
+    });
+  }
 });
 
 test.describe('sitemap-cats.xml', () => {
