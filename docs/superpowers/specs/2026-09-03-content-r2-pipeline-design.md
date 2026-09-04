@@ -74,7 +74,7 @@ WebP) so the fallback is still acceptable and R2 stays tiny.
 ## Non-goals
 
 - Migrating settings, landing page and static pages out of Keystatic (follow-up plan).
-- Extending the design-system package with form controls (admin-specific controls live in `apps/admin`; upstreaming is a follow-up).
+- Extending the design-system package with form controls (admin-specific controls live in `apps/admin`; upstreaming is a follow-up). **2026-09-04:** settled by adopting shadcn/ui in `apps/admin` — see the amendment under *Interface contract → Workspace*.
 - HTML caching of dynamic pages (Cache API purges are per-PoP; traffic does not justify it).
 - Roles/permissions beyond "allowlisted email can edit everything".
 - Changing the GitHub ruleset.
@@ -128,6 +128,35 @@ apps/admin                 package name "admin"
 packages/content           package name "@avd/content"
 packages/design-system     package name "@avd/design-system" (unchanged)
 ```
+
+**Amendment 2026-09-04 — admin UI library.** `apps/admin` renders with
+**shadcn/ui** (Radix primitives + Tailwind, source vendored into
+`apps/admin/src/components/ui/`, configured by `apps/admin/components.json`
+and the `@/*` → `src/*` path alias), not with `@avd/design-system`
+components. The maintainer asked for a well-established component library
+rather than hand-written primitives.
+
+This does not contradict the spec's decisions — the *Non-goals* already
+said "admin-specific controls live in `apps/admin`" and ruled extending
+`@avd/design-system` with form controls out of scope — but it does change
+one fact the phase docs relied on: **`apps/admin` no longer depends on
+`@avd/design-system`, and `apps/web` never did.** The package therefore has
+no consumers today. It is deliberately left in place (built, and its 62
+tests, including `tokens.test.ts`, still green): `tokens.test.ts` is what
+pins the design tokens to `apps/web/src/styles/global.css`, and the
+follow-up plan that moves Keystatic content into the admin is the right
+place to decide the package's future. Its Storybook remains the visual
+reference for `apps/web`'s Preact components.
+
+The admin's semantic tokens are declared in `apps/admin/src/styles/admin.css`
+and mapped onto the same brand palette; `apps/admin/tests/a11y-contrast.test.ts`
+asserts WCAG AA on every rendered pair (shadcn's `neutral` defaults carry no
+contrast guarantee once the palette is swapped).
+
+Admin dependencies added: `radix-ui`, `class-variance-authority`, `cn`,
+`lucide-react`. Worker size went from 656.65 KiB to 674.80 KiB gzip, against
+the 3 MB compressed limit. `apps/web` is unchanged (526 KiB gzip) and gains
+no React.
 
 ### Cloudflare resources
 

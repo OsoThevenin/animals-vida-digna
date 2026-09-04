@@ -68,6 +68,12 @@ once Phase 2 is merged, in parallel with Phase 3, if two people/agents work at o
 ## Out of scope (follow-up plans)
 
 - Moving settings, landing and static pages from Keystatic into the admin; removing Keystatic and React from `apps/web`.
-- Upstreaming admin form controls into `@avd/design-system`.
+- ~~Upstreaming admin form controls into `@avd/design-system`.~~
+  **Resolved 2026-09-04:** `apps/admin` uses **shadcn/ui** instead
+  (`apps/admin/src/components/ui/`, `components.json`). `@avd/design-system`
+  now has no consumers — it is kept, not deleted, because its
+  `tokens.test.ts` pins the palette to `apps/web/src/styles/global.css`;
+  the maintainer decides its future in the Keystatic follow-up plan. See
+  the amendment in the spec's *Interface contract*.
 - Roles, audit history UI, image trash/undo.
 - Cloudflare Access in front of `admin.` (optional hardening; see research).

@@ -8,7 +8,9 @@ with a 6-digit email code and every non-public route requires a valid
 session; `/cats` shows a read-only list read from `@avd/content`.
 
 **Architecture:** A second Astro app (React islands, Tailwind 4 with
-`@avd/design-system` tokens) deployed as its own Cloudflare Worker, sharing
+**shadcn/ui** components on the site's palette — see *Amendment 2026-09-04*
+below; originally `@avd/design-system` tokens) deployed as its own
+Cloudflare Worker, sharing
 the `avd-content` D1 database with `apps/web` (read/write here) and binding
 the images R2 bucket (unused until Phase 5). Auth is better-auth's
 `emailOTP` plugin over a Drizzle adapter, built per-request from
@@ -21,10 +23,63 @@ public-path allowlist.
 **Tech Stack:** Astro 5.18, `@astrojs/cloudflare` 12.6, `@astrojs/react` 4.4,
 React 19, Tailwind 4 + `@tailwindcss/vite`, better-auth 1.7.2 (`emailOTP`,
 `@better-auth/drizzle-adapter`), Drizzle ORM, Resend, `@avd/content`,
-`@avd/design-system`, Vitest, Wrangler.
+**shadcn/ui** (`radix-ui`, `class-variance-authority`, `cn`, `lucide-react`),
+Vitest, Wrangler.
 
 **Spec:** `docs/superpowers/specs/2026-09-03-content-r2-pipeline-design.md` —
 the *Interface contract* section is binding for every phase.
+
+## Amendment 2026-09-04 — the admin UI is shadcn/ui, not `@avd/design-system`
+
+The maintainer asked for a well-established component library rather than
+hand-written primitives. `apps/admin` now uses **shadcn/ui** (Radix
+primitives + Tailwind, source vendored into the app). Everything below that
+imports from `@avd/design-system` is superseded; read this table instead.
+
+| Was (`@avd/design-system`) | Now (`apps/admin`) |
+|---|---|
+| `Button variant="primary"` | `Button` from `@/components/ui/button` (default variant) |
+| `Button variant="outline"` | `Button variant="outline"` |
+| `Button fullWidth` | `Button className="w-full"` |
+| `Input` | `Input` from `@/components/ui/input` (same native `<input>` props) |
+| `Field` | `FormField` from `@/components/form-field` (same `id`/`label`/`error`/`children` props) |
+| `Badge label status` | `CatStatusBadge status` from `@/components/cat-status-badge` |
+| `Card`, `Section` | not used by the admin |
+| `@import '@avd/design-system/styles.css'` + `@source` | tokens declared directly in `src/styles/admin.css` |
+
+What changed in this phase's artefacts:
+
+- `apps/admin/package.json` no longer lists `@avd/design-system`; it lists
+  `radix-ui`, `class-variance-authority`, `cn` and `lucide-react`.
+- `apps/admin/components.json` (shadcn registry config), `@/*` →`src/*` path
+  alias in `tsconfig.json`, and `apps/admin/vitest.config.ts` (React JSX +
+  the `@/*` alias for tests) are new.
+- **Task 2's** `src/styles/admin.css` is rewritten: it declares the brand
+  palette and shadcn's semantic tokens itself. There is no
+  `@avd/design-system/styles.css` import and no `@source` directive — every
+  component Tailwind must scan now lives under `apps/admin/src`. It also
+  pins Tailwind's `dark` variant to an opt-in `.dark` class, so the `dark:`
+  utilities baked into the registry components cannot fire on a volunteer's
+  dark-mode OS against a light-only token set.
+- **Task 2's** `tests/design-system-import.test.ts` is deleted and replaced
+  by `tests/shadcn-wiring.test.ts` (alias, registry config, palette) plus
+  `tests/a11y-contrast.test.ts`, which asserts WCAG AA on every rendered
+  token pair — shadcn's `neutral` defaults carry no contrast guarantee once
+  the palette is swapped.
+- **Task 9's** `login-form.tsx` uses `Button`/`Input`/`Label`; **Task 10's**
+  `cats/index.astro` renders a single `CatsTable` React component (see
+  below) instead of hand-written `<table>` markup with `<Badge>` cells.
+- `tests/ui-migration.test.tsx` covers the swapped components by rendering
+  them (`renderToStaticMarkup`), the same pure, DOM-free style the rest of
+  the suite uses.
+
+**Astro-specific constraint discovered here:** a React component receiving
+children from `.astro` markup gets them wrapped in an `<astro-slot>`
+element. That element is illegal inside `<table>`/`<tbody>`, where the HTML
+parser hoists it out and destroys the table. Any shadcn `Table` must
+therefore be assembled inside one React component
+(`src/components/cats-table.tsx`), rendered from the page **without** a
+`client:*` directive so the list still ships zero JavaScript.
 
 **Research:**
 `docs/superpowers/plans/2026-09-03-content-r2-pipeline/research/better-auth-on-workers.md`,
@@ -54,12 +109,12 @@ the *Interface contract* section is binding for every phase.
 - Phase 2 shipped `@avd/content` (`packages/content`) with `createDb`,
   `listAllCats`, and `packages/content/src/schema.ts` (Drizzle sqlite schema
   for `cats`/`cat_images`), plus `packages/content/migrations/0000_*.sql`.
-- The `design-system` branch is merged: `packages/design-system` is
+- ~~The `design-system` branch is merged: `packages/design-system` is
   `@avd/design-system`, React 19, exporting `Button`, `Badge`, `Field`,
-  `Input`, `Card`, `Section` and `./styles.css`. Its `package.json` lists
-  `react`/`react-dom` as plain `dependencies`, not `peerDependencies` — Task 1
-  notes this should change but does not block on it (out of scope here; a
-  follow-up plan owns `packages/design-system/package.json`).
+  `Input`, `Card`, `Section` and `./styles.css`.~~ **Superseded 2026-09-04**
+  (see *Amendment* below): `packages/design-system` still exists and is still
+  built and tested, but `apps/admin` no longer depends on it. The admin's UI
+  layer is shadcn/ui, vendored into `apps/admin/src/components/ui/`.
 
 ---
 
@@ -356,6 +411,12 @@ git commit -m "feat(admin): scaffold apps/admin with wrangler config"
 ---
 
 ### Task 2: Styles, tokens, and a workspace-wiring smoke test
+
+> **Superseded 2026-09-04** — see *Amendment* at the top. `admin.css` no
+> longer imports `@avd/design-system/styles.css` and has no `@source`
+> directive; it declares the brand palette and shadcn's semantic tokens
+> itself. `tests/design-system-import.test.ts` is replaced by
+> `tests/shadcn-wiring.test.ts` and `tests/a11y-contrast.test.ts`.
 
 **Files:**
 - Create: `apps/admin/src/styles/admin.css`
@@ -1332,6 +1393,12 @@ git commit -m "feat(admin): add session middleware and env typing"
 
 ### Task 7: Login page and island
 
+> **Amended 2026-09-04** — `login-form.tsx` imports `Button`, `Input` and
+> `Label` from `@/components/ui/*` instead of `Button`/`Field` from
+> `@avd/design-system`; the hand-copied input class strings are gone
+> (shadcn's `Input` carries them). Behaviour, labels and the two-step flow
+> are unchanged, and covered by `tests/ui-migration.test.tsx`.
+
 **Files:**
 - Create: `apps/admin/src/components/login-form.tsx`
 - Create: `apps/admin/src/pages/login.astro`
@@ -1585,6 +1652,14 @@ git commit -m "feat(admin): add login page and OTP login island"
 ---
 
 ### Task 8: Admin layout with sign-out, index redirect, and cats list
+
+> **Amended 2026-09-04** — the sign-out control is shadcn's `Button`
+> (`variant="outline"`, `size="sm"`) rendered server-side inside the Astro
+> form; the layout uses `bg-background`/`text-foreground`/`border-border`
+> instead of the brand-named utilities; and the cats table is
+> `src/components/cats-table.tsx` (shadcn `Table` + `CatStatusBadge`),
+> rendered with no `client:*` directive. See the amendment at the top for
+> why the table has to live inside a single React component.
 
 **Files:**
 - Create: `apps/admin/src/actions/index.ts`

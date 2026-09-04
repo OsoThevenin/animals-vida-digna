@@ -6,7 +6,7 @@
 
 **Architecture:** Pure, unit-tested helpers in `apps/admin/src/lib/` (validation/coercion/gallery-ordering/Markdoc preview, no I/O) are consumed by Astro Actions (`apps/admin/src/actions/index.ts`) that talk to `@avd/content`'s repository functions and the `IMAGES_BUCKET` R2 binding; the R2 write/compensate and delete logic is itself extracted into a pure-ish `image-store.ts` so it can be unit-tested against fake bucket objects. Three React islands (`cat-form.tsx`, `image-manager.tsx`, `delete-cat-button.tsx`) call the actions from three Astro pages (`cats/index.astro`, `cats/new.astro`, `cats/[id].astro`).
 
-**Tech Stack:** Astro 5.18 (React islands, Astro Actions), `@astrojs/cloudflare` 12.6 (`context.locals.runtime.env`), `@avd/content` (Phase 2), `@avd/design-system` (React 19: `Button`, `Field`, `Input`, `Badge`), `browser-image-compression` 2.0.2, `nanoid` ^6.0.1, `@markdoc/markdoc` ^0.5.6, Vitest, Biome.
+**Tech Stack:** Astro 5.18 (React islands, Astro Actions), `@astrojs/cloudflare` 12.6 (`context.locals.runtime.env`), `@avd/content` (Phase 2), **shadcn/ui** (React 19, vendored in `apps/admin/src/components/ui/`: `Button`, `Input`, `Label`, `Textarea`, `Checkbox`, `Select`, `Badge`, `Table`, `AlertDialog`), `browser-image-compression` 2.0.2, `nanoid` ^6.0.1, `@markdoc/markdoc` ^0.5.6, Vitest, Biome.
 
 **Spec:** `docs/superpowers/specs/2026-09-03-content-r2-pipeline-design.md` — the *Interface contract* section is binding. This plan also depends on `docs/superpowers/plans/2026-09-03-content-r2-pipeline/README.md` (phase ordering) and the completed Phase 4 (`apps/admin` shell, auth, middleware, `admin-layout.astro`, `src/lib/auth.ts`, `src/styles/admin.css`, `IMAGES_BUCKET`/`DB` bindings in `apps/admin/wrangler.toml`).
 
@@ -22,6 +22,65 @@
 - No secrets in git. Runtime secrets via `wrangler secret put`; local copies in `.dev.vars` (gitignored).
 
 ---
+
+## Amendment 2026-09-04 — the admin UI layer is shadcn/ui
+
+The maintainer replaced the hand-written `@avd/design-system` primitives in
+`apps/admin` with **shadcn/ui**. `apps/admin` no longer depends on
+`@avd/design-system` at all. **Every code block below that imports from
+`@avd/design-system` is pre-migration**; translate it with this table before
+writing any of it:
+
+| Written below | Write instead |
+|---|---|
+| `import { Button, Field, Input } from '@avd/design-system'` | `import { Button } from '@/components/ui/button'`, `import { Input } from '@/components/ui/input'`, `import { FormField } from '@/components/form-field'` |
+| `<Field id label error>` | `<FormField id label error>` — identical props |
+| `<Input …>` | `<Input …>` from `@/components/ui/input` — same native `<input>` props, so call sites are unchanged |
+| `<Button variant="primary">` | `<Button>` (the default variant) |
+| `<Button fullWidth>` | `<Button className="w-full">` |
+| `<Badge label={…} status={…} />` + `import type { CatStatus } from '@avd/design-system'` | `<CatStatusBadge status={…} />` from `@/components/cat-status-badge` (it looks the label up itself from `CAT_STATUS_LABELS_CA`); `CatStatus` comes from `@avd/content/validate` |
+| raw `<select className="…">` (Task 7 filter, Task 8 form) | `Select` from `@/components/ui/select` **inside a hydrated island only** — see the constraint below |
+| raw `<textarea className="…">` | `Textarea` from `@/components/ui/textarea` |
+| raw `<input type="checkbox">` | `Checkbox` from `@/components/ui/checkbox` |
+| `window.confirm(...)` (Task 9 image removal, Task 10 cat delete) | `AlertDialog` from `@/components/ui/alert-dialog` — accessible, focus-trapped, and styleable, which `window.confirm` is not |
+
+Components already installed and available; **do not `shadcn add` anything
+else without justifying the bundle cost** (see below).
+
+### Astro constraints that apply to every shadcn component in this phase
+
+1. **Children passed from `.astro` markup are wrapped in `<astro-slot>`.**
+   That element is illegal inside `<table>`/`<tbody>` — the parser hoists it
+   out and the table collapses. Any shadcn `Table` must be assembled inside
+   one React component and rendered from the page as a whole (Phase 4 did
+   this: `src/components/cats-table.tsx`). Task 7 must extend that component
+   rather than writing shadcn `Table` tags directly in `cats/index.astro`.
+2. **Radix components need a `client:*` island.** `Select`, `Checkbox` and
+   `AlertDialog` are interactive; they are inert in server-rendered markup.
+   Task 7's status filter is on a server-rendered page: either keep it a
+   native `<select>` in a plain GET form (no JS, works today) or move it
+   into a small island. Do not put a Radix `Select` on a non-hydrated page.
+3. **Verify hydration under `wrangler dev`, not `astro dev`.** `astro dev`
+   silently breaks island hydration in this repo (React and Preact both
+   inject a Fast-Refresh preamble; the second throws).
+
+### Bundle budget
+
+The Worker limit is 3 MB compressed. `apps/admin` measured **674.80 KiB
+gzip** after the Phase 4 migration. Adding `Select` + `AlertDialog` +
+`Checkbox` + `Textarea` to a hydrated island was measured at **+30.6 KiB
+gzip** (705.38 KiB), so this phase has ample headroom — but re-measure with
+`npx wrangler deploy --dry-run` in `apps/admin` before opening the PR, and
+say so in the phase report.
+
+### Accessibility
+
+`tests/a11y-contrast.test.ts` asserts WCAG AA for every semantic token pair
+in `src/styles/admin.css`. Any **new** colour pairing this phase introduces
+(for example a "Sense foto" placeholder, or the published/draft pill in
+Task 7's table) must be added to that test as a token, not hard-coded as a
+Tailwind palette class — shadcn's defaults carry no contrast guarantee
+against this palette.
 
 ## Deferred verification owed by this phase (added 2026-09-04)
 
@@ -115,7 +174,7 @@ npm view nanoid version
 
 Confirmed at plan-writing time: `browser-image-compression@2.0.2`, `nanoid@6.0.1` (pin `^6.0.1` — same range Phase 2 already pins for `packages/content`, so pnpm can dedupe the two). Pin `@markdoc/markdoc` to the same range the root `apps/web` uses (`^0.5.6`) rather than latest, for consistency across the monorepo.
 
-Edit `apps/admin/package.json` `dependencies` (keep existing Phase 4 entries — `astro`, `@astrojs/cloudflare`, `@astrojs/react`, `react`, `react-dom`, `better-auth`, `@avd/content`, `@avd/design-system`, `zod` — and add):
+Edit `apps/admin/package.json` `dependencies` (keep existing Phase 4 entries — `astro`, `@astrojs/cloudflare`, `@astrojs/react`, `react`, `react-dom`, `better-auth`, `@avd/content`, `zod`, and the shadcn set `radix-ui`, `class-variance-authority`, `cn`, `lucide-react`; **`@avd/design-system` is no longer a dependency** — and add):
 
 ```json
 {
@@ -1469,6 +1528,17 @@ git commit -m "feat(admin): add images upload/update/remove/setCover actions"
 
 ### Task 7: Cats list page
 
+> **Amended 2026-09-04 (shadcn/ui)** — the table lives in
+> `src/components/cats-table.tsx`, not in the `.astro` file; extend that
+> component (thumbnail, ES name, published pill, edit link) and keep the
+> page rendering `<CatsTable cats={cats} />` with **no** `client:*`
+> directive so the list still ships zero JavaScript. Replace `<Badge
+> label status />` with `<CatStatusBadge status />`. Keep the status filter
+> a native `<select>` in a GET form (a Radix `Select` would need an island
+> on a page that currently ships no JS). The published/draft pill's colours
+> must become tokens in `src/styles/admin.css` and be added to
+> `tests/a11y-contrast.test.ts`.
+
 **Files:**
 - Modify: `apps/admin/src/pages/cats/index.astro` (replaces the Phase 4 read-only table)
 
@@ -1640,6 +1710,15 @@ git commit -m "feat(admin): build cats list page with status filter"
 ---
 
 ### Task 8: `cat-form.tsx` island + create/edit pages
+
+> **Amended 2026-09-04 (shadcn/ui)** — this island is `client:load`, so
+> every shadcn control is available here. Use `FormField` (not `Field`),
+> `Input`, `Textarea`, `Checkbox` and `Select`; drop every hand-written
+> `className="w-full rounded-lg border border-primary/20 …"` string, the
+> components carry their own styling. `<Button variant="primary">` becomes
+> `<Button>`. Keep the field ids: `FormField` still binds label to control
+> by `htmlFor`/`id`, and the error is rendered with `role="alert"` and
+> `id="<field-id>-error"`.
 
 **Files:**
 - Create: `apps/admin/src/components/cat-form.tsx`
@@ -2373,6 +2452,13 @@ git commit -m "feat(admin): add cat create/edit form and pages"
 
 ### Task 9: `image-manager.tsx` island
 
+> **Amended 2026-09-04 (shadcn/ui)** — alt-text inputs are `Input`, the
+> reorder/remove controls are `Button` (`variant="outline"` /
+> `variant="destructive"`, `size="sm"`), and the
+> `window.confirm('Segur que vols eliminar aquesta foto?')` becomes an
+> `AlertDialog`. Radix's dialog traps focus and restores it on close, which
+> `window.confirm` cannot be styled or tested around.
+
 **Files:**
 - Create: `apps/admin/src/components/image-manager.tsx`
 
@@ -2702,6 +2788,12 @@ git commit -m "feat(admin): add image manager island with browser-side resize"
 ---
 
 ### Task 10: Delete button, dev R2 route, `.env.development`
+
+> **Amended 2026-09-04 (shadcn/ui)** — `delete-cat-button.tsx` uses
+> `AlertDialog` with `<Button variant="destructive">` as its trigger,
+> replacing the `window.confirm` double-check. The destructive token pair
+> is `--destructive` (#a02c1e) with white text, 7.31:1, already asserted in
+> `tests/a11y-contrast.test.ts`.
 
 **Files:**
 - Create: `apps/admin/src/components/delete-cat-button.tsx`
