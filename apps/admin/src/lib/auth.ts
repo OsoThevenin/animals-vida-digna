@@ -1,7 +1,7 @@
 import * as schema from '@avd/content/schema';
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { betterAuth } from 'better-auth';
-import { APIError } from 'better-auth/api';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { emailOTP } from 'better-auth/plugins';
 import { drizzle } from 'drizzle-orm/d1';
 import { Resend } from 'resend';
@@ -33,8 +33,40 @@ export function createAuth(env: Env) {
       // leaves AUTH_INSECURE_COOKIES unset. See .dev.vars.example (Task 9).
       useSecureCookies: env.AUTH_INSECURE_COOKIES !== '1',
       ipAddress: {
+        // Only `cf-connecting-ip` is trusted here. Never add
+        // `x-forwarded-for` — it is fully client-controlled, so trusting it
+        // would let any caller spoof the rate-limit key. See the
+        // `buildRequestWithTrustedIp` comment in
+        // src/pages/api/auth/[...all].ts for how the header gets set.
         ipAddressHeaders: ['cf-connecting-ip'],
       },
+    },
+    hooks: {
+      // Rejects a non-allowlisted email *before* better-auth's
+      // send-verification-otp endpoint runs. That endpoint (in the
+      // emailOTP plugin) calls resolveOTP — which writes a row to the
+      // `verification` table — before it ever calls sendVerificationOTP
+      // below to decide whether to actually email anyone. Without this
+      // earlier gate, any unauthenticated visitor can cause unbounded
+      // writes to production D1 just by posting arbitrary addresses,
+      // even though no code is ever sent and sign-in is still blocked by
+      // the databaseHooks.user.create.before hook further down.
+      //
+      // Short-circuiting here with the endpoint's own `{ success: true }`
+      // shape keeps the HTTP response byte-identical to the allowlisted
+      // case (no enumeration signal) and does no extra work on either
+      // branch (no timing signal). Router-level rate limiting (see
+      // rateLimit above) still runs before hooks.before, so this path
+      // stays rate-limited exactly like every other request.
+      before: createAuthMiddleware(async (ctx) => {
+        if (ctx.path !== '/email-otp/send-verification-otp') {
+          return;
+        }
+        const email = ctx.body?.email;
+        if (typeof email === 'string' && !isAllowedEmail(allowed, email)) {
+          return ctx.json({ success: true });
+        }
+      }),
     },
     databaseHooks: {
       user: {
