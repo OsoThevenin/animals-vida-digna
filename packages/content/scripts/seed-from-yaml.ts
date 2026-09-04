@@ -5,9 +5,16 @@ import { nanoid } from 'nanoid';
 import { parse as parseYaml } from 'yaml';
 import { type CatInput, catInputSchema } from '../src/validate';
 
+// Phase 3 (docs/superpowers/plans/2026-09-03-content-r2-pipeline/
+// phase-3-web-on-d1.md, Task 8) deletes apps/web/src/content/cats now that
+// the public site reads exclusively from D1 -- this script's own real
+// fixture source data was relocated alongside it (packages/content/tests/
+// fixtures/cats) rather than deleted, so `pnpm run seed:generate` keeps
+// working for local dev bootstrap (Task 1/Task 10's documented workflow)
+// until Phase 6 retires this script entirely.
 const DEFAULT_CATS_DIR = resolve(
   import.meta.dirname,
-  '../../../apps/web/src/content/cats'
+  '../tests/fixtures/cats'
 );
 const OUT_FILE = resolve(import.meta.dirname, '../seed.sql');
 
