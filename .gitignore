@@ -58,3 +58,6 @@ worker-configuration.d.ts
 # astro build output for the dev/prod wrangler environments
 dist-dev/
 dist-prod/
+
+# turborepo local cache
+.turbo/
