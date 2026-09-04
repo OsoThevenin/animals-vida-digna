@@ -973,7 +973,7 @@ git commit -m "fix(web): scope Keystatic GitHub storage to apps/web pathPrefix"
 - Produces: nothing new — this task documents why no code change is needed
   in these four files, closing a gap a reviewer would otherwise flag.
 
-- [ ] **Step 1: `apps/web/scripts/generate-settings.ts`**
+- [x] **Step 1: `apps/web/scripts/generate-settings.ts`**
 
 Line 29: `const reader = createReader(process.cwd(), keystaticConfig);`. This
 is invoked via the `prebuild` script (`npx tsx scripts/generate-settings.ts`)
@@ -983,7 +983,7 @@ i.e. `apps/web`. `process.cwd()` therefore still resolves to `apps/web`
 after the move, matching where `apps/web/src/content/**` now lives (moved by
 `git mv src apps/web/src` in Task 2). **No change needed.**
 
-- [ ] **Step 2: `apps/web/tests/wrangler-config.test.ts`**
+- [x] **Step 2: `apps/web/tests/wrangler-config.test.ts`**
 
 Line 6: `const root = resolve(import.meta.dirname, '..');` —
 `import.meta.dirname` is the directory containing the test file itself
@@ -997,7 +997,7 @@ its output. **No change needed** — every path in this file is
 already relative to the test file's own directory, which moved together
 with the test file.
 
-- [ ] **Step 3: `apps/web/tests/worker-bundle-no-keystatic.test.ts`**
+- [x] **Step 3: `apps/web/tests/worker-bundle-no-keystatic.test.ts`**
 
 Line 27: `const WORKER_DIR = join(process.cwd(), 'dist', '_worker.js');`.
 Same reasoning as Step 1: Vitest, run via `pnpm --filter web test` or
@@ -1006,7 +1006,7 @@ mechanism `cd`s into the target package before running its script). This
 resolves to `apps/web/dist/_worker.js`, matching the build output location.
 **No change needed.**
 
-- [ ] **Step 4: `.gitignore` (root, unmoved)**
+- [x] **Step 4: `.gitignore` (root, unmoved)**
 
 Entries `dist/`, `.astro/`, `.wrangler/`, `worker-configuration.d.ts`,
 `dist-dev/`, `dist-prod/` are all unanchored (no leading `/`) patterns, so
@@ -1032,7 +1032,7 @@ git check-ignore -v apps/web/node_modules apps/web/dist apps/web/.astro apps/web
 Expected: every path printed with a matching `.gitignore` rule and line
 number.
 
-- [ ] **Step 5: No commit** (audit-only task, no files change).
+- [x] **Step 5: No commit** (audit-only task, no files change).
 
 ---
 
