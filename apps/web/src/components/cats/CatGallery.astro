@@ -1,12 +1,22 @@
 ---
+import { DEFAULT_IMAGES_ORIGIN, originalImageUrl } from '@avd/content/image-url';
 import OptimizedImage from '../OptimizedImage.astro';
 
+interface GalleryImage {
+  key: string;
+  alt: string;
+  width: number;
+  height: number;
+}
+
 interface Props {
-  images: Array<{ src: string; alt: string }>;
+  images: GalleryImage[];
   catName: string;
 }
 
 const { images, catName } = Astro.props;
+const imagesOrigin =
+  import.meta.env.PUBLIC_IMAGES_ORIGIN ?? DEFAULT_IMAGES_ORIGIN;
 ---
 
 {images.length > 0 && (
@@ -14,13 +24,15 @@ const { images, catName } = Astro.props;
     <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
       {images.map((img, i) => (
         <a
-          href={img.src}
+          href={originalImageUrl(img.key, imagesOrigin)}
           class="lightbox group overflow-hidden rounded-lg"
           data-group="cat-gallery"
         >
           <OptimizedImage
-            src={img.src}
+            r2Key={img.key}
             alt={img.alt || `${catName} - ${i + 1}`}
+            width={img.width}
+            height={img.height}
             loading="lazy"
             class="aspect-square h-full w-full rounded-lg object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 768px) 50vw, 25vw"

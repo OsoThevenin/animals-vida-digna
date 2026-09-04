@@ -1,46 +1,34 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import CatTraits from '../../components/cats/CatTraits.astro';
+import { getCatBySlug } from '@avd/content';
+import { DEFAULT_IMAGES_ORIGIN, imageUrl } from '@avd/content/image-url';
+import { localizeCat } from '@avd/content/localize';
 import CatGallery from '../../components/cats/CatGallery.astro';
+import CatTraits from '../../components/cats/CatTraits.astro';
 import AdoptionForm from '../../components/forms/AdoptionForm.tsx';
-import { buildCanonicalUrl, buildCatSchema } from '../../lib/seo';
-import { reader } from '../../lib/keystatic';
-import { getLocalizedCat } from '../../i18n/content';
-import { t, getAlternateUrl } from '../../i18n/index';
-import { renderMarkdoc } from '../../lib/markdoc';
-import { generateCatPathsCa } from '../../lib/cat-routes';
 import OptimizedImage from '../../components/OptimizedImage.astro';
+import { t } from '../../i18n/index';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { requireDb } from '../../lib/db';
+import { reader } from '../../lib/keystatic';
+import { renderMarkdocSource } from '../../lib/markdoc';
+import { buildCanonicalUrl, buildCatSchema } from '../../lib/seo';
+
+export const prerender = false;
 
 const locale = 'ca' as const;
 
-export async function getStaticPaths() {
-  const slugs = await reader.collections.cats.list();
-  const entries = slugs.map((slug) => ({ keystatic_slug: slug }));
-  return generateCatPathsCa(entries);
-}
+const slug = Astro.params.slug as string;
 
-const { keystatic_slug } = Astro.props;
+const db = requireDb(Astro.locals);
+const catRow = await getCatBySlug(db, locale, slug);
 
-const entry = await reader.collections.cats.read(keystatic_slug, {
-  resolveLinkedFiles: true,
-});
-
-if (!entry) {
+if (!catRow) {
   return Astro.redirect('/cats');
 }
 
-const cat = getLocalizedCat(entry as Record<string, unknown>, locale);
+const cat = localizeCat(catRow, locale);
 
-// Render markdoc description
-let descriptionHtml = '';
-const descField = cat.description;
-if (descField) {
-  if (typeof descField === 'function') {
-    descriptionHtml = await renderMarkdoc(descField as () => Promise<{ node: unknown }>);
-  } else if (typeof descField === 'object' && descField !== null && 'node' in (descField as Record<string, unknown>)) {
-    descriptionHtml = await renderMarkdoc(descField as { node: unknown });
-  }
-}
+const descriptionHtml = renderMarkdocSource(cat.description ?? '');
 
 const settings = await reader.singletons.settings.read();
 const donateUrl = settings?.donateUrl ?? '#';
@@ -48,15 +36,20 @@ const donateUrl = settings?.donateUrl ?? '#';
 const seoTitle = cat.seo?.title || cat.name;
 const seoDescription = cat.seo?.description || cat.shortDescription || '';
 
-const site = Astro.site?.href?.replace(/\/$/, '') || 'https://animalsvidadigna.org';
+const site =
+  Astro.site?.href?.replace(/\/$/, '') || 'https://animalsvidadigna.org';
 const canonicalUrl = buildCanonicalUrl(Astro.url.pathname, site);
-const alternateUrl = buildCanonicalUrl(getAlternateUrl(Astro.url, 'es'), site);
+// Alternate locale slug comes from the D1 row -- ca and es slugs can differ,
+// unlike the generic path-prefix swap getAlternateUrl() does (used only by
+// LanguageSwitcher, see "Known, deliberate limitation" above).
+const alternateUrl = buildCanonicalUrl(`/es/cat/${catRow.slugEs}`, site);
+
+const imagesOrigin =
+  import.meta.env.PUBLIC_IMAGES_ORIGIN ?? DEFAULT_IMAGES_ORIGIN;
 const catJsonLd = buildCatSchema({
   name: cat.name,
   description: seoDescription,
-  image: cat.coverImage?.src
-    ? new URL(`/cdn-cgi/image/format=auto,width=1200/${cat.coverImage.src.replace(/^\//, '')}`, site).href
-    : '',
+  image: cat.coverImage ? imageUrl(cat.coverImage.key, 1200, imagesOrigin) : '',
   url: canonicalUrl,
   inLanguage: locale,
 });
@@ -90,11 +83,13 @@ const adoptionFormTranslations = {
     </a>
 
     {/* Cover image */}
-    {cat.coverImage?.src && (
+    {cat.coverImage && (
       <div class="mb-8 overflow-hidden rounded-2xl">
         <OptimizedImage
-          src={cat.coverImage.src}
+          r2Key={cat.coverImage.key}
           alt={cat.coverImage.alt || cat.name}
+          width={cat.coverImage.width}
+          height={cat.coverImage.height}
           class="h-64 w-full object-cover sm:h-80 lg:h-96"
           loading="eager"
           sizes="100vw"
