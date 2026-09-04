@@ -1,0 +1,11 @@
+@import 'tailwindcss';
+@import '@avd/design-system/styles.css';
+
+/* Tailwind's automatic content detection scans this package's own source
+   tree, but a workspace dependency loaded through a symlink is outside
+   that scan root by default. This `@source` is Tailwind 4's documented way
+   to add an extra directory to scan, so utility classes used inside
+   @avd/design-system's .tsx files (e.g. Badge's status colors) are not
+   purged from the admin build.
+   https://tailwindcss.com/docs/detecting-classes-in-source-files#explicitly-registering-sources */
+@source "../../node_modules/@avd/design-system/src";
