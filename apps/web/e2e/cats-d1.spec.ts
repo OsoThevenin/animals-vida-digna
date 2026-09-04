@@ -101,20 +101,28 @@ test.describe('cat detail page reached by clicking through (D1-backed)', () => {
     await expect(coverImg).toBeVisible();
     const coverSrc = await coverImg.getAttribute('src');
     expect(coverSrc).not.toBeNull();
-    assertCanonicalTransformUrl(coverSrc as string, 1280, 'e2e-test-img-1\\.webp');
+    assertCanonicalTransformUrl(coverSrc as string, 1280, 'e2e-test-img-1.webp');
 
     // The intrinsic (non-allowlisted) width must still be exposed as the
     // HTML width attribute, so the browser can reserve layout space.
     expect(await coverImg.getAttribute('width')).toBe('1500');
 
-    // JSON-LD schema.org image (C1 fix): always width=1280.
-    const jsonLd = await page
+    // JSON-LD schema.org image (C1 fix): always width=1280. BaseLayout
+    // renders two <script type="application/ld+json"> tags -- the
+    // Organization schema (first, no `image` field) and the cat's own
+    // Thing schema (buildCatSchema) -- so find the one with `@type: Thing`.
+    const jsonLdScripts = await page
       .locator('script[type="application/ld+json"]')
-      .first()
-      .textContent();
-    expect(jsonLd).not.toBeNull();
-    const parsed = JSON.parse(jsonLd as string) as { image: string };
-    assertCanonicalTransformUrl(parsed.image, 1280, 'e2e-test-img-1\\.webp');
+      .allTextContents();
+    const catSchema = jsonLdScripts
+      .map((text) => JSON.parse(text) as Record<string, unknown>)
+      .find((schema) => schema['@type'] === 'Thing');
+    expect(catSchema, 'expected a Thing (cat) JSON-LD schema on the page').not.toBeUndefined();
+    assertCanonicalTransformUrl(
+      catSchema?.image as string,
+      1280,
+      'e2e-test-img-1.webp'
+    );
 
     // Gallery image (seeded intrinsic width 640, already allowlisted --
     // M8 fix: the gallery must exclude the cover image, so this is the
@@ -123,7 +131,7 @@ test.describe('cat detail page reached by clicking through (D1-backed)', () => {
     await expect(galleryImg).toBeVisible();
     const gallerySrc = await galleryImg.getAttribute('src');
     expect(gallerySrc).not.toBeNull();
-    assertCanonicalTransformUrl(gallerySrc as string, 640, 'e2e-test-img-2\\.webp');
+    assertCanonicalTransformUrl(gallerySrc as string, 640, 'e2e-test-img-2.webp');
   });
 });
 
