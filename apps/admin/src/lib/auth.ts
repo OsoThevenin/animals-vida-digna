@@ -6,6 +6,7 @@ import { emailOTP } from 'better-auth/plugins';
 import { drizzle } from 'drizzle-orm/d1';
 import { Resend } from 'resend';
 import { isAllowedEmail, parseAllowedEmails } from './allowlist';
+import { assertAuthEnv } from './auth-env';
 import { buildOtpEmail } from './otp-email';
 
 /**
@@ -16,6 +17,11 @@ import { buildOtpEmail } from './otp-email';
  * instance. betterAuth() is a cheap synchronous factory.
  */
 export function createAuth(env: Env) {
+  // Fail loudly and by name for a missing/blank secret, instead of either
+  // a generic TypeError deep inside parseAllowedEmails or (for a missing
+  // BETTER_AUTH_SECRET specifically) letting better-auth silently sign
+  // cookies with its own published fallback secret. See src/lib/auth-env.ts.
+  assertAuthEnv(env);
   const allowed = parseAllowedEmails(env.ADMIN_ALLOWED_EMAILS);
   const db = drizzle(env.DB, { schema });
 
