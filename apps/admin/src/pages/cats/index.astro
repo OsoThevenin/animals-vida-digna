@@ -1,8 +1,7 @@
 ---
 import { createDb, listAllCats } from '@avd/content';
-import { Badge } from '@avd/design-system';
+import { CatsTable } from '../../components/cats-table';
 import AdminLayout from '../../layouts/admin-layout.astro';
-import { CAT_STATUS_LABELS_CA } from '../../lib/cat-status-labels';
 
 export const prerender = false;
 
@@ -12,35 +11,5 @@ const cats = await listAllCats(db);
 
 <AdminLayout title="Gats">
   <h1 class="mb-6 font-semibold text-2xl text-primary">Gats</h1>
-  {
-    cats.length === 0 ? (
-      <p class="text-text-muted">Encara no hi ha cap gat.</p>
-    ) : (
-      <table class="w-full border-collapse text-sm">
-        <thead>
-          <tr class="border-primary/20 border-b text-left text-text-muted">
-            <th class="py-2 pr-4">Nom</th>
-            <th class="py-2 pr-4">Estat</th>
-            <th class="py-2 pr-4">Publicat</th>
-            <th class="py-2 pr-4">Actualitzat</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cats.map((cat) => (
-            <tr class="border-primary/10 border-b">
-              <td class="py-2 pr-4">{cat.nameCa}</td>
-              <td class="py-2 pr-4">
-                <Badge
-                  label={CAT_STATUS_LABELS_CA[cat.status]}
-                  status={cat.status}
-                />
-              </td>
-              <td class="py-2 pr-4">{cat.published ? 'Sí' : 'No'}</td>
-              <td class="py-2 pr-4">{cat.updatedAt}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    )
-  }
+  <CatsTable cats={cats} />
 </AdminLayout>

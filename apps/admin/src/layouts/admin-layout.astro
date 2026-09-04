@@ -1,6 +1,7 @@
 ---
 import '../styles/admin.css';
 import { actions } from 'astro:actions';
+import { Button } from '../components/ui/button';
 
 interface Props {
   title: string;
@@ -17,19 +18,16 @@ const user = Astro.locals.user;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} | Animals Vida Digna — Admin</title>
   </head>
-  <body class="flex min-h-screen flex-col bg-surface font-sans text-text">
-    <header class="flex items-center justify-between border-primary/20 border-b px-6 py-4">
+  <body class="flex min-h-screen flex-col bg-background font-sans text-foreground">
+    <header class="flex items-center justify-between border-border border-b px-6 py-4">
       <span class="font-semibold text-primary">Animals Vida Digna — Admin</span>
       {
         user ? (
           <form action={actions.auth.signOut} class="flex items-center gap-4" method="POST">
-            <span class="text-sm text-text-muted">{user.email}</span>
-            <button
-              class="rounded-lg border border-primary/20 px-4 py-2 text-sm transition-colors hover:bg-primary/10"
-              type="submit"
-            >
+            <span class="text-muted-foreground text-sm">{user.email}</span>
+            <Button size="sm" type="submit" variant="outline">
               Surt / Salir
-            </button>
+            </Button>
           </form>
         ) : null
       }
