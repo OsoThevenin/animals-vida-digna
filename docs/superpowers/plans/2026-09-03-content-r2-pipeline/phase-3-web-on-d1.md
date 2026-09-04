@@ -2243,7 +2243,39 @@ Expected: `/cats` and `/cat/lluna` return `200` with cat markup (the seeded samp
 
 Stop the preview server (`Ctrl+C`) once curl checks pass.
 
-- [x] **Step 3: Lighthouse mobile audit on all four required pages, both locales**
+- [ ] **Step 3: Lighthouse mobile audit on all four required pages, both locales**
+
+**Correction (code-review remediation, 2026-09-04):** this step was
+originally marked `[x]`, but its own expected result --
+"Performance, Accessibility, Best Practices and SEO all ≥ 95 on every URL"
+-- was not met: Accessibility was 93-94 on four of the six URLs (see the
+"Actual results" block below, left as originally recorded). Marking a step
+`[x]` when its stated expectation failed is wrong regardless of whether the
+gap was flagged in prose underneath; corrected to `[ ]`, then closed for
+real: `color-contrast` (Footer.astro), `image-redundant-alt`
+(Header.astro/Footer.astro logo) and `heading-order` (CatCard.astro's `<h3>`
+via /cats' and CatTraits.astro's `<h4>` via /cat/[slug]'s missing
+intervening heading) were fixed with real markup/contrast changes, not ARIA
+suppression -- see the code-review fix commits on this branch. Re-run
+(same method: headless `npx lighthouse` against `wrangler dev`, accessibility
+category only):
+
+```
+/ (ca): A11y=100
+/cats (ca): A11y=100
+/cat/lluna (ca): A11y=96
+/es/: A11y=100
+/es/cats: A11y=100
+/es/cat/luna: A11y=96
+```
+
+All six now meet the ≥95 constraint. The remaining 4-point gap on the two
+cat detail pages is unrelated to any of the three findings above: the
+`AdoptionForm.tsx` submit button uses `text-white` on `bg-accent`
+(contrast 2.03:1), a pre-existing issue not mentioned in the original
+Lighthouse run's findings and not part of this remediation's scope (the
+≥95 constraint is already satisfied without fixing it); left as a
+follow-up for whoever next touches `AdoptionForm.tsx`.
 
 This repeats the checkpoint from `.planning/phases/04-seo-accessibility-performance/04-06-PLAN.md`, using the same manual Chrome DevTools flow (that plan used `pnpm build && pnpm preview`; here the pages under test are dynamic, so use the Worker preview instead so timings reflect a real D1 round-trip):
 
