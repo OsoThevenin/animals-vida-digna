@@ -82,7 +82,7 @@ the *Interface contract* section is binding for every phase.
   `IMAGES_BUCKET` (R2, `animals-vida-digna-images`) — every later task in
   this phase (and all of Phase 5) reads env through these two binding names.
 
-- [ ] **Step 1: Write the failing wrangler-config test**
+- [x] **Step 1: Write the failing wrangler-config test**
 
 ```ts
 // apps/admin/tests/wrangler-config.test.ts
@@ -188,7 +188,7 @@ describe('apps/admin wrangler.toml', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm --filter admin test -- wrangler-config -t "names the worker"`
 Expected: FAIL — `apps/admin/wrangler.toml` does not exist yet (and neither
@@ -197,7 +197,7 @@ cannot resolve; run `pnpm vitest run apps/admin/tests/wrangler-config.test.ts`
 from the repo root instead if `pnpm --filter admin` errors before the test
 runner starts).
 
-- [ ] **Step 3: Write `apps/admin/package.json`**
+- [x] **Step 3: Write `apps/admin/package.json`**
 
 ```json
 {
@@ -244,7 +244,7 @@ that file and use its exact `drizzle-orm` version instead of `^0.45.2` if it
 differs (both packages read/write the same D1 tables through one Drizzle
 schema; a version mismatch is a real bug, not a style nit).
 
-- [ ] **Step 4: Write `apps/admin/astro.config.mjs`**
+- [x] **Step 4: Write `apps/admin/astro.config.mjs`**
 
 ```js
 import cloudflare from '@astrojs/cloudflare';
@@ -270,7 +270,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 5: Write `apps/admin/tsconfig.json`**
+- [x] **Step 5: Write `apps/admin/tsconfig.json`**
 
 ```json
 {
@@ -284,7 +284,7 @@ export default defineConfig({
 }
 ```
 
-- [ ] **Step 6: Write `apps/admin/wrangler.toml`**
+- [x] **Step 6: Write `apps/admin/wrangler.toml`**
 
 Open `docs/superpowers/plans/2026-09-03-content-r2-pipeline/phase-0-results.md`
 and copy the `database_id` value recorded there for `avd-content` (the row
@@ -327,7 +327,7 @@ binding = "IMAGES_BUCKET"
 bucket_name = "animals-vida-digna-images"
 ```
 
-- [ ] **Step 7: Write `apps/admin/.gitignore`**
+- [x] **Step 7: Write `apps/admin/.gitignore`**
 
 ```
 dist/
@@ -338,12 +338,12 @@ worker-configuration.d.ts
 .dev.vars
 ```
 
-- [ ] **Step 8: Install and run the test to verify it passes**
+- [x] **Step 8: Install and run the test to verify it passes**
 
 Run: `pnpm install && pnpm vitest run apps/admin/tests/wrangler-config.test.ts`
 Expected: PASS, all 9 assertions.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add apps/admin/package.json apps/admin/astro.config.mjs \
@@ -368,7 +368,7 @@ git commit -m "feat(admin): scaffold apps/admin with wrangler config"
 - Produces: `apps/admin/src/styles/admin.css`, imported by
   `src/layouts/admin-layout.astro` in Task 8.
 
-- [ ] **Step 1: Write the failing workspace-wiring test**
+- [x] **Step 1: Write the failing workspace-wiring test**
 
 ```ts
 // apps/admin/tests/design-system-import.test.ts
@@ -397,7 +397,7 @@ describe('@avd/design-system workspace wiring', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run apps/admin/tests/design-system-import.test.ts`
 Expected: FAIL — `pnpm install` has not yet linked `@avd/design-system` into
@@ -407,13 +407,13 @@ If it unexpectedly passes, run `pnpm install` at the repo root first, then
 re-run this step to confirm the failure is "module not found" and not a
 stale lockfile.
 
-- [ ] **Step 3: Install workspace dependencies**
+- [x] **Step 3: Install workspace dependencies**
 
 Run: `pnpm install`
 This links `apps/admin/node_modules/@avd/design-system` and
 `apps/admin/node_modules/@avd/content` to the workspace packages.
 
-- [ ] **Step 4: Write `apps/admin/src/styles/admin.css`**
+- [x] **Step 4: Write `apps/admin/src/styles/admin.css`**
 
 ```css
 @import 'tailwindcss';
@@ -429,12 +429,12 @@ This links `apps/admin/node_modules/@avd/design-system` and
 @source "../../node_modules/@avd/design-system/src";
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `pnpm vitest run apps/admin/tests/design-system-import.test.ts`
 Expected: PASS, both assertions.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/admin/src/styles/admin.css \
@@ -458,7 +458,7 @@ git commit -m "feat(admin): wire design-system tokens and styles"
   `buildOtpEmail(otp: string): { subject: string; text: string; html: string }`
   — all three consumed by `src/lib/auth.ts` in Task 5.
 
-- [ ] **Step 1: Write the failing allowlist tests**
+- [x] **Step 1: Write the failing allowlist tests**
 
 ```ts
 // apps/admin/tests/allowlist.test.ts
@@ -505,12 +505,12 @@ describe('isAllowedEmail', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `pnpm vitest run apps/admin/tests/allowlist.test.ts`
 Expected: FAIL with "Failed to resolve import ../src/lib/allowlist".
 
-- [ ] **Step 3: Write `apps/admin/src/lib/allowlist.ts`**
+- [x] **Step 3: Write `apps/admin/src/lib/allowlist.ts`**
 
 ```ts
 /**
@@ -537,12 +537,12 @@ export function isAllowedEmail(
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `pnpm vitest run apps/admin/tests/allowlist.test.ts`
 Expected: PASS, all 7 assertions.
 
-- [ ] **Step 5: Write the failing otp-email tests**
+- [x] **Step 5: Write the failing otp-email tests**
 
 ```ts
 // apps/admin/tests/otp-email.test.ts
@@ -585,12 +585,12 @@ describe('buildOtpEmail', () => {
 });
 ```
 
-- [ ] **Step 6: Run tests to verify they fail**
+- [x] **Step 6: Run tests to verify they fail**
 
 Run: `pnpm vitest run apps/admin/tests/otp-email.test.ts`
 Expected: FAIL with "Failed to resolve import ../src/lib/otp-email".
 
-- [ ] **Step 7: Write `apps/admin/src/lib/otp-email.ts`**
+- [x] **Step 7: Write `apps/admin/src/lib/otp-email.ts`**
 
 ```ts
 /**
@@ -629,12 +629,12 @@ export function buildOtpEmail(otp: string): {
 }
 ```
 
-- [ ] **Step 8: Run tests to verify they pass**
+- [x] **Step 8: Run tests to verify they pass**
 
 Run: `pnpm vitest run apps/admin/tests/otp-email.test.ts`
 Expected: PASS, all 6 assertions.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add apps/admin/src/lib/allowlist.ts apps/admin/tests/allowlist.test.ts \
@@ -665,7 +665,7 @@ This is the one exception in this phase to "Phase 2 owns `packages/content`":
 this task only *adds* `schema-auth.ts` and one migration file; it must not
 otherwise touch `packages/content/src/cats.ts`, `validate.ts`, or `0000_*.sql`.
 
-- [ ] **Step 1: Write the failing schema test**
+- [x] **Step 1: Write the failing schema test**
 
 ```ts
 // packages/content/tests/schema-auth.test.ts
@@ -688,13 +688,13 @@ describe('better-auth tables re-exported from packages/content schema', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm --filter @avd/content test -- schema-auth`
 Expected: FAIL — `schema.user` etc. are `undefined` (module resolves, but
 the named exports do not exist yet).
 
-- [ ] **Step 3: Write the Node-only CLI config `apps/admin/src/lib/auth-cli.ts`**
+- [x] **Step 3: Write the Node-only CLI config `apps/admin/src/lib/auth-cli.ts`**
 
 ```ts
 // Node-only config for `@better-auth/cli generate`. Never imported by the
@@ -733,7 +733,7 @@ export const auth = betterAuth({
 });
 ```
 
-- [ ] **Step 4: Confirm the CLI flags and config export shape**
+- [x] **Step 4: Confirm the CLI flags and config export shape**
 
 Open https://www.better-auth.com/docs/concepts/cli and confirm: the exact
 flag names for `--adapter`, `--dialect`, `--config`, and `--output` on the
@@ -747,7 +747,7 @@ version` → `1.7.2`, "The CLI for Better Auth"), not `@better-auth/cli`
 (stale at `1.4.21` and superseded). Use `npx auth@latest`, never
 `npx @better-auth/cli@latest`.
 
-- [ ] **Step 5: Run the generator**
+- [x] **Step 5: Run the generator**
 
 Run (from `apps/admin`):
 ```bash
@@ -839,7 +839,7 @@ export const rateLimit = sqliteTable('rateLimit', {
 });
 ```
 
-- [ ] **Step 6: Re-export the auth tables from `packages/content/src/schema.ts`**
+- [x] **Step 6: Re-export the auth tables from `packages/content/src/schema.ts`**
 
 Open `packages/content/src/schema.ts` (Phase 2's file — it currently exports
 `cats` and `catImages` from a single file). Add one line to the end:
@@ -848,7 +848,7 @@ Open `packages/content/src/schema.ts` (Phase 2's file — it currently exports
 export * from './schema-auth';
 ```
 
-- [ ] **Step 7: Generate the migration**
+- [x] **Step 7: Generate the migration**
 
 Run (from `packages/content`):
 ```bash
@@ -860,7 +860,7 @@ statements for `user`, `session`, `account`, `verification`, `rateLimit`
 matching Step 5's schema. Confirm the generated SQL creates exactly those
 five tables and nothing else (no accidental diff against `cats`/`cat_images`).
 
-- [ ] **Step 8: Apply the migration locally and remotely**
+- [x] **Step 8: Apply the migration locally and remotely**
 
 `packages/content` has no default `wrangler.toml` of its own (only
 `wrangler.test.toml`, bound to a separate `avd-content-test` database for
@@ -877,12 +877,12 @@ pnpm --filter admin exec wrangler d1 migrations apply avd-content --remote
 Expected: both report migration `0001_auth.sql` applied (`0000_*.sql` should
 already show as applied from Phase 2).
 
-- [ ] **Step 9: Run test to verify it passes**
+- [x] **Step 9: Run test to verify it passes**
 
 Run: `pnpm --filter @avd/content test -- schema-auth`
 Expected: PASS, both assertions.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add apps/admin/src/lib/auth-cli.ts packages/content/src/schema-auth.ts \
@@ -910,7 +910,7 @@ git commit -m "feat(content): add better-auth tables and migration"
   task), and `src/actions/index.ts` (Task 8). `authClient` — consumed by
   `src/components/login-form.tsx` (Task 7).
 
-- [ ] **Step 1: Write the failing auth-factory test**
+- [x] **Step 1: Write the failing auth-factory test**
 
 `betterAuth()` cannot run its emailOTP HTTP endpoint end-to-end in Vitest
 against a fake D1 binding (the real endpoint writes the OTP to the
@@ -1020,7 +1020,7 @@ describe('createAuth', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run apps/admin/tests/auth-factory.test.ts`
 Expected: FAIL with "Failed to resolve import ../src/lib/auth" (and `Env`
@@ -1029,7 +1029,7 @@ run; if TypeScript errors block the test from executing at all, proceed to
 Step 3 and re-run this step after Step 3, still expecting FAIL because the
 module does not exist).
 
-- [ ] **Step 3: Write `apps/admin/src/lib/auth.ts`**
+- [x] **Step 3: Write `apps/admin/src/lib/auth.ts`**
 
 ```ts
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
@@ -1121,7 +1121,7 @@ export function createAuth(env: Env) {
 }
 ```
 
-- [ ] **Step 4: Write `apps/admin/src/pages/api/auth/[...all].ts`**
+- [x] **Step 4: Write `apps/admin/src/pages/api/auth/[...all].ts`**
 
 ```ts
 import type { APIRoute } from 'astro';
@@ -1143,7 +1143,7 @@ export const ALL: APIRoute = async (ctx) => {
 };
 ```
 
-- [ ] **Step 5: Write `apps/admin/src/lib/auth-client.ts`**
+- [x] **Step 5: Write `apps/admin/src/lib/auth-client.ts`**
 
 ```ts
 import { createAuthClient } from 'better-auth/client';
@@ -1154,14 +1154,14 @@ export const authClient = createAuthClient({
 });
 ```
 
-- [ ] **Step 6: Run test to verify it passes**
+- [x] **Step 6: Run test to verify it passes**
 
 Run: `pnpm vitest run apps/admin/tests/auth-factory.test.ts`
 Expected: PASS, both assertions. (The `Env` type errors noted in Step 2 are
 resolved once `wrangler types` runs in Task 6, Step 1 — if this step still
 shows type errors, proceed to Task 6 Step 1 first and return here.)
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/admin/src/lib/auth.ts apps/admin/src/pages/api/auth \
@@ -1185,7 +1185,7 @@ git commit -m "feat(admin): add createAuth, auth route, and auth client"
   `App.Locals.session` — consumed by every page in Tasks 7–8 and by
   `src/actions/index.ts` (Task 8).
 
-- [ ] **Step 1: Generate the `Env` type**
+- [x] **Step 1: Generate the `Env` type**
 
 Run: `pnpm --filter admin run types`
 This runs `wrangler types`, reading `apps/admin/wrangler.toml` (bindings:
@@ -1204,7 +1204,7 @@ only starts checking those property accesses once Task 9, Step 1 re-runs
 this command after `.dev.vars` exists. Re-run `pnpm --filter admin run
 types` again at that point, and again any time a secret name changes.
 
-- [ ] **Step 2: Write the failing `isPublicPath` tests**
+- [x] **Step 2: Write the failing `isPublicPath` tests**
 
 ```ts
 // apps/admin/tests/is-public-path.test.ts
@@ -1248,12 +1248,12 @@ describe('isPublicPath', () => {
 });
 ```
 
-- [ ] **Step 3: Run tests to verify they fail**
+- [x] **Step 3: Run tests to verify they fail**
 
 Run: `pnpm vitest run apps/admin/tests/is-public-path.test.ts`
 Expected: FAIL with "Failed to resolve import ../src/lib/is-public-path".
 
-- [ ] **Step 4: Write `apps/admin/src/lib/is-public-path.ts`**
+- [x] **Step 4: Write `apps/admin/src/lib/is-public-path.ts`**
 
 ```ts
 const PUBLIC_PATH_PREFIXES = [
@@ -1274,12 +1274,12 @@ export function isPublicPath(pathname: string): boolean {
 }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `pnpm vitest run apps/admin/tests/is-public-path.test.ts`
 Expected: PASS, all 7 assertions.
 
-- [ ] **Step 6: Write `apps/admin/src/env.d.ts`**
+- [x] **Step 6: Write `apps/admin/src/env.d.ts`**
 
 ```ts
 /// <reference types="astro/client" />
@@ -1294,7 +1294,7 @@ declare namespace App {
 }
 ```
 
-- [ ] **Step 7: Write `apps/admin/src/middleware.ts`**
+- [x] **Step 7: Write `apps/admin/src/middleware.ts`**
 
 ```ts
 import { defineMiddleware } from 'astro:middleware';
@@ -1319,7 +1319,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 });
 ```
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add apps/admin/src/lib/is-public-path.ts \
@@ -1345,7 +1345,7 @@ git commit -m "feat(admin): add session middleware and env typing"
   is not yet built, so `login.astro` renders its own minimal `<html>`
   shell in this task; Task 8 replaces it with `AdminLayout`.
 
-- [ ] **Step 1: Write the failing bilingual-labels test**
+- [x] **Step 1: Write the failing bilingual-labels test**
 
 The island itself needs `jsdom`/React Testing Library to exercise
 interactively, which this app does not yet have configured (out of scope —
@@ -1379,12 +1379,12 @@ describe('LOGIN_LABELS', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run apps/admin/tests/login-labels.test.ts`
 Expected: FAIL with "Failed to resolve import ../src/components/login-form".
 
-- [ ] **Step 3: Write `apps/admin/src/components/login-form.tsx`**
+- [x] **Step 3: Write `apps/admin/src/components/login-form.tsx`**
 
 ```tsx
 import { Button, Field } from '@avd/design-system';
@@ -1530,7 +1530,7 @@ OTP field. Both inputs reuse `Input`'s own Tailwind class string directly
 (copied from `packages/design-system/src/primitives/input.tsx`'s
 `INPUT_CLASS`) so they still look identical to the primitive.
 
-- [ ] **Step 4: Write `apps/admin/src/pages/login.astro`**
+- [x] **Step 4: Write `apps/admin/src/pages/login.astro`**
 
 ```astro
 ---
@@ -1569,12 +1569,12 @@ from a cookie) — a prerendered build-time page cannot read that. This is
 declared explicitly per file rather than globally, matching the "static by
 default" guidance in `research/astro-admin-capabilities.md` §2.
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `pnpm vitest run apps/admin/tests/login-labels.test.ts`
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/admin/src/components/login-form.tsx apps/admin/src/pages/login.astro \
@@ -1602,7 +1602,7 @@ git commit -m "feat(admin): add login page and OTP login island"
   Phase 5 adds `cats.*` and `images.*` to the same `server` object in this
   file.
 
-- [ ] **Step 1: Write the failing status-label test**
+- [x] **Step 1: Write the failing status-label test**
 
 ```ts
 // apps/admin/tests/cats-list-status-labels.test.ts
@@ -1619,12 +1619,12 @@ describe('CAT_STATUS_LABELS_CA', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run apps/admin/tests/cats-list-status-labels.test.ts`
 Expected: FAIL with "Failed to resolve import ../src/pages/cats/status-labels".
 
-- [ ] **Step 3: Write `apps/admin/src/pages/cats/status-labels.ts`**
+- [x] **Step 3: Write `apps/admin/src/pages/cats/status-labels.ts`**
 
 ```ts
 import type { CatStatus } from '@avd/content/validate';
@@ -1654,12 +1654,12 @@ export const CAT_STATUS_LABELS_CA: Record<CatStatus, string> = {
 };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm vitest run apps/admin/tests/cats-list-status-labels.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Write `apps/admin/src/actions/index.ts`**
+- [x] **Step 5: Write `apps/admin/src/actions/index.ts`**
 
 ```ts
 import { ActionError, defineAction } from 'astro:actions';
@@ -1684,7 +1684,7 @@ export const server = {
 };
 ```
 
-- [ ] **Step 6: Write `apps/admin/src/layouts/admin-layout.astro`**
+- [x] **Step 6: Write `apps/admin/src/layouts/admin-layout.astro`**
 
 ```astro
 ---
@@ -1730,7 +1730,7 @@ const user = Astro.locals.user;
 </html>
 ```
 
-- [ ] **Step 7: Rewrite `apps/admin/src/pages/login.astro` to use the layout**
+- [x] **Step 7: Rewrite `apps/admin/src/pages/login.astro` to use the layout**
 
 ```astro
 ---
@@ -1754,7 +1754,7 @@ if (Astro.locals.user) {
 </AdminLayout>
 ```
 
-- [ ] **Step 8: Write `apps/admin/src/pages/index.astro`**
+- [x] **Step 8: Write `apps/admin/src/pages/index.astro`**
 
 ```astro
 ---
@@ -1764,7 +1764,7 @@ return Astro.redirect('/cats');
 ---
 ```
 
-- [ ] **Step 9: Write `apps/admin/src/pages/cats/index.astro`**
+- [x] **Step 9: Write `apps/admin/src/pages/cats/index.astro`**
 
 ```astro
 ---
@@ -1819,7 +1819,7 @@ This list is read-only in this phase — no create/edit/delete UI, no image
 upload. Phase 5 (`phase-5-admin-cats-images.md`) adds `/cats/new`,
 `/cats/[id]`, and the `cats.*`/`images.*` actions.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add apps/admin/src/actions apps/admin/src/layouts \
@@ -1842,7 +1842,7 @@ git commit -m "feat(admin): add layout, sign-out action, and read-only cats list
 - Produces: the local dev secret contract for this app, and the deployed
   Worker's secret contract via `wrangler secret put`.
 
-- [ ] **Step 1: Write `apps/admin/.dev.vars.example`**
+- [x] **Step 1: Write `apps/admin/.dev.vars.example`**
 
 ```
 BETTER_AUTH_SECRET=dev-only-not-a-real-secret-please-rotate-in-prod
@@ -1868,7 +1868,7 @@ fill in a real `RESEND_API_KEY` and your own email in
 types` again (Task 6 Step 1 ran it before `.dev.vars` existed, so its
 `Env` type did not yet include these seven names).
 
-- [ ] **Step 2: Set the deployed Worker's secrets**
+- [x] **Step 2: Set the deployed Worker's secrets**
 
 Run, from `apps/admin`, once per secret (each prompts for the value):
 ```bash
@@ -1882,14 +1882,14 @@ Do not set `AUTH_INSECURE_COOKIES` or `AUTH_DEV_LOG_OTP` as production
 secrets — their absence is what makes `env.AUTH_INSECURE_COOKIES !== '1'`
 true and the Resend branch in `sendVerificationOTP` the one that runs.
 
-- [ ] **Step 3: Verify no secret values are staged for commit**
+- [x] **Step 3: Verify no secret values are staged for commit**
 
 Run: `git status --short apps/admin`
 Expected: only `.dev.vars.example` appears (untracked/staged); `.dev.vars`
 itself must not appear — if it does, `apps/admin/.gitignore` (Task 1) is
 missing or was overridden; fix before continuing.
 
-- [ ] **Step 4: Local end-to-end login**
+- [x] **Step 4: Local end-to-end login**
 
 Run: `pnpm --filter admin run types && pnpm --filter admin dev`
 With `apps/admin/.dev.vars` filled in from Step 1:
@@ -1909,7 +1909,7 @@ With `apps/admin/.dev.vars` filled in from Step 1:
    allowed" message (this deliberately avoids confirming to a stranger
    which emails are allowlisted).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/admin/.dev.vars.example
