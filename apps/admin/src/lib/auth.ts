@@ -42,25 +42,42 @@ export function createAuth(env: Env) {
       },
     },
     hooks: {
-      // Rejects a non-allowlisted email *before* better-auth's
-      // send-verification-otp endpoint runs. That endpoint (in the
-      // emailOTP plugin) calls resolveOTP — which writes a row to the
-      // `verification` table — before it ever calls sendVerificationOTP
-      // below to decide whether to actually email anyone. Without this
-      // earlier gate, any unauthenticated visitor can cause unbounded
-      // writes to production D1 just by posting arbitrary addresses,
-      // even though no code is ever sent and sign-in is still blocked by
-      // the databaseHooks.user.create.before hook further down.
+      // The emailOTP plugin registers nine public routes, but this app
+      // only ever calls two of them: /email-otp/send-verification-otp
+      // (request a code) and /sign-in/email-otp (redeem it — untouched by
+      // the prefix check below, since it doesn't start with either
+      // prefix). Every other /email-otp/* and /forget-password/* route
+      // (check-verification-otp, verify-email, request-password-reset,
+      // the deprecated forget-password/email-otp, reset-password,
+      // request-email-change, change-email) is attacker-reachable
+      // regardless of the allowlist and, for the two password-reset
+      // routes, calls resolveOTP — which writes a row to the
+      // `verification` table — *before* checking whether the user even
+      // exists, deleting it only afterwards. That is an unbounded-D1-write
+      // vector reachable by anyone, and for an address that already has a
+      // user row, a route that genuinely emails a correctly-branded access
+      // code: an attacker can script it to flood an admin's inbox, burn
+      // the Resend quota, and drop a far more credible phishing message
+      // into the flood. This is a path *allowlist*: every route under
+      // either prefix is blocked outright except send-verification-otp,
+      // which instead falls through to the existing per-email allowlist
+      // check below.
       //
-      // Short-circuiting here with the endpoint's own `{ success: true }`
-      // shape keeps the HTTP response byte-identical to the allowlisted
-      // case (no enumeration signal) and does no extra work on either
-      // branch (no timing signal). Router-level rate limiting (see
-      // rateLimit above) still runs before hooks.before, so this path
-      // stays rate-limited exactly like every other request.
+      // Short-circuiting with the endpoint's own `{ success: true }` shape
+      // keeps the HTTP response byte-identical to a real send (no
+      // enumeration signal) and does no extra work on either branch (no
+      // timing signal). Router-level rate limiting (see rateLimit above)
+      // still runs before hooks.before, so every path here stays
+      // rate-limited exactly like every other request.
       before: createAuthMiddleware(async (ctx) => {
-        if (ctx.path !== '/email-otp/send-verification-otp') {
+        const isEmailOtpOrForgetPasswordPath =
+          ctx.path.startsWith('/email-otp/') ||
+          ctx.path.startsWith('/forget-password/');
+        if (!isEmailOtpOrForgetPasswordPath) {
           return;
+        }
+        if (ctx.path !== '/email-otp/send-verification-otp') {
+          return ctx.json({ success: true });
         }
         const email = ctx.body?.email;
         if (typeof email === 'string' && !isAllowedEmail(allowed, email)) {
@@ -92,7 +109,19 @@ export function createAuth(env: Env) {
         otpLength: 6,
         expiresIn: 300,
         allowedAttempts: 3,
-        async sendVerificationOTP({ email, otp }) {
+        async sendVerificationOTP({ email, otp, type }) {
+          // This app only ever offers sign-in-by-code, never
+          // email-verification, forget-password, or change-email OTPs. The
+          // `before` hook above blocks every route except
+          // /email-otp/send-verification-otp, but that one remaining route
+          // still accepts an attacker-supplied `type` in its own request
+          // body, and better-auth calls this callback (and would email a
+          // real, correctly-branded code) for whichever type is asked for.
+          // Rejecting anything but 'sign-in' here closes that regardless
+          // of which path called it.
+          if (type !== 'sign-in') {
+            return;
+          }
           // Never email a stranger, and never call Resend at all for one.
           if (!isAllowedEmail(allowed, email)) {
             return;
