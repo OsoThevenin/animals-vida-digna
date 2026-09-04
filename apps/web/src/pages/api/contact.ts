@@ -66,9 +66,14 @@ export const POST: APIRoute = async (context) => {
     // Get Resend API key from env binding
     let resendApiKey: string | undefined;
     try {
-      const env = (context.locals as Record<string, unknown>).runtime
-        ? ((context.locals as Record<string, { env: Record<string, unknown> }>)
-            .runtime.env as Record<string, unknown>)
+      const env = (context.locals as unknown as Record<string, unknown>)
+        .runtime
+        ? ((
+            context.locals as unknown as Record<
+              string,
+              { env: Record<string, unknown> }
+            >
+          ).runtime.env as Record<string, unknown>)
         : {};
       resendApiKey = (env.RESEND_API_KEY as string) || undefined;
     } catch {
