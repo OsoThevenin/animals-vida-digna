@@ -382,7 +382,7 @@ git commit -m "chore(monorepo): move site into apps/web"
 - Consumes: `biome.json`'s existing `files.includes` and `vcs.useIgnoreFile`.
 - Produces: nothing new — this task only verifies no edit is required.
 
-- [ ] **Step 1: Inspect `files.includes` for path assumptions**
+- [x] **Step 1: Inspect `files.includes` for path assumptions**
 
 `biome.json`'s `files.includes` is `["**", "!**/dist", "!**/dist-dev",
 "!**/dist-prod", "!**/.astro", "!**/.wrangler", "!**/coverage",
@@ -391,7 +391,7 @@ matches `apps/web/dist`, `apps/web/.astro`, `apps/web/node_modules`,
 `packages/content/node_modules`, etc. equally well as it matched the
 repo-root versions before the move. **No change needed.**
 
-- [ ] **Step 2: Inspect `vcs.useIgnoreFile`**
+- [x] **Step 2: Inspect `vcs.useIgnoreFile`**
 
 `vcs: { enabled: true, clientKind: "git", useIgnoreFile: true, defaultBranch:
 "main" }` makes Biome respect `.gitignore`, resolved from the directory
@@ -401,7 +401,14 @@ every pattern needed (`dist/`, `.astro/`, `.wrangler/`,
 `worker-configuration.d.ts`, `dist-dev/`, `dist-prod/`, `node_modules/`), all
 unanchored. **No change needed.**
 
-- [ ] **Step 3: Run `pnpm lint` from the root and confirm it walks into `apps/web`**
+- [x] **Step 3: Run `pnpm lint` from the root and confirm it walks into `apps/web`**
+
+Note: `pnpm lint` reports 117 errors / 220 warnings, all pre-existing on
+`main` before this move (confirmed by running `biome check .` against a
+`git archive 56503c0` extraction of the pre-move tree: 116 errors / 219
+warnings there — the +1 error is the new root `package.json`'s own content).
+No new violations were introduced by the move; fixing these pre-existing
+violations is out of scope for this phase.
 
 ```bash
 pnpm lint
@@ -413,7 +420,7 @@ passed lint before the move). If this step is run before Task 2's move is
 committed, skip it and re-run after Task 2 — there is nothing to lint at the
 root alone before `apps/web` exists.
 
-- [ ] **Step 4: No commit** (no files changed in this task; it is a
+- [x] **Step 4: No commit** (no files changed in this task; it is a
       verification-only task folded in because a reviewer could otherwise
       reasonably ask "did anyone check Biome's path assumptions after the
       move?").
@@ -439,7 +446,7 @@ root alone before `apps/web` exists.
   in the Interface contract; nothing in this task's exports is meant to
   survive Phase 2 except the package name and export-map shape.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // packages/content/tests/index.test.ts
@@ -453,7 +460,7 @@ describe('@avd/content package wiring', () => {
 });
 ```
 
-- [ ] **Step 2: Write `packages/content/package.json` (needed before the test can even resolve the workspace member)**
+- [x] **Step 2: Write `packages/content/package.json` (needed before the test can even resolve the workspace member)**
 
 ```json
 {
@@ -510,7 +517,7 @@ only the `.` entry:
 the actual file for this task; Phase 2 adds the remaining five entries
 alongside the files that back them.)
 
-- [ ] **Step 3: Write `packages/content/tsconfig.json`**
+- [x] **Step 3: Write `packages/content/tsconfig.json`**
 
 ```json
 {
@@ -523,7 +530,7 @@ alongside the files that back them.)
 }
 ```
 
-- [ ] **Step 4: Write `packages/content/vitest.config.ts`**
+- [x] **Step 4: Write `packages/content/vitest.config.ts`**
 
 ```ts
 import { defineConfig } from 'vitest/config';
@@ -540,7 +547,7 @@ No `esbuild.jsx` override here (unlike `apps/web/vitest.config.ts`) —
 contract's module list (schema, repository, validation, localization, image
 URLs — none of which render markup).
 
-- [ ] **Step 5: Run the test to verify it fails**
+- [x] **Step 5: Run the test to verify it fails**
 
 ```bash
 pnpm install
@@ -550,14 +557,14 @@ pnpm --filter @avd/content test
 Expected: FAIL — `Cannot find module '../src/index'` (or equivalent Vitest
 resolution error), because `src/index.ts` does not exist yet.
 
-- [ ] **Step 6: Write the minimal implementation**
+- [x] **Step 6: Write the minimal implementation**
 
 ```ts
 // packages/content/src/index.ts
 export const CONTENT_PACKAGE = '@avd/content';
 ```
 
-- [ ] **Step 7: Run the test to verify it passes**
+- [x] **Step 7: Run the test to verify it passes**
 
 ```bash
 pnpm --filter @avd/content test
@@ -565,7 +572,7 @@ pnpm --filter @avd/content test
 
 Expected: PASS.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add packages/content pnpm-lock.yaml
