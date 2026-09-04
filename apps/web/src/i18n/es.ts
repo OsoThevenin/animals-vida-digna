@@ -48,6 +48,7 @@ const es: Record<TranslationKey, string> = {
   'cat.backToList': 'Volver a todos los gatos',
   'cat.adoptMe': 'Adoptame',
   'cat.gallery': 'Galeria',
+  'cat.detailsHeading': 'Detalles del gato',
   'cat.status.adopted.message': 'Este gato ya ha sido adoptado!',
   'cat.status.treatment.message': 'Este gato esta en tratamiento actualmente.',
   'cat.status.unavailable.message': 'Este gato no esta disponible para adopcion.',
@@ -75,6 +76,7 @@ const es: Record<TranslationKey, string> = {
   // Cats listing
   'cats.title': 'Gatos',
   'cats.subtitle': 'Descubre nuestros gatos en acogida y adopta a tu companero ideal.',
+  'cats.listHeading': 'Listado de gatos',
   'cats.showing': 'Mostrando',
   'cats.noResults': 'No se encontraron gatos con estos filtros.',
   'cats.filterStatus': 'Estado',

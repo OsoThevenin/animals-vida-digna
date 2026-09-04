@@ -87,6 +87,12 @@ const alternateUrl = buildCanonicalUrl(getAlternateUrl(Astro.url, 'es'), site);
       {t(locale, 'cats.subtitle')}
     </p>
 
+    {/* Visually-hidden heading: without it, the cat cards' <h3> name
+        headings (CatCard.astro, CatFilters.tsx) directly follow this
+        page's <h1> with no intervening <h2> -- a heading-order violation
+        Lighthouse flagged. */}
+    <h2 class="sr-only">{t(locale, 'cats.listHeading')}</h2>
+
     {/* Interactive filter island (takes over rendering when JS available) */}
     <CatFilters client:load cats={filterData} locale={locale} translations={translations} />
 

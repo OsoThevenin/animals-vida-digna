@@ -81,6 +81,10 @@ const alternateUrl = buildCanonicalUrl(getAlternateUrl(Astro.url, 'ca'), site);
       {t(locale, 'cats.subtitle')}
     </p>
 
+    {/* See src/pages/cats/index.astro for why this heading-order fix is
+        needed. */}
+    <h2 class="sr-only">{t(locale, 'cats.listHeading')}</h2>
+
     <CatFilters client:load cats={filterData} locale={locale} translations={translations} />
 
     <noscript>

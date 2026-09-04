@@ -46,6 +46,7 @@ const ca = {
   'cat.backToList': 'Tornar a tots els gats',
   'cat.adoptMe': "Adopta'm",
   'cat.gallery': 'Galeria',
+  'cat.detailsHeading': 'Detalls del gat',
   'cat.status.adopted.message': 'Aquest gat ja ha estat adoptat!',
   'cat.status.treatment.message': 'Aquest gat esta en tractament actualment.',
   'cat.status.unavailable.message': 'Aquest gat no esta disponible per a adopcio.',
@@ -73,6 +74,7 @@ const ca = {
   // Cats listing
   'cats.title': 'Gats',
   'cats.subtitle': 'Descobreix els nostres gats en acollida i adopta el teu company ideal.',
+  'cats.listHeading': 'Llistat de gats',
   'cats.showing': 'Mostrant',
   'cats.noResults': "No s'han trobat gats amb aquests filtres.",
   'cats.filterStatus': 'Estat',

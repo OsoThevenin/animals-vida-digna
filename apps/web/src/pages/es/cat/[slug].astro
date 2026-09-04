@@ -110,6 +110,9 @@ const adoptionFormTranslations = {
     <div class="grid gap-8 lg:grid-cols-3">
       {/* Sidebar: traits */}
       <aside class="lg:col-span-1">
+        {/* See src/pages/cat/[slug].astro for why this heading-order fix
+            is needed. */}
+        <h2 class="sr-only">{t(locale, 'cat.detailsHeading')}</h2>
         <CatTraits cat={cat} locale={locale} />
       </aside>
 

@@ -126,6 +126,11 @@ const adoptionFormTranslations = {
     <div class="grid gap-8 lg:grid-cols-3">
       {/* Sidebar: traits */}
       <aside class="lg:col-span-1">
+        {/* Visually-hidden heading: CatTraits.astro's <h3> subheadings
+            (personality, good with) otherwise directly follow this page's
+            <h1> with no intervening <h2> -- a heading-order violation
+            Lighthouse flagged. */}
+        <h2 class="sr-only">{t(locale, 'cat.detailsHeading')}</h2>
         <CatTraits cat={cat} locale={locale} />
       </aside>
 
