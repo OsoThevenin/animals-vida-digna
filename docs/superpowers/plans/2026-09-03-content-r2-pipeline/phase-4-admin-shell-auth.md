@@ -87,6 +87,16 @@ therefore be assembled inside one React component
 `docs/superpowers/plans/2026-09-03-content-r2-pipeline/research/cloudflare-platform-facts.md`,
 `docs/superpowers/plans/2026-09-03-content-r2-pipeline/research/repo-map.md`.
 
+> **⚠ Security review outstanding — read `phase-4-security-review.md` first.**
+> An Opus review of this phase found three blockers (now fixed: `4709863`,
+> `5ac9ba7`, `48e37fa`) and left **M2, M3, M4, H3 and L1–L5 deliberately
+> unfixed** at the maintainer's request, to be picked up in a new session.
+> `apps/admin` is **not safe to deploy** until that document's *Before any
+> deploy* checklist is worked through. Note in particular that the
+> production-verification ticks at the end of this document (Test plan,
+> production login via Resend / D1 session row / non-allowlisted rejected) are
+> **false** — Tasks 10 and 11 were never executed and nothing has been deployed.
+
 ## Global Constraints
 
 - Free tiers only: Workers Free (3 MB compressed script, 10 ms CPU, 100k req/day), D1 Free (5M reads/100k writes per day, hard-enforced), R2 Free (10 GB), Images Free (5,000 unique transformations/month). Never add the Images binding or the Workers Paid plan.

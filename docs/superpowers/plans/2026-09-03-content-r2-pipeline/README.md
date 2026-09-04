@@ -40,6 +40,35 @@
 Total ≈ 6–7 working days. Phases 1→2→3 and 4→5 are two chains; Phase 4 may start
 once Phase 2 is merged, in parallel with Phase 3, if two people/agents work at once.
 
+## Status as of 2026-09-04
+
+Phases **0–4 are implemented** on branch `worktree-content-r2-impl` (worktree
+`.claude/worktrees/content-r2-impl`). Nothing is pushed, merged or deployed.
+Pipeline is green: `pnpm turbo test build check lint --force` → 15 tasks, 502+
+tests; `pnpm --filter web test:e2e` → 60 passed / 2 skipped.
+
+Two records to read before continuing:
+
+- **`phase-0-results.md`** — the platform spike, GO verdict, and five findings
+  (the `fit=scale-down` amendment, the Sources fix, the quota threat model, and
+  the production WAF allowlist that makes the image-URL contract
+  enforced-in-production).
+- **`phase-4-security-review.md`** — ⚠ **read before deploying `apps/admin`.**
+  Three blockers fixed; M2, M3, M4, H3 and L1–L5 deliberately left open for a
+  future session. Includes the *Before any deploy* checklist and the maintainer
+  actions (secrets, second Workers Builds project, `admin.` custom domain).
+
+**Next up: Phase 5** (cats CRUD + image uploader), which also owes the
+*Deferred verification owed by this phase* checks recorded in
+`phase-5-admin-cats-images.md` — the end-to-end image-chain verification that
+could not run while no real cat photo existed. Then Phase 6.
+
+Also integrated along the way, outside the numbered phases: the `design-system`
+branch (13 commits rebased in, its obsolete workspace-conversion commit
+dropped), a **Playwright** E2E suite for `apps/web`, and a **shadcn/ui**
+migration replacing `@avd/design-system` in `apps/admin` — which leaves that
+package with no consumers (kept deliberately; see the spec amendment).
+
 ## Ordering rules
 
 1. **Phase 0 gates everything.** If `/cdn-cgi/image/` on `images.animalsvidadigna.org` does not return transformed images on the Free plan, stop and switch the image contract to "browser generates the 4 widths and uploads all of them" before writing Phase 2/5 code (the spec documents this fallback in *Why URL transformations…*).
