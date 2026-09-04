@@ -50,7 +50,11 @@ const imagesOrigin =
 const catJsonLd = buildCatSchema({
   name: cat.name,
   description: seoDescription,
-  image: cat.coverImage ? imageUrl(cat.coverImage.key, 1200, imagesOrigin) : '',
+  // 1280 is the largest of the four widths the production WAF rule
+  // allowlists verbatim on images.animalsvidadigna.org -- any other width
+  // (1200 previously) returns a 403 to every crawler that fetches this
+  // schema.org image (Googlebot, Facebook, WhatsApp).
+  image: cat.coverImage ? imageUrl(cat.coverImage.key, 1280, imagesOrigin) : '',
   url: canonicalUrl,
   inLanguage: locale,
 });

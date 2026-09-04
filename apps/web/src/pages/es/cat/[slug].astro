@@ -47,7 +47,8 @@ const imagesOrigin =
 const catJsonLd = buildCatSchema({
   name: cat.name,
   description: seoDescription,
-  image: cat.coverImage ? imageUrl(cat.coverImage.key, 1200, imagesOrigin) : '',
+  // See src/pages/cat/[slug].astro for why this must be 1280, not 1200.
+  image: cat.coverImage ? imageUrl(cat.coverImage.key, 1280, imagesOrigin) : '',
   url: canonicalUrl,
   inLanguage: locale,
 });
