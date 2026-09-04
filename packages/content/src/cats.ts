@@ -48,12 +48,19 @@ async function attachImages(db: Db, catRows: Cat[]): Promise<CatWithImages[]> {
   });
 }
 
-export async function listPublishedCats(db: Db): Promise<CatWithImages[]> {
+export async function listPublishedCats(
+  db: Db,
+  locale: 'ca' | 'es' = 'ca'
+): Promise<CatWithImages[]> {
+  // Tie-break on the requested locale's name column: without this, the ES
+  // listing silently sorted same-sortOrder cats in Catalan alphabetical
+  // order.
+  const nameColumn = locale === 'es' ? schema.cats.nameEs : schema.cats.nameCa;
   const rows = await db
     .select()
     .from(schema.cats)
     .where(eq(schema.cats.published, true))
-    .orderBy(schema.cats.sortOrder, schema.cats.nameCa);
+    .orderBy(schema.cats.sortOrder, nameColumn);
   return attachImages(db, rows);
 }
 

@@ -167,6 +167,37 @@ describe('listPublishedCats', () => {
     const cats = await listPublishedCats(ctx.db);
     expect(cats.map((c) => c.nameCa)).toEqual(['Anna', 'Zorro']);
   });
+
+  it("ties on sortOrder tie-break on nameEs (Spanish alphabetical) when locale is 'es'", async () => {
+    // Catalan and Spanish names sort differently for these two: nameCa
+    // ('Zeta' < 'Bruna') vs nameEs ('Alba' < 'Zeta'). The ES listing must
+    // use the Spanish tie-break, not silently reuse the Catalan one.
+    await createCat(
+      ctx.db,
+      baseInput({
+        slugCa: 'gat-1',
+        slugEs: 'gat-1',
+        nameCa: 'Bruna',
+        nameEs: 'Zeta',
+        sortOrder: 1,
+      }),
+      'a@b.org'
+    );
+    await createCat(
+      ctx.db,
+      baseInput({
+        slugCa: 'gat-2',
+        slugEs: 'gat-2',
+        nameCa: 'Zeta',
+        nameEs: 'Alba',
+        sortOrder: 1,
+      }),
+      'a@b.org'
+    );
+
+    const esCats = await listPublishedCats(ctx.db, 'es');
+    expect(esCats.map((c) => c.nameEs)).toEqual(['Alba', 'Zeta']);
+  });
 });
 
 describe('listFeaturedCats', () => {

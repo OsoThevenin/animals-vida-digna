@@ -22,8 +22,12 @@ const locale = 'ca' as const;
 // at request time (see src/lib/keystatic.ts and scripts/generate-settings.ts).
 const donateUrl = siteSettings.donateUrl;
 
+// M9: see src/pages/cat/[slug].astro for why 60s -- same reasoning applies
+// to the listing (1 D1 query: listPublishedCats).
+Astro.response.headers.set('Cache-Control', 'public, max-age=60');
+
 const db = requireDb(Astro.locals);
-const rows = await listPublishedCats(db);
+const rows = await listPublishedCats(db, locale);
 
 const localizedCats = rows
   .map((row) => ({ ...localizeCat(row, locale), id: row.id }))

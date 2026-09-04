@@ -19,8 +19,11 @@ const locale = 'es' as const;
 // settings module instead of the Keystatic filesystem reader.
 const donateUrl = siteSettings.donateUrl;
 
+// M9: see src/pages/cat/[slug].astro for why 60s.
+Astro.response.headers.set('Cache-Control', 'public, max-age=60');
+
 const db = requireDb(Astro.locals);
-const rows = await listPublishedCats(db);
+const rows = await listPublishedCats(db, locale);
 
 const localizedCats = rows
   .map((row) => ({ ...localizeCat(row, locale), id: row.id }))
