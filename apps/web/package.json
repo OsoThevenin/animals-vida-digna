@@ -12,6 +12,7 @@
     "deploy": "astro build && wrangler deploy",
     "astro": "astro",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "check": "tsc --noEmit",
     "sync-images": "npx tsx scripts/sync-images.ts"
   },
@@ -36,6 +37,7 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "vitest": "^4.1.0",
     "wrangler": "^4.75.0"
   }

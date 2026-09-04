@@ -61,3 +61,11 @@ dist-prod/
 
 # turborepo local cache
 .turbo/
+
+# playwright
+/test-results/
+/playwright-report/
+/.playwright/
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/.playwright/
