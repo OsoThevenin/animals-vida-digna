@@ -8,15 +8,19 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { toCatCardProps } from '../../lib/cat-card-props';
 import type { CatFilterData } from '../../lib/cat-filters';
 import { requireDb } from '../../lib/db';
-import { reader } from '../../lib/keystatic';
+import { siteSettings } from '../../generated/settings';
 import { buildCanonicalUrl } from '../../lib/seo';
 
 export const prerender = false;
 
 const locale = 'ca' as const;
 
-const settings = await reader.singletons.settings.read();
-const donateUrl = settings?.donateUrl ?? '#';
+// Read from the build-time-generated settings module, not the Keystatic
+// filesystem reader: this route is on-demand (prerender = false), and the
+// reader ultimately calls node:fs, which throws
+// "[unenv] fs.readFile is not implemented yet!" in a real Cloudflare Worker
+// at request time (see src/lib/keystatic.ts and scripts/generate-settings.ts).
+const donateUrl = siteSettings.donateUrl;
 
 const db = requireDb(Astro.locals);
 const rows = await listPublishedCats(db);
