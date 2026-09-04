@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { CatStatusBadge } from '../src/components/cat-status-badge';
 import { CatsTable } from '../src/components/cats-table';
+import { FormField } from '../src/components/form-field';
 import { LOGIN_LABELS, LoginForm } from '../src/components/login-form';
 import { Badge } from '../src/components/ui/badge';
 import { Button } from '../src/components/ui/button';
@@ -45,6 +46,31 @@ describe('shadcn primitives render usable markup', () => {
   it('Badge renders a span with the shadcn data-slot hook', () => {
     const html = renderToStaticMarkup(<Badge>Nou</Badge>);
     expect(html).toContain('data-slot="badge"');
+  });
+});
+
+describe('FormField', () => {
+  it('labels the control it wraps and renders no error slot when clean', () => {
+    const html = renderToStaticMarkup(
+      <FormField id="cat-name-ca" label="Nom (CA)">
+        <Input id="cat-name-ca" />
+      </FormField>
+    );
+    expect(html).toContain('for="cat-name-ca"');
+    expect(html).toContain('Nom (CA)');
+    expect(html).not.toContain('role="alert"');
+  });
+
+  it('announces a validation error next to the control', () => {
+    const html = renderToStaticMarkup(
+      <FormField error="Requerit" id="cat-name-ca" label="Nom (CA)">
+        <Input id="cat-name-ca" />
+      </FormField>
+    );
+    expect(html).toContain('role="alert"');
+    expect(html).toContain('id="cat-name-ca-error"');
+    expect(html).toContain('Requerit');
+    expect(html).toContain('text-destructive');
   });
 });
 
