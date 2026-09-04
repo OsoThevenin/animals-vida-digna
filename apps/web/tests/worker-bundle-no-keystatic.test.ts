@@ -26,7 +26,20 @@ import { describe, expect, it } from 'vitest';
 
 const WORKER_DIR = join(process.cwd(), 'dist', '_worker.js');
 const API_DIR = join(WORKER_DIR, 'pages', 'api');
-const describeIfBuilt = existsSync(API_DIR) ? describe : describe.skip;
+const BUILT = existsSync(API_DIR);
+
+// LOW fix: a silent describe.skip is easy to miss in CI output -- a
+// vanished dist/ (a build step reordered, a clean that ran too early) would
+// make this whole guard quietly stop running with no signal in the test
+// report. Emit one loud, always-visible failing-shaped notice instead of a
+// silent skip when the build is missing.
+if (!BUILT) {
+  it('SKIPPED: dist/_worker.js/pages/api not found -- run `pnpm build` first so these bundle guards actually run', () => {
+    expect(BUILT, 'run `pnpm build` before `pnpm test` to exercise the worker-bundle guards').toBe(true);
+  });
+}
+
+const describeIfBuilt = BUILT ? describe : describe.skip;
 
 const FORBIDDEN = [
   { label: 'node:fs import', pattern: /from\s+['"]node:fs/ },
@@ -83,41 +96,67 @@ describeIfBuilt('Worker API route bundles (dist/_worker.js/pages/api)', () => {
 });
 
 /**
- * Companion guard for the cats listing route: now that src/pages/cats/index.astro
- * and src/pages/es/cats/index.astro read from D1 instead of the Keystatic
+ * Companion guard for the public cats routes: now that
+ * src/pages/cats/index.astro, src/pages/es/cats/index.astro,
+ * src/pages/cat/[slug].astro, src/pages/es/cat/[slug].astro and
+ * src/pages/sitemap-cats.xml.ts all read from D1 instead of the Keystatic
  * reader (Phase 3), their bundled module graph must stay filesystem-free --
  * a node:fs import here would risk the same class of production 500 the
- * guard above protects contact/adopt against. (These routes still legitimately
- * import @keystatic/core, via reader.singletons.settings.read() for donateUrl
- * -- migrating settings off Keystatic is out of scope for this phase, see the
- * spec's Non-goals -- so that import is not asserted against here.)
+ * guard above protects contact/adopt against.
+ *
+ * Stale-comment fix: these routes do NOT import @keystatic/core any more.
+ * `donateUrl` is read from the build-time-generated
+ * src/generated/settings.ts module (deliberately zero-dependency on
+ * @keystatic/core or node:fs -- see that file and
+ * scripts/generate-settings.ts), not from
+ * `reader.singletons.settings.read()`. So @keystatic/core is asserted
+ * against here too, not carved out.
  *
  * Astro's build flattens `src/pages/cats/index.astro` to
  * `dist/_worker.js/pages/cats.astro.mjs` (no `cats/index.astro.mjs`
  * subdirectory) -- confirmed against the actual build output.
  */
 
-const describeCatsIfBuilt = existsSync(join(WORKER_DIR, 'pages', 'cats.astro.mjs'))
-  ? describe
-  : describe.skip;
+const CATS_ROUTE_ENTRIES = [
+  ['cats/index', join(WORKER_DIR, 'pages', 'cats.astro.mjs')],
+  ['es/cats/index', join(WORKER_DIR, 'pages', 'es', 'cats.astro.mjs')],
+  ['cat/[slug]', join(WORKER_DIR, 'pages', 'cat', '_slug_.astro.mjs')],
+  ['es/cat/[slug]', join(WORKER_DIR, 'pages', 'es', 'cat', '_slug_.astro.mjs')],
+  ['sitemap-cats.xml', join(WORKER_DIR, 'pages', 'sitemap-cats.xml.astro.mjs')],
+] as const;
 
-describeCatsIfBuilt('Public cats listing bundle (dist/_worker.js/pages)', () => {
-  for (const [label, entry] of [
-    ['cats/index', join(WORKER_DIR, 'pages', 'cats.astro.mjs')],
-    ['es/cats/index', join(WORKER_DIR, 'pages', 'es', 'cats.astro.mjs')],
-  ] as const) {
-    it(`${label} route's transitive module graph is filesystem-free (no node:fs)`, () => {
-      const graph = collectModuleGraph(entry);
+const catsRouteBuilt = CATS_ROUTE_ENTRIES.every(([, entry]) => existsSync(entry));
 
-      expect(graph.length).toBeGreaterThan(1);
+if (BUILT && !catsRouteBuilt) {
+  it('SKIPPED: one or more public cats route bundles not found under dist/_worker.js/pages -- rebuild before trusting this guard', () => {
+    expect(
+      catsRouteBuilt,
+      `expected all of: ${CATS_ROUTE_ENTRIES.map(([label]) => label).join(', ')}`
+    ).toBe(true);
+  });
+}
 
-      for (const modulePath of graph) {
-        const source = readFileSync(modulePath, 'utf-8');
-        expect(
-          /from\s+['"]node:fs|require\(['"]node:fs/.test(source),
-          `${modulePath} must not import node:fs`
-        ).toBe(false);
-      }
-    });
+const describeCatsIfBuilt = BUILT && catsRouteBuilt ? describe : describe.skip;
+
+describeCatsIfBuilt(
+  'Public cats route bundles are filesystem-free and Keystatic-free (dist/_worker.js/pages)',
+  () => {
+    for (const [label, entry] of CATS_ROUTE_ENTRIES) {
+      it(`${label} route's transitive module graph is filesystem-free and does not import @keystatic/core`, () => {
+        const graph = collectModuleGraph(entry);
+
+        expect(graph.length).toBeGreaterThan(1);
+
+        for (const modulePath of graph) {
+          const source = readFileSync(modulePath, 'utf-8');
+          for (const { label: forbiddenLabel, pattern } of FORBIDDEN) {
+            expect(
+              pattern.test(source),
+              `${modulePath} must not contain ${forbiddenLabel}`
+            ).toBe(false);
+          }
+        }
+      });
+    }
   }
-});
+);
