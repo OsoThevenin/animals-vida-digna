@@ -1,8 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { CONTENT_PACKAGE } from '../src/index';
+import * as barrel from '../src/index';
 
 describe('@avd/content package wiring', () => {
-  it('exports its own package name as a sanity constant', () => {
-    expect(CONTENT_PACKAGE).toBe('@avd/content');
+  it('re-exports the schema, repository, validation, localize and image-url modules', () => {
+    expect(barrel.cats).toBeDefined();
+    expect(barrel.catImages).toBeDefined();
+    expect(barrel.createDb).toBeTypeOf('function');
+    expect(barrel.catInputSchema).toBeDefined();
+    expect(barrel.slugify).toBeTypeOf('function');
+    expect(barrel.localizeCat).toBeTypeOf('function');
+    expect(barrel.imageUrl).toBeTypeOf('function');
+    expect(barrel.DEFAULT_IMAGES_ORIGIN).toBe(
+      'https://images.animalsvidadigna.org'
+    );
   });
 });
