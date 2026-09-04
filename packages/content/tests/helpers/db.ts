@@ -25,6 +25,14 @@ export interface TestDb {
 export async function setupTestDb(): Promise<TestDb> {
   const proxy = await getPlatformProxy<{ DB: D1Database }>({
     configPath: CONFIG_PATH,
+    // Ephemeral, in-memory bindings scoped to this call only. Several test
+    // files run in the same vitest process (in parallel, by default) and
+    // each calls setupTestDb() independently; the default behaviour
+    // persists D1 state to `.wrangler/state/v3` on disk, shared across every
+    // proxy pointed at the same wrangler.test.toml, which causes
+    // "table already exists" collisions between files. persist: false gives
+    // every setupTestDb() call its own isolated database.
+    persist: false,
   });
 
   const migrationFiles = readdirSync(MIGRATIONS_DIR)

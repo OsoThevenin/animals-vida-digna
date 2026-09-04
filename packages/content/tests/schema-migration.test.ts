@@ -11,6 +11,7 @@ let proxy: Awaited<ReturnType<typeof getPlatformProxy<{ DB: D1Database }>>>;
 beforeAll(async () => {
   proxy = await getPlatformProxy<{ DB: D1Database }>({
     configPath: CONFIG_PATH,
+    persist: false,
   });
   const migrationFiles = readdirSync(MIGRATIONS_DIR)
     .filter((file) => file.endsWith('.sql'))
