@@ -1,5 +1,5 @@
-import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import * as schema from '@avd/content/schema';
+import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { betterAuth } from 'better-auth';
 import { APIError } from 'better-auth/api';
 import { emailOTP } from 'better-auth/plugins';

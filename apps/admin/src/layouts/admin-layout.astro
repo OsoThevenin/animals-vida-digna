@@ -1,0 +1,41 @@
+---
+import '../styles/admin.css';
+import { actions } from 'astro:actions';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const user = Astro.locals.user;
+---
+
+<!doctype html>
+<html lang="ca">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} | Animals Vida Digna — Admin</title>
+  </head>
+  <body class="flex min-h-screen flex-col bg-surface font-sans text-text">
+    <header class="flex items-center justify-between border-primary/20 border-b px-6 py-4">
+      <span class="font-semibold text-primary">Animals Vida Digna — Admin</span>
+      {
+        user ? (
+          <form action={actions.auth.signOut} class="flex items-center gap-4" method="POST">
+            <span class="text-sm text-text-muted">{user.email}</span>
+            <button
+              class="rounded-lg border border-primary/20 px-4 py-2 text-sm transition-colors hover:bg-primary/10"
+              type="submit"
+            >
+              Surt / Salir
+            </button>
+          </form>
+        ) : null
+      }
+    </header>
+    <main class="flex-1 px-6 py-8">
+      <slot />
+    </main>
+  </body>
+</html>

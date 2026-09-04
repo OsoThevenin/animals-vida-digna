@@ -14,9 +14,6 @@ export function parseAllowedEmails(raw: string): Set<string> {
   );
 }
 
-export function isAllowedEmail(
-  allowed: Set<string>,
-  email: string
-): boolean {
+export function isAllowedEmail(allowed: Set<string>, email: string): boolean {
   return allowed.has(email.trim().toLowerCase());
 }

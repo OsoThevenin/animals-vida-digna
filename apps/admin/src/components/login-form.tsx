@@ -13,13 +13,11 @@ export const LOGIN_LABELS = {
   back: 'Torna / Volver',
   sending: 'Enviant… / Enviando…',
   verifying: 'Verificant… / Verificando…',
-  genericError:
-    "No s'ha pogut enviar el codi / No se pudo enviar el código",
+  genericError: "No s'ha pogut enviar el codi / No se pudo enviar el código",
   tooManyAttempts:
     'Massa intents, demana un codi nou / Demasiados intentos, pide un código nuevo',
   invalidCode: 'Codi incorrecte / Código incorrecto',
-  notAllowed:
-    'Aquest correu no té accés / Este correo no tiene acceso',
+  notAllowed: 'Aquest correu no té accés / Este correo no tiene acceso',
 } as const;
 
 export function LoginForm() {
@@ -33,9 +31,10 @@ export function LoginForm() {
     event.preventDefault();
     setError(null);
     setBusy(true);
-    const { error: sendError } = await authClient.emailOtp.sendVerificationOtp(
-      { email, type: 'sign-in' }
-    );
+    const { error: sendError } = await authClient.emailOtp.sendVerificationOtp({
+      email,
+      type: 'sign-in',
+    });
     setBusy(false);
     if (sendError) {
       setError(LOGIN_LABELS.genericError);
@@ -87,9 +86,7 @@ export function LoginForm() {
             value={email}
           />
         </Field>
-        {error ? (
-          <p className="mb-4 text-red-600 text-sm">{error}</p>
-        ) : null}
+        {error ? <p className="mb-4 text-red-600 text-sm">{error}</p> : null}
         <Button disabled={busy} fullWidth type="submit" variant="primary">
           {busy ? LOGIN_LABELS.sending : LOGIN_LABELS.sendCode}
         </Button>

@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import '@avd/design-system/styles.css';
+@import "tailwindcss";
+@import "@avd/design-system/styles.css";
 
 /* Tailwind's automatic content detection scans this package's own source
    tree, but a workspace dependency loaded through a symlink is outside
