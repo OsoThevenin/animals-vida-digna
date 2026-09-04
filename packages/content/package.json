@@ -15,6 +15,7 @@
     "build": "echo 'no build step'",
     "test": "vitest run",
     "check": "tsc --noEmit",
+    "lint": "biome check src scripts tests",
     "db:generate": "drizzle-kit generate",
     "seed:generate": "npx tsx scripts/seed-from-yaml.ts"
   },

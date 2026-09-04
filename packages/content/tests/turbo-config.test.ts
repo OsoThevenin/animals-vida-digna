@@ -17,6 +17,14 @@ import { describe, expect, it } from 'vitest';
  *   reads are stripped rather than merely miscached -- which stops being
  *   benign once PUBLIC_IMAGES_ORIGIN becomes a build-time variable in
  *   Phase 3.
+ * - A root-level `lint` task must exist (Phase 2 code review finding F7):
+ *   the root `lint` npm script (`biome check .`) is whole-repo and is not a
+ *   turbo task, so it was never covered by any phase's `test`/`build`/
+ *   `check` gate. Individual packages opt in by giving themselves their own
+ *   `lint` script (see `packages/content/package.json` and
+ *   `apps/web/package.json`, both scoped to the files that package has
+ *   actually cleaned up) — `pnpm turbo lint` then runs it for every package
+ *   that defines one and fails the pipeline if any of them fail.
  */
 
 interface TurboTaskConfig {
@@ -51,5 +59,11 @@ describe('root turbo.json', () => {
 
     expect(declaredEnv).toContain('PUBLIC_*');
     expect(declaredEnv).toContain('RESEND_API_KEY');
+  });
+
+  it('declares a lint task, so `pnpm turbo lint` covers every package that opts in', () => {
+    const { tasks } = readTurboConfig();
+
+    expect(tasks.lint).toBeDefined();
   });
 });

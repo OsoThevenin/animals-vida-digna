@@ -1,5 +1,5 @@
-import type { D1Database } from '@cloudflare/workers-types';
 import { createDb, type Db } from '@avd/content/cats';
+import type { D1Database } from '@cloudflare/workers-types';
 
 function extractRuntimeEnv(
   locals: unknown

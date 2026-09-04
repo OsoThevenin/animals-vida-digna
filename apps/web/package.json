@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "check": "tsc --noEmit",
+    "lint": "biome check src/lib/db.ts",
     "sync-images": "npx tsx scripts/sync-images.ts"
   },
   "dependencies": {

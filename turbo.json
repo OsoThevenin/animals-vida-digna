@@ -6,6 +6,10 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "@avd/content#build": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
     "test": {
       "dependsOn": ["^build", "build"]
     },
@@ -13,6 +17,7 @@
       "dependsOn": ["^build"],
       "cache": false
     },
-    "check": {}
+    "check": {},
+    "lint": {}
   }
 }
