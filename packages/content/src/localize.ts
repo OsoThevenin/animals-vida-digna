@@ -75,11 +75,28 @@ export function localizeCat(
     adoptionDate: cat.adoptionDate,
     featured: cat.featured,
     order: cat.sortOrder,
-    coverImage: cat.coverImage ? toLocalizedImage(cat.coverImage, locale) : null,
+    coverImage: cat.coverImage
+      ? toLocalizedImage(cat.coverImage, locale)
+      : null,
     gallery: cat.images.map((image) => toLocalizedImage(image, locale)),
-    seo:
-      locale === 'ca'
-        ? { title: cat.seoTitleCa, description: cat.seoDescriptionCa }
-        : { title: cat.seoTitleEs, description: cat.seoDescriptionEs },
+    seo: buildSeo(cat, locale),
   };
+}
+
+/**
+ * Matches today's `getLocalizedCat` (apps/web/src/i18n/content.ts), which
+ * returns `seo: null` when the source entry has no `seo` object at all.
+ * The DB has no such presence flag — `seo_title_*`/`seo_description_*`
+ * default to `''` — so "absent" is modelled as both columns being empty
+ * for the requested locale.
+ */
+function buildSeo(
+  cat: CatWithImages,
+  locale: 'ca' | 'es'
+): { title: string; description: string } | null {
+  const title = locale === 'ca' ? cat.seoTitleCa : cat.seoTitleEs;
+  const description =
+    locale === 'ca' ? cat.seoDescriptionCa : cat.seoDescriptionEs;
+  if (title === '' && description === '') return null;
+  return { title, description };
 }

@@ -1,6 +1,5 @@
 import { sql } from 'drizzle-orm';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { setupTestDb, type TestDb } from './helpers/db';
 import {
   addCatImage,
   createCat,
@@ -12,6 +11,7 @@ import {
 } from '../src/cats';
 import * as schema from '../src/schema';
 import type { CatInput } from '../src/validate';
+import { setupTestDb, type TestDb } from './helpers/db';
 
 let ctx: TestDb;
 
@@ -89,6 +89,57 @@ describe('addCatImage', () => {
 
     const withImages = await getCatById(ctx.db, cat.id);
     expect(withImages?.images.map((i) => i.id)).toEqual([img1.id, img2.id]);
+  });
+
+  it('does not collide positions after removing a middle image', async () => {
+    const cat = await createCat(ctx.db, baseInput(), 'a@b.org');
+    const img1 = await addCatImage(ctx.db, cat.id, {
+      r2Key: `cats/${cat.id}/1.webp`,
+      width: 800,
+      height: 600,
+    });
+    const img2 = await addCatImage(ctx.db, cat.id, {
+      r2Key: `cats/${cat.id}/2.webp`,
+      width: 800,
+      height: 600,
+    });
+    const img3 = await addCatImage(ctx.db, cat.id, {
+      r2Key: `cats/${cat.id}/3.webp`,
+      width: 800,
+      height: 600,
+    });
+    expect([img1.position, img2.position, img3.position]).toEqual([0, 1, 2]);
+
+    await removeCatImage(ctx.db, img2.id);
+
+    // removeCatImage renumbers the remaining images to a contiguous
+    // 0..n-1 sequence, so img3 (previously at position 2) is now at 1.
+    const afterRemove = await getCatById(ctx.db, cat.id);
+    expect(
+      afterRemove?.images.map((i) => ({ id: i.id, position: i.position }))
+    ).toEqual([
+      { id: img1.id, position: 0 },
+      { id: img3.id, position: 1 },
+    ]);
+
+    const img4 = await addCatImage(ctx.db, cat.id, {
+      r2Key: `cats/${cat.id}/4.webp`,
+      width: 800,
+      height: 600,
+    });
+
+    // Before the fix, addCatImage used count(existing) for the new
+    // position: after removing the middle image, count() was 2 — the same
+    // position img3 already occupies — producing a collision. With
+    // max(position)+1 on the renumbered set, img4 must land at 2, not 3
+    // and not collide with img3.
+    expect(img4.position).toBe(2);
+
+    const positions = (await getCatById(ctx.db, cat.id))?.images.map(
+      (i) => i.position
+    );
+    expect(new Set(positions).size).toBe(positions?.length);
+    expect(positions).toEqual([0, 1, 2]);
   });
 });
 

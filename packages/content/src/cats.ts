@@ -1,6 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types';
-import { and, eq, inArray } from 'drizzle-orm';
-import { drizzle, type DrizzleD1Database } from 'drizzle-orm/d1';
+import { and, eq, inArray, max } from 'drizzle-orm';
+import { type DrizzleD1Database, drizzle } from 'drizzle-orm/d1';
 import { nanoid } from 'nanoid';
 import * as schema from './schema';
 import type { CatInput } from './validate';
@@ -22,10 +22,7 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-async function attachImages(
-  db: Db,
-  catRows: Cat[]
-): Promise<CatWithImages[]> {
+async function attachImages(db: Db, catRows: Cat[]): Promise<CatWithImages[]> {
   if (catRows.length === 0) return [];
 
   const catIds = catRows.map((cat) => cat.id);
@@ -67,9 +64,7 @@ export async function listFeaturedCats(
   const rows = await db
     .select()
     .from(schema.cats)
-    .where(
-      and(eq(schema.cats.published, true), eq(schema.cats.featured, true))
-    )
+    .where(and(eq(schema.cats.published, true), eq(schema.cats.featured, true)))
     .orderBy(schema.cats.sortOrder, schema.cats.nameCa)
     .limit(limit);
   return attachImages(db, rows);
@@ -171,11 +166,15 @@ export async function addCatImage(
   }
 ): Promise<CatImage> {
   const id = nanoid();
-  const existing = await db
-    .select({ id: schema.catImages.id })
+  // max(position)+1, not count(existing): count() collides once an image
+  // has been removed from the middle of the gallery (e.g. positions
+  // {0, 2} after removing 1 — count() is 2, which collides with the
+  // existing image at position 2).
+  const [{ maxPosition }] = await db
+    .select({ maxPosition: max(schema.catImages.position) })
     .from(schema.catImages)
     .where(eq(schema.catImages.catId, catId));
-  const position = existing.length;
+  const position = maxPosition === null ? 0 : maxPosition + 1;
 
   await db.insert(schema.catImages).values({
     id,
@@ -223,15 +222,32 @@ export async function removeCatImage(
   imageId: string
 ): Promise<{ r2Key: string } | null> {
   const [row] = await db
-    .select({ r2Key: schema.catImages.r2Key })
+    .select({ r2Key: schema.catImages.r2Key, catId: schema.catImages.catId })
     .from(schema.catImages)
     .where(eq(schema.catImages.id, imageId));
   if (!row) return null;
 
   // cats.cover_image_id has ON DELETE SET NULL, so the FK clears it; this
-  // delete is the only statement needed as long as foreign_keys is ON
-  // (tests/helpers/db.ts sets it; production D1 must too — see Task 8).
+  // delete is the only statement needed. D1 enforces foreign keys by
+  // default and does not allow disabling them, so no extra PRAGMA is
+  // required in production.
   await db.delete(schema.catImages).where(eq(schema.catImages.id, imageId));
+
+  // Renumber the remaining images to a contiguous 0..n-1 sequence so
+  // addCatImage's max(position)+1 keeps producing the next slot instead of
+  // drifting upward forever, and so gallery order stays legible.
+  const remaining = await db
+    .select({ id: schema.catImages.id })
+    .from(schema.catImages)
+    .where(eq(schema.catImages.catId, row.catId))
+    .orderBy(schema.catImages.position);
+  for (const [index, image] of remaining.entries()) {
+    await db
+      .update(schema.catImages)
+      .set({ position: index })
+      .where(eq(schema.catImages.id, image.id));
+  }
+
   return { r2Key: row.r2Key };
 }
 
@@ -245,10 +261,7 @@ export async function setCoverImage(
       .select({ id: schema.catImages.id })
       .from(schema.catImages)
       .where(
-        and(
-          eq(schema.catImages.id, imageId),
-          eq(schema.catImages.catId, catId)
-        )
+        and(eq(schema.catImages.id, imageId), eq(schema.catImages.catId, catId))
       );
     if (!row) throw new Error('image not in cat');
   }

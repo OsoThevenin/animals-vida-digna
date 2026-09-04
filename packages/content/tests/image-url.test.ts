@@ -3,11 +3,11 @@ import {
   DEFAULT_IMAGES_ORIGIN,
   DEFAULT_SIZES,
   DEFAULT_WIDTHS,
-  MAX_UPLOAD_BYTES,
-  MAX_UPLOAD_EDGE,
   imageKey,
   imageSrcset,
   imageUrl,
+  MAX_UPLOAD_BYTES,
+  MAX_UPLOAD_EDGE,
   originalImageUrl,
 } from '../src/image-url';
 

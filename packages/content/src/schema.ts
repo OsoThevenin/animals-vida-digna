@@ -27,10 +27,7 @@ export const cats = sqliteTable(
     nameEs: text('name_es').notNull(),
     raceCa: text('race_ca').notNull().default(''),
     raceEs: text('race_es').notNull().default(''),
-    status: text('status')
-      .$type<CatStatus>()
-      .notNull()
-      .default('available'),
+    status: text('status').$type<CatStatus>().notNull().default('available'),
     age: integer('age'),
     gender: text('gender').$type<CatGender>().notNull().default('male'),
     size: text('size').$type<CatSize>().notNull().default('medium'),

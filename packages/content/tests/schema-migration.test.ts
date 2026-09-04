@@ -1,7 +1,7 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { getPlatformProxy } from 'wrangler';
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { getPlatformProxy } from 'wrangler';
 
 const CONFIG_PATH = resolve(import.meta.dirname, '../wrangler.test.toml');
 const MIGRATIONS_DIR = resolve(import.meta.dirname, '../migrations');

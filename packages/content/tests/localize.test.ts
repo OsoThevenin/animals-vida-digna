@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { localizeCat } from '../src/localize';
 import type { CatWithImages } from '../src/cats';
+import { localizeCat } from '../src/localize';
 
 function makeCat(overrides: Partial<CatWithImages> = {}): CatWithImages {
   const base: CatWithImages = {
@@ -127,7 +127,10 @@ describe('localizeCat', () => {
     expect(result.description).toBe('# Luna\n\nUna gata muy bonita.');
     expect(result.coverImage?.alt).toBe('Luna sentada');
     expect(result.gallery[1].alt).toBe('Luna jugando');
-    expect(result.seo).toEqual({ title: 'Adopta a Luna', description: 'SEO ES' });
+    expect(result.seo).toEqual({
+      title: 'Adopta a Luna',
+      description: 'SEO ES',
+    });
   });
 
   it('returns null coverImage when the cat has none', () => {
@@ -140,5 +143,22 @@ describe('localizeCat', () => {
     const cat = makeCat({ images: [], coverImage: null, coverImageId: null });
     const result = localizeCat(cat, 'ca');
     expect(result.gallery).toEqual([]);
+  });
+
+  it('returns null seo when both title and description are empty for the locale', () => {
+    // Matches today's getLocalizedCat (apps/web/src/i18n/content.ts), which
+    // returns `seo: null` when the seo object is absent from the source
+    // entry. In the DB, "absent" for a locale means both its seo columns
+    // are empty — that must still produce `seo: null`, not
+    // `{ title: '', description: '' }`.
+    const cat = makeCat({ seoTitleEs: '', seoDescriptionEs: '' });
+    const result = localizeCat(cat, 'es');
+    expect(result.seo).toBeNull();
+  });
+
+  it('returns a seo object when only one of title/description is set', () => {
+    const cat = makeCat({ seoTitleEs: 'Title only', seoDescriptionEs: '' });
+    const result = localizeCat(cat, 'es');
+    expect(result.seo).toEqual({ title: 'Title only', description: '' });
   });
 });

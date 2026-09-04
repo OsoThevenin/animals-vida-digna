@@ -1,6 +1,5 @@
 import { sql } from 'drizzle-orm';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { setupTestDb, type TestDb } from './helpers/db';
 import {
   createCat,
   getCatById,
@@ -10,6 +9,7 @@ import {
   listPublishedCats,
 } from '../src/cats';
 import type { CatInput } from '../src/validate';
+import { setupTestDb, type TestDb } from './helpers/db';
 
 let ctx: TestDb;
 
@@ -68,7 +68,11 @@ afterAll(async () => {
 
 describe('createCat + getCatById', () => {
   it('creates a cat and reads it back with empty images', async () => {
-    const created = await createCat(ctx.db, baseInput(), 'volunteer@example.org');
+    const created = await createCat(
+      ctx.db,
+      baseInput(),
+      'volunteer@example.org'
+    );
     expect(created.id).toHaveLength(21);
     expect(created.nameCa).toBe('Misi');
     expect(created.images).toEqual([]);
@@ -96,13 +100,21 @@ describe('createCat + getCatById', () => {
 
 describe('getCatBySlug', () => {
   it('finds a published cat by its ca slug', async () => {
-    await createCat(ctx.db, baseInput({ slugCa: 'misi', slugEs: 'misi-es' }), 'a@b.org');
+    await createCat(
+      ctx.db,
+      baseInput({ slugCa: 'misi', slugEs: 'misi-es' }),
+      'a@b.org'
+    );
     const found = await getCatBySlug(ctx.db, 'ca', 'misi');
     expect(found?.slugCa).toBe('misi');
   });
 
   it('finds a published cat by its es slug', async () => {
-    await createCat(ctx.db, baseInput({ slugCa: 'misi', slugEs: 'misi-es' }), 'a@b.org');
+    await createCat(
+      ctx.db,
+      baseInput({ slugCa: 'misi', slugEs: 'misi-es' }),
+      'a@b.org'
+    );
     const found = await getCatBySlug(ctx.db, 'es', 'misi-es');
     expect(found?.slugEs).toBe('misi-es');
   });
@@ -123,12 +135,22 @@ describe('listPublishedCats', () => {
   it('excludes unpublished cats and orders by sortOrder then nameCa', async () => {
     await createCat(
       ctx.db,
-      baseInput({ slugCa: 'zorro', slugEs: 'zorro', nameCa: 'Zorro', sortOrder: 0 }),
+      baseInput({
+        slugCa: 'zorro',
+        slugEs: 'zorro',
+        nameCa: 'Zorro',
+        sortOrder: 0,
+      }),
       'a@b.org'
     );
     await createCat(
       ctx.db,
-      baseInput({ slugCa: 'anna', slugEs: 'anna', nameCa: 'Anna', sortOrder: 0 }),
+      baseInput({
+        slugCa: 'anna',
+        slugEs: 'anna',
+        nameCa: 'Anna',
+        sortOrder: 0,
+      }),
       'a@b.org'
     );
     await createCat(

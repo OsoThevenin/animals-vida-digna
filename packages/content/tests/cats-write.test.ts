@@ -1,8 +1,8 @@
 import { sql } from 'drizzle-orm';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { setupTestDb, type TestDb } from './helpers/db';
 import { createCat, deleteCat, getCatById, updateCat } from '../src/cats';
 import type { CatInput } from '../src/validate';
+import { setupTestDb, type TestDb } from './helpers/db';
 
 let ctx: TestDb;
 
