@@ -1,0 +1,9 @@
+name = "avd-content-test"
+compatibility_date = "2025-08-15"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "avd-content-test"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "./migrations"

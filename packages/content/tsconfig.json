@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "moduleResolution": "bundler",
-    "noEmit": true
+    "noEmit": true,
+    "types": ["@cloudflare/workers-types"]
   },
-  "include": ["src/**/*", "tests/**/*"]
+  "include": ["src/**/*", "scripts/**/*", "tests/**/*"]
 }

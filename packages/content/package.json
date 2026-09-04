@@ -4,15 +4,33 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts",
+    "./cats": "./src/cats.ts",
+    "./validate": "./src/validate.ts",
+    "./localize": "./src/localize.ts",
+    "./image-url": "./src/image-url.ts"
   },
   "scripts": {
+    "build": "echo 'no build step'",
     "test": "vitest run",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "seed:generate": "npx tsx scripts/seed-from-yaml.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "nanoid": "^6.0.1",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260904.1",
     "@types/node": "^24.12.0",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.23.13",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.0",
+    "wrangler": "^4.75.0",
+    "yaml": "^2.9.0"
   }
 }
