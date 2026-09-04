@@ -8,11 +8,13 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
+    "check": "turbo run check",
     "lint": "biome check .",
     "format": "biome format --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.7",
+    "astro": "^5.18.1",
     "turbo": "^2.5.0",
     "typescript": "^5.9.3"
   },
