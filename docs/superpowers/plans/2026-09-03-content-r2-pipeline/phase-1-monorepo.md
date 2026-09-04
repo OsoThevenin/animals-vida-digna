@@ -230,7 +230,7 @@ be redone anyway once `apps/web` and `packages/content` exist).
   `@avd/content` to as a dependency, and that Task 9's Workers Builds "Root
   directory" setting points at.
 
-- [ ] **Step 1: Create the `apps/web` directory and move files with `git mv`**
+- [x] **Step 1: Create the `apps/web` directory and move files with `git mv`**
 
 Run each of these from the repo root (do not `cd`):
 
@@ -253,7 +253,7 @@ any build or test path (it documents Cloudflare Worker secrets for local
 `wrangler dev`, which Phase 4 will need for `apps/admin` too), and moving it
 is not required by any test in this phase. Leave it in place.
 
-- [ ] **Step 2: Rewrite `apps/web/tsconfig.json` to extend the shared base**
+- [x] **Step 2: Rewrite `apps/web/tsconfig.json` to extend the shared base**
 
 ```json
 {
@@ -266,7 +266,7 @@ is not required by any test in this phase. Leave it in place.
 }
 ```
 
-- [ ] **Step 3: Create `apps/web/package.json`**
+- [x] **Step 3: Create `apps/web/package.json`**
 
 ```json
 {
@@ -324,7 +324,7 @@ version even if a future package pins a different one — today they match
 (`^5.9.3`), so pnpm hoists a single copy and this is a no-op duplication, not
 a version fork.
 
-- [ ] **Step 4: Root-relative paths inside moved files — confirm none exist**
+- [x] **Step 4: Root-relative paths inside moved files — confirm none exist**
 
 Every path reference audited in Task 7 (`scripts/generate-settings.ts` uses
 `process.cwd()`, `tests/wrangler-config.test.ts` and
@@ -341,7 +341,7 @@ grep -rn "process.cwd()" apps/web/tests apps/web/src apps/web/scripts
 Expected: only the two files named above; both are already correct for
 running with cwd `apps/web` (Task 7 confirms in detail).
 
-- [ ] **Step 5: `pnpm install` to regenerate the lockfile against both workspace members declared so far**
+- [x] **Step 5: `pnpm install` to regenerate the lockfile against both workspace members declared so far**
 
 ```bash
 pnpm install
@@ -352,7 +352,7 @@ dependency error — a mis-typed version range is the only expected failure
 mode here since every dependency is copied verbatim from the pre-move root
 `package.json`.
 
-- [ ] **Step 6: Run the moved test suite from the root via the workspace filter**
+- [x] **Step 6: Run the moved test suite from the root via the workspace filter**
 
 ```bash
 pnpm --filter web test
@@ -363,7 +363,7 @@ as it did before the move, because no test content changed, only its
 location and the working directory Vitest runs from (`apps/web`, per pnpm's
 `--filter`, which `cd`s into the package directory).
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/web package.json pnpm-lock.yaml
