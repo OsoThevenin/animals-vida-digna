@@ -357,7 +357,7 @@ describe('resolveOptimizedImageSource', () => {
       imagesOrigin: 'https://images.animalsvidadigna.org',
     });
     expect(result.src).toBe(
-      'https://images.animalsvidadigna.org/cdn-cgi/image/width=1280,fit=cover,quality=80,format=auto,onerror=redirect/cats/abc123/img1.webp',
+      'https://images.animalsvidadigna.org/cdn-cgi/image/width=1280,fit=scale-down,quality=80,format=auto,onerror=redirect/cats/abc123/img1.webp',
     );
     expect(result.width).toBe(1280);
   });
@@ -370,7 +370,7 @@ describe('resolveOptimizedImageSource', () => {
       imagesOrigin: 'https://images.animalsvidadigna.org',
     });
     expect(result.src).toBe(
-      'https://images.animalsvidadigna.org/cdn-cgi/image/width=960,fit=cover,quality=80,format=auto,onerror=redirect/cats/abc123/img1.webp',
+      'https://images.animalsvidadigna.org/cdn-cgi/image/width=960,fit=scale-down,quality=80,format=auto,onerror=redirect/cats/abc123/img1.webp',
     );
     expect(result.width).toBe(960);
   });

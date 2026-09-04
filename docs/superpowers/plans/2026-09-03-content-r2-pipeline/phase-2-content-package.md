@@ -2197,9 +2197,21 @@ This mirrors `apps/web/src/lib/image-utils.ts` (`DEFAULT_WIDTHS`,
 `DEFAULT_SIZES`, `imageUrl`, `generateSrcset`) with two differences the spec
 requires: the R2-custom-domain origin is baked in as a default parameter
 instead of an `isDev` boolean, and the transform option string is
-`width=W,fit=cover,quality=80,format=auto,onerror=redirect` (order and
+`width=W,fit=scale-down,quality=80,format=auto,onerror=redirect` (order and
 `onerror=redirect` per the *Image URLs* contract) rather than
 `format=auto,fit=cover,width=W,quality=80`.
+
+> **Amended after Phase 0 (2026-09-04):** the fit mode is `scale-down`, not
+> `cover`. `imageUrl()` takes no height, and Cloudflare rejects `cover`
+> without one — the Phase 0 spike observed
+> `warning: cf-images 299 "cover fit mode needs both width and height"` on an
+> otherwise successful 200. `scale-down` resizes to the requested width,
+> preserves aspect ratio and never upscales, which is exactly what the edge
+> was already doing while silently ignoring `cover`. The spec's *Image URLs*
+> contract has been updated to match; see `phase-0-results.md`, *Findings
+> that change later phases* §1. Note that `apps/web/src/lib/image-utils.ts`
+> keeps its existing `format=auto,fit=cover,width=W,quality=80` shape for
+> site-relative static assets — that legacy path is untouched by this phase.
 
 **Phase 0 go/no-go check.** Before writing this task, open
 `docs/superpowers/plans/2026-09-03-content-r2-pipeline/phase-0-results.md`.
@@ -2273,7 +2285,7 @@ describe('imageUrl', () => {
   it('builds a /cdn-cgi/image/ URL against the default images origin', () => {
     const result = imageUrl('cats/cat_abc/img_xyz.webp', 640);
     expect(result).toBe(
-      'https://images.animalsvidadigna.org/cdn-cgi/image/width=640,fit=cover,quality=80,format=auto,onerror=redirect/cats/cat_abc/img_xyz.webp'
+      'https://images.animalsvidadigna.org/cdn-cgi/image/width=640,fit=scale-down,quality=80,format=auto,onerror=redirect/cats/cat_abc/img_xyz.webp'
     );
   });
 
@@ -2294,7 +2306,7 @@ describe('imageSrcset', () => {
       [320, 640, 960, 1280]
         .map(
           (w) =>
-            `https://images.animalsvidadigna.org/cdn-cgi/image/width=${w},fit=cover,quality=80,format=auto,onerror=redirect/cats/cat_abc/img_xyz.webp ${w}w`
+            `https://images.animalsvidadigna.org/cdn-cgi/image/width=${w},fit=scale-down,quality=80,format=auto,onerror=redirect/cats/cat_abc/img_xyz.webp ${w}w`
         )
         .join(', ')
     );
@@ -2347,7 +2359,7 @@ export function imageUrl(
   origin: string = DEFAULT_IMAGES_ORIGIN
 ): string {
   if (origin === DEFAULT_IMAGES_ORIGIN) {
-    return `${origin}/cdn-cgi/image/width=${width},fit=cover,quality=80,format=auto,onerror=redirect/${key}`;
+    return `${origin}/cdn-cgi/image/width=${width},fit=scale-down,quality=80,format=auto,onerror=redirect/${key}`;
   }
   return `${origin}/${key}`;
 }

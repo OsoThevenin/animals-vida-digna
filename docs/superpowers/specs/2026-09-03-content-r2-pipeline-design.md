@@ -254,7 +254,13 @@ export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 export function imageKey(catId: string, imageId: string): string;   // `cats/${catId}/${imageId}.webp`
 export function originalImageUrl(key: string, origin?: string): string;
 export function imageUrl(key: string, width: number, origin?: string): string;
-  // origin === DEFAULT_IMAGES_ORIGIN → `${origin}/cdn-cgi/image/width=${width},fit=cover,quality=80,format=auto,onerror=redirect/${key}`
+  // origin === DEFAULT_IMAGES_ORIGIN → `${origin}/cdn-cgi/image/width=${width},fit=scale-down,quality=80,format=auto,onerror=redirect/${key}`
+  // fit=scale-down, not cover: imageUrl() has no height, and Cloudflare rejects
+  // `cover` without one (`warning: cf-images 299 "cover fit mode needs both
+  // width and height"`, observed in Phase 0 Task 6 Step 2). scale-down resizes
+  // to the requested width, preserves aspect ratio and never upscales, which is
+  // what the edge was already doing when `cover` was silently ignored.
+  // See phase-0-results.md, "Findings that change later phases" §1.
   // any other origin (local dev)    → `${origin}/${key}`
 export function imageSrcset(key: string, widths?: number[], origin?: string): string;
 ```
