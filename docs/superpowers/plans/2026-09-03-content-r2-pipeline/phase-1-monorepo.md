@@ -596,7 +596,7 @@ git commit -m "feat(content): add @avd/content package skeleton"
   (Phase 2 replaces it with real imports of `@avd/content/cats` etc.
   directly where needed), so it is fine for this file to be short-lived.
 
-- [ ] **Step 1: Add the workspace dependency**
+- [x] **Step 1: Add the workspace dependency**
 
 Edit `apps/web/package.json`'s `dependencies` block to add:
 
@@ -608,7 +608,7 @@ Edit `apps/web/package.json`'s `dependencies` block to add:
 `@astrojs` and before `@keystatic`; the existing block is otherwise
 untouched.)
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 ```ts
 // apps/web/tests/content-package.test.ts
@@ -622,7 +622,7 @@ describe('apps/web ↔ @avd/content workspace resolution', () => {
 });
 ```
 
-- [ ] **Step 3: Run the test to verify it fails**
+- [x] **Step 3: Run the test to verify it fails**
 
 ```bash
 pnpm install
@@ -631,14 +631,14 @@ pnpm --filter web test -- content-package
 
 Expected: FAIL — `Cannot find module '../src/lib/content-package'`.
 
-- [ ] **Step 4: Write the minimal implementation**
+- [x] **Step 4: Write the minimal implementation**
 
 ```ts
 // apps/web/src/lib/content-package.ts
 export { CONTENT_PACKAGE } from '@avd/content';
 ```
 
-- [ ] **Step 5: Run the test to verify it passes**
+- [x] **Step 5: Run the test to verify it passes**
 
 ```bash
 pnpm --filter web test -- content-package
@@ -646,7 +646,7 @@ pnpm --filter web test -- content-package
 
 Expected: PASS.
 
-- [ ] **Step 6: Prove resolution also works through `astro build`, not just Vitest**
+- [x] **Step 6: Prove resolution also works through `astro build`, not just Vitest**
 
 Vitest and Astro/Vite use separate resolution logic; a workspace `exports`
 map can resolve in one and not the other if `package.json#exports` conditions
@@ -672,7 +672,7 @@ directly. Do not add an artificial import into a page just to make the grep
 match; that would be scaffolding with no product purpose. Treat Step 6 as
 informational and move on regardless of its outcome.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/web/package.json apps/web/src/lib/content-package.ts apps/web/tests/content-package.test.ts pnpm-lock.yaml
