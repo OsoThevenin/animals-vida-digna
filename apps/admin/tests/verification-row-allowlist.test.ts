@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { getPlatformProxy } from 'wrangler';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { getPlatformProxy } from 'wrangler';
 import { createAuth } from '../src/lib/auth';
 
 /**
@@ -99,7 +99,10 @@ describe('POST /email-otp/send-verification-otp against local D1', () => {
   it('never writes a verification row for a non-allowlisted address, and still does for an allowlisted one', async () => {
     expect(await countVerificationRows(db)).toBe(0);
 
-    const strangerResponse = await sendVerificationOtp(env, 'stranger@example.com');
+    const strangerResponse = await sendVerificationOtp(
+      env,
+      'stranger@example.com'
+    );
     const strangerBody = await strangerResponse.clone().json();
     expect(await countVerificationRows(db)).toBe(0);
 
