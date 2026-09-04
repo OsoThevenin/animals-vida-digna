@@ -78,7 +78,11 @@ export function localizeCat(
     coverImage: cat.coverImage
       ? toLocalizedImage(cat.coverImage, locale)
       : null,
-    gallery: cat.images.map((image) => toLocalizedImage(image, locale)),
+    // M8: exclude the cover image from the gallery -- otherwise it renders
+    // twice on the detail page (once as the hero, once as a gallery tile).
+    gallery: cat.images
+      .filter((image) => image.id !== cat.coverImageId)
+      .map((image) => toLocalizedImage(image, locale)),
     seo: buildSeo(cat, locale),
   };
 }

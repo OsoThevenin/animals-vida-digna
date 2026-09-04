@@ -98,13 +98,10 @@ describe('localizeCat', () => {
       width: 800,
       height: 600,
     });
+    // M8: the gallery must exclude the cover image (img_1, coverImageId).
+    // Otherwise the cat's cover renders twice on the detail page -- once as
+    // the hero image, once again as the first gallery tile.
     expect(result.gallery).toEqual([
-      {
-        key: 'cats/cat_1/img_1.webp',
-        alt: 'Lluna asseguda',
-        width: 800,
-        height: 600,
-      },
       {
         key: 'cats/cat_1/img_2.webp',
         alt: 'Lluna jugant',
@@ -126,7 +123,9 @@ describe('localizeCat', () => {
     expect(result.slug).toBe('luna');
     expect(result.description).toBe('# Luna\n\nUna gata muy bonita.');
     expect(result.coverImage?.alt).toBe('Luna sentada');
-    expect(result.gallery[1].alt).toBe('Luna jugando');
+    // img_1 is the cover (excluded from the gallery, see M8 fix above), so
+    // img_2 is the only -- i.e. first -- gallery entry.
+    expect(result.gallery[0].alt).toBe('Luna jugando');
     expect(result.seo).toEqual({
       title: 'Adopta a Luna',
       description: 'SEO ES',
@@ -143,6 +142,19 @@ describe('localizeCat', () => {
     const cat = makeCat({ images: [], coverImage: null, coverImageId: null });
     const result = localizeCat(cat, 'ca');
     expect(result.gallery).toEqual([]);
+  });
+
+  it('returns an empty gallery array when the only image is the cover', () => {
+    const cat = makeCat();
+    const single = { ...cat, images: [cat.images[0]] };
+    const result = localizeCat(single, 'ca');
+    expect(result.gallery).toEqual([]);
+  });
+
+  it('includes all images in the gallery when the cat has no cover set', () => {
+    const cat = makeCat({ coverImageId: null, coverImage: null });
+    const result = localizeCat(cat, 'ca');
+    expect(result.gallery).toHaveLength(2);
   });
 
   it('returns null seo when both title and description are empty for the locale', () => {
