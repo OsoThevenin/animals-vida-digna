@@ -23,10 +23,25 @@ const db = requireDb(Astro.locals);
 const catRow = await getCatBySlug(db, locale, slug);
 
 if (!catRow) {
-  return Astro.redirect('/cats');
+  // M5: a real 404, not a redirect. The phase plan called for redirecting to
+  // /cats, but that turns unpublishing an adopted cat's indexed URL into a
+  // soft-404: Search Console flags it, and visitors land on the listing with
+  // no explanation of what happened. This is a deliberate deviation from the
+  // plan -- see the phase doc.
+  return new Response('Not found', { status: 404 });
 }
 
 const cat = localizeCat(catRow, locale);
+
+// M9: every visitor without this header costs a Worker invocation plus 2 D1
+// queries (getCatBySlug + attachImages), against a 100k/day Worker and
+// 5M-reads/day D1 free-tier budget. 60s is short enough that a volunteer's
+// edit in the admin is live for the next visitor within a minute -- far
+// shorter than the sitemap's 3600s, because sitemap freshness doesn't block
+// an adopter seeing a status change -- while still absorbing bursts of
+// repeat hits (e.g. a shared social link) as edge cache hits instead of
+// fresh D1 reads.
+Astro.response.headers.set('Cache-Control', 'public, max-age=60');
 
 const descriptionHtml = renderMarkdocSource(cat.description ?? '');
 

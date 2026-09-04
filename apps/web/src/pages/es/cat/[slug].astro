@@ -23,10 +23,15 @@ const db = requireDb(Astro.locals);
 const catRow = await getCatBySlug(db, locale, slug);
 
 if (!catRow) {
-  return Astro.redirect('/es/cats');
+  // M5: see src/pages/cat/[slug].astro for why this is a real 404, not a
+  // redirect -- deliberate deviation from the phase plan.
+  return new Response('Not found', { status: 404 });
 }
 
 const cat = localizeCat(catRow, locale);
+
+// M9: see src/pages/cat/[slug].astro for why 60s.
+Astro.response.headers.set('Cache-Control', 'public, max-age=60');
 
 const descriptionHtml = renderMarkdocSource(cat.description ?? '');
 
