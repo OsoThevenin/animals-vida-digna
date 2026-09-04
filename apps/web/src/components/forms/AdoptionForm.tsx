@@ -215,7 +215,7 @@ export default function AdoptionForm({ locale, translations: t, catName }: Props
       <button
         type="submit"
         disabled={status === 'submitting'}
-        class="w-full rounded-lg bg-accent px-6 py-3 font-semibold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60"
+        class="w-full rounded-lg bg-accent px-6 py-3 font-semibold text-text transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {status === 'submitting' ? t.sending : t.submit}
       </button>

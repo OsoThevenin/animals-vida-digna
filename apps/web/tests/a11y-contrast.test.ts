@@ -174,3 +174,48 @@ describe('WCAG AA compliance for brand color pairs', () => {
     expect(contrastRatio(colors.accent, colors.surface)).toBeLessThan(3);
   });
 });
+
+describe('AdoptionForm submit button contrast (WCAG AA fix)', () => {
+  // AdoptionForm renders the primary conversion control on cat detail
+  // pages. It used to render white text on `bg-accent`, measured at
+  // ~2.03:1 -- well under the 4.5:1 AA minimum for normal text (the button
+  // label is well under the 18.66px-bold / 24px large-text threshold, so
+  // the 3:1 large-text exception doesn't apply either). The fix swaps the
+  // text color to `text-text` (#2D1B0E), the same dark-brown-on-accent
+  // pairing already used everywhere else bg-accent appears as a button
+  // background (Header, Footer, DonateSticky, the landing CTAs) -- so this
+  // also confirms the fix doesn't introduce a new, unrelated color.
+  const adoptionFormSource = readFileSync(
+    join(process.cwd(), 'src/components/forms/AdoptionForm.tsx'),
+    'utf-8'
+  );
+
+  function extractSubmitButtonClass(source: string): string {
+    const match = source.match(
+      /<button\s+type="submit"[\s\S]*?class="([^"]+)"/
+    );
+    if (!match) {
+      throw new Error('could not find the submit <button> in AdoptionForm.tsx');
+    }
+    return match[1];
+  }
+
+  it('white on accent (the pre-fix pairing) FAILS 4.5:1', () => {
+    const ratio = contrastRatio('#FFFFFF', colors.accent);
+    expect(ratio).toBeCloseTo(2.03, 1);
+    expect(ratio).toBeLessThan(4.5);
+  });
+
+  it('text on accent (the fixed pairing) PASSES 4.5:1', () => {
+    expect(contrastRatio(colors.text, colors.accent)).toBeGreaterThanOrEqual(
+      4.5
+    );
+  });
+
+  it("the submit button's class list does not use text-white on bg-accent", () => {
+    const buttonClass = extractSubmitButtonClass(adoptionFormSource);
+    expect(buttonClass).toMatch(/\bbg-accent\b/);
+    expect(buttonClass).not.toMatch(/\btext-white\b/);
+    expect(buttonClass).toMatch(/\btext-text\b/);
+  });
+});
