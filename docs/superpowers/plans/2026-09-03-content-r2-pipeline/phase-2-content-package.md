@@ -136,6 +136,38 @@ If any command reports a newer version than pinned below, use the newer patch/mi
 
 - [x] **Step 3: Write `packages/content/tsconfig.json`**
 
+> **What actually shipped** (code-review finding F10, 2026-09-04): the
+> Phase-1 skeleton had already given this package a `tsconfig.json` that
+> extends the repo's shared `tsconfig.base.json` instead of the standalone
+> block originally sketched below, so this step kept that base and only
+> layered package-specific options on top. It also adds `scripts/**/*` to
+> `include` (the seed script needs type-checking too) and `@types/node` as a
+> devDependency (Task 7's `scripts/seed-from-yaml.ts` uses Node's `fs`/`path`
+> APIs). The real file is:
+>
+> ```json
+> {
+>   "extends": "../../tsconfig.base.json",
+>   "compilerOptions": {
+>     "moduleResolution": "bundler",
+>     "noEmit": true,
+>     "types": ["@cloudflare/workers-types"]
+>   },
+>   "include": ["src/**/*", "scripts/**/*", "tests/**/*"]
+> }
+> ```
+>
+> Fix commit `e479636` later resolved two `tsc --noEmit` errors this config
+> surfaced under `pnpm turbo check`: `schema.ts`'s circular `cats`/
+> `cat_images` FK reference callbacks needed an explicit `AnySQLiteColumn`
+> return type, and `cats.ts`/`apps/web/src/lib/db.ts` needed an explicit
+> `import type { D1Database } from '@cloudflare/workers-types'` (the ambient
+> global from this package's own `types` array wasn't in scope once
+> `apps/web`'s `tsc` program pulled `cats.ts` in as a dependency).
+>
+> The block below is the original sketch, kept for history; it was not what
+> got written to disk.
+
 ```json
 {
   "compilerOptions": {
