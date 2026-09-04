@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CAT_STATUS_LABELS_CA } from '../src/pages/cats/status-labels';
+import { CAT_STATUS_LABELS_CA } from '../src/lib/cat-status-labels';
 
 describe('CAT_STATUS_LABELS_CA', () => {
   it('has a Catalan label for every cat status', () => {

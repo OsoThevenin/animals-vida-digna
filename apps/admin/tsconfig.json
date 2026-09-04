@@ -4,6 +4,6 @@
     "jsxImportSource": "react",
     "types": ["@cloudflare/workers-types"]
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*", "tests/**/*", "worker-configuration.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

@@ -77,16 +77,12 @@
       "indexes": {
         "cat_images_r2_key_idx": {
           "name": "cat_images_r2_key_idx",
-          "columns": [
-            "r2_key"
-          ],
+          "columns": ["r2_key"],
           "isUnique": true
         },
         "cat_images_cat_id_idx": {
           "name": "cat_images_cat_id_idx",
-          "columns": [
-            "cat_id"
-          ],
+          "columns": ["cat_id"],
           "isUnique": false
         }
       },
@@ -95,12 +91,8 @@
           "name": "cat_images_cat_id_cats_id_fk",
           "tableFrom": "cat_images",
           "tableTo": "cats",
-          "columnsFrom": [
-            "cat_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cat_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -416,16 +408,12 @@
       "indexes": {
         "cats_slug_ca_idx": {
           "name": "cats_slug_ca_idx",
-          "columns": [
-            "slug_ca"
-          ],
+          "columns": ["slug_ca"],
           "isUnique": true
         },
         "cats_slug_es_idx": {
           "name": "cats_slug_es_idx",
-          "columns": [
-            "slug_es"
-          ],
+          "columns": ["slug_es"],
           "isUnique": true
         }
       },
@@ -434,12 +422,8 @@
           "name": "cats_cover_image_id_cat_images_id_fk",
           "tableFrom": "cats",
           "tableTo": "cat_images",
-          "columnsFrom": [
-            "cover_image_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cover_image_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -554,17 +538,12 @@
       "indexes": {
         "account_issuer_accountId_uidx": {
           "name": "account_issuer_accountId_uidx",
-          "columns": [
-            "issuer",
-            "account_id"
-          ],
+          "columns": ["issuer", "account_id"],
           "isUnique": true
         },
         "account_userId_idx": {
           "name": "account_userId_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         }
       },
@@ -573,12 +552,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -622,9 +597,7 @@
       "indexes": {
         "rate_limit_key_unique": {
           "name": "rate_limit_key_unique",
-          "columns": [
-            "key"
-          ],
+          "columns": ["key"],
           "isUnique": true
         }
       },
@@ -697,16 +670,12 @@
       "indexes": {
         "session_token_unique": {
           "name": "session_token_unique",
-          "columns": [
-            "token"
-          ],
+          "columns": ["token"],
           "isUnique": true
         },
         "session_userId_idx": {
           "name": "session_userId_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         }
       },
@@ -715,12 +684,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -788,9 +753,7 @@
       "indexes": {
         "user_email_unique": {
           "name": "user_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },
@@ -850,9 +813,7 @@
       "indexes": {
         "verification_identifier_idx": {
           "name": "verification_identifier_idx",
-          "columns": [
-            "identifier"
-          ],
+          "columns": ["identifier"],
           "isUnique": false
         }
       },
