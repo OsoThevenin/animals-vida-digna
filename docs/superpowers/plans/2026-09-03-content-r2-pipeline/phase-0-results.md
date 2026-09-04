@@ -62,6 +62,65 @@ affect the verdict (only Steps 1–2 gate it). Keep `onerror=redirect` in the
 URL contract — it costs nothing — but do not rely on it as a proven
 behaviour.
 
+### 3. Restricting Sources to the images subdomain alone breaks apex transforms (affects Phase 3)
+
+The maintainer first set zone → Images → Transformations → **Sources** to
+*Specified origins* listing only `images.animalsvidadigna.org`. That is correct
+for the R2 pipeline but silently breaks the site's *own* static-asset
+transforms, because the panel's "Specified origins" mode does not include the
+apex or other subdomains:
+
+```
+$ curl -sI "https://animalsvidadigna.org/cdn-cgi/image/width=320,format=auto/images/logo.webp"
+HTTP/2 403
+cf-resized: err=9401          ← origin not allowed
+
+$ curl -sI "https://animalsvidadigna.org/images/logo.webp"
+HTTP/2 200                     ← the untransformed original is unaffected
+```
+
+No visitor saw a broken image, because the live site currently emits no
+`/cdn-cgi/image/` URLs at all (verified on `/`, `/cats`, `/contact`, `/es`).
+But the spec keeps `OptimizedImage.astro`'s existing behaviour for
+site-relative static assets — hero, logo, landing images — which build
+*apex-relative* transform URLs. Phase 3 would therefore have shipped a hero
+image that fails to load, and no unit test would catch it, because the tests
+assert the URL string rather than whether Cloudflare accepts the origin.
+
+**Resolved 2026-09-04:** switched to **"This zone only"**, which allows
+`animalsvidadigna.org` and `*.animalsvidadigna.org` in one setting — covering
+both the apex assets and the R2 subdomain, while still refusing arbitrary
+third-party sources. Re-verified after the change: the apex returns `200` with
+`cf-resized: internal=ok`, and `images.animalsvidadigna.org` still returns a
+640px AVIF at 2431 bytes.
+
+### 4. Quota abuse is a denial-of-service risk, not a billing risk
+
+Recorded because the maintainer asked whether the transform endpoint needed a
+secret. It does not, and one would not work: transform URLs appear verbatim in
+public HTML `<img src>` attributes, and `/cdn-cgi/` is handled by Cloudflare's
+edge *before* any Worker runs, so there is nothing to verify a signature in
+without putting a Worker in front of every image request — which the spec
+rejected for the same reason it rejected `assets.run_worker_first`.
+
+Per the Images pricing documentation, exceeding 5,000 unique transformations on
+the Free plan returns error `9422` for new transformations, keeps serving
+cached ones, and **"You will not be charged for exceeding the limits in the
+Free plan."** R2, the only usage-billed product on this account, charges no
+egress and gives 10M Class B operations per month, and objects are served
+`max-age=31536000, immutable` so repeat requests are cache hits that never
+reach the bucket.
+
+The real exposure is an attacker walking the `width` parameter to exhaust the
+month's uniques, after which images degrade to full-size originals via
+`onerror=redirect` — a Lighthouse regression, not an invoice. Mitigations, in
+order of value: the Sources restriction above (already in place), and a WAF
+custom rule allowlisting the exact transform parameter strings. Note the Free
+plan has **no regex support** in custom rules and a 5-rule limit, so the rule
+must be written with `starts_with` alternatives rather than a pattern, and
+there is no *Log* action available to trial it safely — it must be verified
+with live requests immediately after deployment.
+
 ## Plan state
 
 | Check | Result |
@@ -100,7 +159,7 @@ what Phase 1/2 `wrangler.toml` uses. The suggestion is ignored.
 | Field | Value |
 |---|---|
 | Transformations enabled for `animalsvidadigna.org` | yes — enabled by the maintainer during this phase |
-| Allowed origins / Sources listed | maintainer to confirm `images.animalsvidadigna.org` is listed explicitly; per `research/cloudflare-platform-facts.md` §5 an apex entry does not cover subdomains. The checks below passed regardless, which suggests same-zone R2 custom domains are permitted without an explicit source entry. |
+| Allowed origins / Sources listed | **"This zone only"** (covers `animalsvidadigna.org` and `*.animalsvidadigna.org`) — see *Findings* §3 for why the initial "Specified origins" setting had to be changed. |
 
 ## Test object
 
@@ -203,10 +262,10 @@ model is that two *widths* of the same object count as two uniques and that
 
 | Check | Result |
 |---|---|
-| `animalsvidadigna.org` verified in Resend | **maintainer to confirm** at `resend.com/domains` |
+| `animalsvidadigna.org` verified in Resend | yes — implied by the accepted send below |
 | `RESEND_API_KEY` present (`wrangler secret list`) | **yes** — present on Worker `animals-vida-digna` alongside `KEYSTATIC_SECRET` |
-| Test email sent from `no-reply@animalsvidadigna.org` | **blocked** — the key is not retrievable (`wrangler secret list` returns names only, by design) and no gitignored `.dev.vars` exists locally. Per this task's own instruction the key must never be pasted into an agent session, so the maintainer must run the `curl` in Task 7 Step 3 from their own shell. |
-| Test email received | pending the above |
+| Test email sent from `no-reply@animalsvidadigna.org` | **yes** — the maintainer ran Task 7 Step 3 from their own shell on 2026-09-04 (the key is not retrievable by an agent and must never enter a session). The API returned a JSON body containing an `"id"` UUID and no `"statusCode"` error field, which is the documented success shape. |
+| Test email received | not separately confirmed — API acceptance is not proof of inbox delivery. Phase 4's better-auth `emailOTP` login depends on this sender, so confirm arrival before Phase 4 rather than after. |
 
 ## Admin hostname reservation
 
