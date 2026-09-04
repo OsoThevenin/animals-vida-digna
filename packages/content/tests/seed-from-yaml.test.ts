@@ -4,10 +4,14 @@ import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { generateSeedSql } from '../scripts/seed-from-yaml';
 
-const CATS_DIR = resolve(
-  import.meta.dirname,
-  '../../../apps/web/src/content/cats'
-);
+// Phase 3 (docs/superpowers/plans/2026-09-03-content-r2-pipeline/
+// phase-3-web-on-d1.md, Task 8) deletes apps/web/src/content/cats now that
+// the public site reads exclusively from D1. These tests exercise the pure
+// generateSeedSql(catsDir) function against real fixture data, so the
+// fixtures were copied here (packages/content/tests/fixtures/cats) rather
+// than deleted along with the Keystatic-facing directory -- this package
+// owns the seed script and its tests, not apps/web.
+const CATS_DIR = resolve(import.meta.dirname, 'fixtures/cats');
 
 // The full, fixed column-list header every generated cats INSERT starts
 // with (see buildCatInsert's `columns` array). Matching this exact ~400

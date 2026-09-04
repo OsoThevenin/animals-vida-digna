@@ -1,11 +1,16 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { eq, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { generateSeedSql } from '../scripts/seed-from-yaml';
 import * as schema from '../src/schema';
 import { setupTestDb, type TestDb } from './helpers/db';
+
+// See tests/seed-from-yaml.test.ts for why this points at the fixtures
+// copied into this package rather than the now-deleted
+// apps/web/src/content/cats (Phase 3, Task 8).
+const CATS_DIR = resolve(import.meta.dirname, 'fixtures/cats');
 
 let ctx: TestDb;
 
@@ -47,7 +52,7 @@ async function applySeedSql(seedSql: string): Promise<void> {
 
 describe('seed re-runnability (F2)', () => {
   it('leaves exactly one row per cat and per image after applying the generated seed twice', async () => {
-    const seedSql = generateSeedSql();
+    const seedSql = generateSeedSql(CATS_DIR);
 
     await applySeedSql(seedSql);
     const afterFirst = await ctx.db.select().from(schema.cats);

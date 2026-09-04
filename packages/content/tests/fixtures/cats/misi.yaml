@@ -1,0 +1,47 @@
+slug_ca: misi
+slug_es: misi
+name_ca: Misi
+name_es: Misi
+race_ca: Europeu
+race_es: Europeo
+status: available
+age: 3
+gender: female
+size: medium
+personality:
+  - affectionate
+  - calm
+goodWith:
+  - children
+  - other-cats
+healthStatus: healthy
+vaccinated: true
+microchipped: true
+sterilized: true
+weight: 4.2
+rescueDate: '2024-06-15'
+adoptionDate: null
+specialNeeds_ca: ''
+specialNeeds_es: ''
+observations_ca: ''
+observations_es: ''
+coverImage:
+  src: null
+  alt_ca: Misi, gata europeu disponible per adopcio
+  alt_es: Misi, gata europeo disponible para adopcion
+gallery: []
+shortDescription_ca: >-
+  Una gata dolca i tranquil-la que busca una llar on rebre molt d'amor. Es
+  porta be amb nens i altres gats.
+shortDescription_es: >-
+  Una gata dulce y tranquila que busca un hogar donde recibir mucho amor. Se
+  lleva bien con ninos y otros gatos.
+description_ca: null
+description_es: null
+featured: true
+order: 1
+seo:
+  title_ca: Adopta la Misi - Animals Vida Digna
+  title_es: Adopta a Misi - Animals Vida Digna
+  description_ca: Misi es una gata europeu de 3 anys, dolca i tranquil-la, disponible per adopcio.
+  description_es: Misi es una gata europeo de 3 anos, dulce y tranquila, disponible para adopcion.
