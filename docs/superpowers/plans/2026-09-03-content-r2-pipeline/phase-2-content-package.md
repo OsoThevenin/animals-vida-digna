@@ -82,7 +82,7 @@ apps/web/
 - Consumes: nothing (first task).
 - Produces: the `@avd/content` package manifest and TS config every later task's imports and `pnpm --filter @avd/content <script>` commands rely on; the `drizzle.config.ts` Task 3 runs `drizzle-kit generate` against; the `wrangler.test.toml` every test in Tasks 3–4, 7 loads through `getPlatformProxy`.
 
-- [ ] **Step 1: Confirm package versions**
+- [x] **Step 1: Confirm package versions**
 
 ```bash
 npm view drizzle-orm version    # 0.45.2 (confirmed 2026-09-03)
@@ -96,7 +96,7 @@ npm view @cloudflare/workers-types version  # 5.20260903.1
 
 If any command reports a newer version than pinned below, use the newer patch/minor version (same major) and note the change in the commit message. **Exception: `zod` stays on the 3.x line regardless of what `npm view zod version` reports** — `astro@5.18.1` depends on `zod ^3.25.76` and types Astro Actions' `defineAction({ input })` against `astro/zod` (zod 3); a zod-4 `catInputSchema` from `@avd/content` is not assignable there and breaks Phase 5. Only bump within `^3.25.76`.
 
-- [ ] **Step 2: Write `packages/content/package.json`**
+- [x] **Step 2: Write `packages/content/package.json`**
 
 ```json
 {
@@ -134,7 +134,7 @@ If any command reports a newer version than pinned below, use the newer patch/mi
 }
 ```
 
-- [ ] **Step 3: Write `packages/content/tsconfig.json`**
+- [x] **Step 3: Write `packages/content/tsconfig.json`**
 
 ```json
 {
@@ -155,7 +155,7 @@ If any command reports a newer version than pinned below, use the newer patch/mi
 }
 ```
 
-- [ ] **Step 4: Write `packages/content/drizzle.config.ts`**
+- [x] **Step 4: Write `packages/content/drizzle.config.ts`**
 
 ```ts
 import { defineConfig } from 'drizzle-kit';
@@ -167,7 +167,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 5: Write `packages/content/wrangler.test.toml`**
+- [x] **Step 5: Write `packages/content/wrangler.test.toml`**
 
 This is a test-only Wrangler config: it declares the same `DB` binding name as the
 real `apps/web/wrangler.toml` and `apps/admin/wrangler.toml` will (Phase 4), but
@@ -188,7 +188,7 @@ database_id = "00000000-0000-0000-0000-000000000000"
 migrations_dir = "./migrations"
 ```
 
-- [ ] **Step 6: Write `packages/content/vitest.config.ts`**
+- [x] **Step 6: Write `packages/content/vitest.config.ts`**
 
 D1 migrations plus several sequential writes per test file are slower than a
 pure-function test; raise the timeout so CI does not flake.
@@ -205,13 +205,13 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 7: Install dependencies**
+- [x] **Step 7: Install dependencies**
 
 ```bash
 pnpm install
 ```
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add packages/content/package.json packages/content/tsconfig.json \
@@ -237,7 +237,7 @@ git commit -m "chore(content): add drizzle, zod, nanoid, yaml deps and test D1 c
   `text`/`integer`; only `cats.ts` (Task 4) and `scripts/seed-from-yaml.ts` (Task 7)
   import `catInputSchema` and `CatInput`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // packages/content/tests/validate.test.ts
@@ -486,12 +486,12 @@ describe('slugify', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm --filter @avd/content exec vitest run tests/validate.test.ts`
 Expected: FAIL — `Cannot find module '../src/validate'`
 
-- [ ] **Step 3: Write `packages/content/src/validate.ts`**
+- [x] **Step 3: Write `packages/content/src/validate.ts`**
 
 ```ts
 import { z } from 'zod';
@@ -605,12 +605,12 @@ export function slugify(value: string): string {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm --filter @avd/content exec vitest run tests/validate.test.ts`
 Expected: PASS (24 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/content/src/validate.ts packages/content/tests/validate.test.ts
@@ -634,7 +634,7 @@ git commit -m "feat(content): add cat enum consts, catInputSchema and slugify"
   `tests/helpers/db.ts` produces `setupTestDb(): Promise<{ db: Db; dispose: () => Promise<void> }>`,
   used by every subsequent D1-backed test file (Tasks 4, 7).
 
-- [ ] **Step 1: Write `packages/content/src/schema.ts`**
+- [x] **Step 1: Write `packages/content/src/schema.ts`**
 
 The two tables reference each other (`cats.cover_image_id` → `cat_images.id`,
 `cat_images.cat_id` → `cats.id`). Both `references()` calls use an arrow
@@ -760,7 +760,7 @@ export const catImages = sqliteTable(
 
 `status`, `gender`, `size`, and `healthStatus` carry `.$type<CatStatus>()`, `.$type<CatGender>()`, `.$type<CatSize>()` and `.$type<CatHealthStatus>()` respectively, and `personality`/`goodWith` carry `.$type<CatPersonality[]>()` / `.$type<CatGoodWith[]>()` — all imported from `./validate` (Task 2), which must be committed before this task's code compiles. `.$type<T>()` is a **type-only** annotation: it tells Drizzle's inferred `Cat`/`CatImage` types (Task 4) to narrow these columns from `string`/`string[]` to the literal unions `CatStatus | ...` instead, but it emits no SQL and adds no runtime check — `drizzle-kit generate`'s output in Step 2 below is unaffected by it, so `migrations/0000_cats.sql` is unchanged from the version shown there. A malformed value written outside this repository's own `cats.ts` (e.g. a stray D1 console edit) can still violate the type at read time; the zod `catInputSchema` (Task 2) is still what enforces validity at write time.
 
-- [ ] **Step 2: Generate the migration**
+- [x] **Step 2: Generate the migration**
 
 ```bash
 pnpm --filter @avd/content exec drizzle-kit generate --name cats
@@ -862,14 +862,14 @@ is present, keep the generated file as-is — it is equivalent SQL. If a column
 is missing or a type/default differs from the spec table in
 `2026-09-03-content-r2-pipeline-design.md`, fix `schema.ts` and regenerate.
 
-- [ ] **Step 3: Delete and regenerate if `age`/`weight`/dates show a stray default**
+- [x] **Step 3: Delete and regenerate if `age`/`weight`/dates show a stray default**
 
 `age`, `weight`, `rescue_date`, `adoption_date`, `cover_image_id` must have
 **no** `DEFAULT` clause and **no** `NOT NULL` (they are nullable). If
 `drizzle-kit` emits one, it means a `.default()` or `.notNull()` was left on
 that column in `schema.ts` — remove it and rerun Step 2.
 
-- [ ] **Step 4: Write the shared D1 test helper**
+- [x] **Step 4: Write the shared D1 test helper**
 
 ```ts
 // packages/content/tests/helpers/db.ts
@@ -940,7 +940,7 @@ export async function setupTestDb(): Promise<TestDb> {
 > `wrangler.toml`-driven pool replacing plain `vitest`) — only take it if the
 > primary approach above demonstrably fails after Step 5's test run.
 
-- [ ] **Step 5: Write the failing test**
+- [x] **Step 5: Write the failing test**
 
 Querying `sqlite_master` through Drizzle's high-level API is awkward before
 `cats.ts` exists (Task 4 defines `createDb`, which this test would otherwise
@@ -1006,17 +1006,17 @@ describe('D1 migration', () => {
 });
 ```
 
-- [ ] **Step 6: Run test to verify it fails**
+- [x] **Step 6: Run test to verify it fails**
 
 Run: `pnpm --filter @avd/content exec vitest run tests/schema-migration.test.ts`
 Expected: FAIL — `migrations/0000_cats.sql` does not exist yet (or `src/schema.ts` / `src/cats.ts` missing, since `tests/helpers/db.ts` imports `../../src/cats` — `cats.ts` is created in Task 4; for this task, do not import `tests/helpers/db.ts` from `schema-migration.test.ts`, use the inline `getPlatformProxy` version shown above so this task is self-contained).
 
-- [ ] **Step 7: Run Steps 1–3 (schema + generate) then rerun the test**
+- [x] **Step 7: Run Steps 1–3 (schema + generate) then rerun the test**
 
 Run: `pnpm --filter @avd/content exec vitest run tests/schema-migration.test.ts`
 Expected: PASS (2 tests)
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add packages/content/src/schema.ts packages/content/migrations \
@@ -1046,7 +1046,7 @@ git commit -m "feat(content): add cats/cat_images drizzle schema and first migra
   (`localize.ts`), Task 7 (`seed-from-yaml.ts` writes SQL directly, does not
   call these, but shares `CatInput`), and by Phase 3/5.
 
-- [ ] **Step 1: Write the failing tests — read paths**
+- [x] **Step 1: Write the failing tests — read paths**
 
 ```ts
 // packages/content/tests/cats-read.test.ts
@@ -1271,12 +1271,12 @@ afterEach(async () => {
 added at the top of the file — instead of the `@ts-expect-error` version
 before running the tests.)
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm --filter @avd/content exec vitest run tests/cats-read.test.ts`
 Expected: FAIL — `Cannot find module '../src/cats'`
 
-- [ ] **Step 3: Write the failing tests — write paths**
+- [x] **Step 3: Write the failing tests — write paths**
 
 ```ts
 // packages/content/tests/cats-write.test.ts
@@ -1377,7 +1377,7 @@ describe('deleteCat', () => {
 });
 ```
 
-- [ ] **Step 4: Write the failing tests — image paths**
+- [x] **Step 4: Write the failing tests — image paths**
 
 ```ts
 // packages/content/tests/cat-images.test.ts
@@ -1596,12 +1596,12 @@ describe('deleteCat cascades to images', () => {
 });
 ```
 
-- [ ] **Step 5: Run tests to verify they fail**
+- [x] **Step 5: Run tests to verify they fail**
 
 Run: `pnpm --filter @avd/content exec vitest run tests/cats-write.test.ts tests/cat-images.test.ts`
 Expected: FAIL — `Cannot find module '../src/cats'`
 
-- [ ] **Step 6: Write `packages/content/src/cats.ts`**
+- [x] **Step 6: Write `packages/content/src/cats.ts`**
 
 ```ts
 // packages/content/src/cats.ts
@@ -1865,7 +1865,7 @@ export async function setCoverImage(
 }
 ```
 
-- [ ] **Step 7: Run tests to verify they pass**
+- [x] **Step 7: Run tests to verify they pass**
 
 Run: `pnpm --filter @avd/content exec vitest run tests/cats-read.test.ts tests/cats-write.test.ts tests/cat-images.test.ts`
 Expected: PASS (all tests). `tests/helpers/db.ts::setupTestDb` sets
@@ -1884,7 +1884,7 @@ re-issuing the PRAGMA per-test still does not fix it, since that would mask
 a real production FK-enforcement gap rather than a test-harness one. Note
 whichever fix was needed in the commit message.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add packages/content/src/cats.ts packages/content/tests/cats-read.test.ts \
@@ -1919,7 +1919,7 @@ string** stored in D1 (Phase 3 renders it with `Markdoc.transform` +
 `Markdoc.renderers.html`, replacing today's Keystatic async-content-function
 path) rather than a pre-resolved value.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // packages/content/tests/localize.test.ts
@@ -2069,12 +2069,12 @@ describe('localizeCat', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm --filter @avd/content exec vitest run tests/localize.test.ts`
 Expected: FAIL — `Cannot find module '../src/localize'`
 
-- [ ] **Step 3: Write `packages/content/src/localize.ts`**
+- [x] **Step 3: Write `packages/content/src/localize.ts`**
 
 ```ts
 // packages/content/src/localize.ts
@@ -2165,12 +2165,12 @@ export function localizeCat(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm --filter @avd/content exec vitest run tests/localize.test.ts`
 Expected: PASS (4 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/content/src/localize.ts packages/content/tests/localize.test.ts
@@ -2232,7 +2232,7 @@ from the fallback formula, keeping every other task in this phase unchanged
 (the fallback does not touch `schema.ts`, `cats.ts`, `validate.ts`, or
 `localize.ts`).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // packages/content/tests/image-url.test.ts
@@ -2326,12 +2326,12 @@ describe('imageSrcset', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm --filter @avd/content exec vitest run tests/image-url.test.ts`
 Expected: FAIL — `Cannot find module '../src/image-url'`
 
-- [ ] **Step 3: Write `packages/content/src/image-url.ts`**
+- [x] **Step 3: Write `packages/content/src/image-url.ts`**
 
 ```ts
 // packages/content/src/image-url.ts
@@ -2373,12 +2373,12 @@ export function imageSrcset(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm --filter @avd/content exec vitest run tests/image-url.test.ts`
 Expected: PASS (7 tests)
 
-- [ ] **Step 5: Update `src/index.ts` re-exports**
+- [x] **Step 5: Update `src/index.ts` re-exports**
 
 ```ts
 // packages/content/src/index.ts
@@ -2389,7 +2389,7 @@ export * from './localize';
 export * from './image-url';
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add packages/content/src/image-url.ts packages/content/tests/image-url.test.ts \
@@ -2418,7 +2418,7 @@ reads them directly — the test in this task uses those same real fixtures
 (not a copy), so it doubles as an integration check that the script still
 parses the live content directory.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // packages/content/tests/seed-from-yaml.test.ts
@@ -2473,12 +2473,12 @@ describe('generateSeedSql against the real fixture cats', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm --filter @avd/content exec vitest run tests/seed-from-yaml.test.ts`
 Expected: FAIL — `Cannot find module '../scripts/seed-from-yaml'`
 
-- [ ] **Step 3: Write `packages/content/scripts/seed-from-yaml.ts`**
+- [x] **Step 3: Write `packages/content/scripts/seed-from-yaml.ts`**
 
 ```ts
 #!/usr/bin/env -S npx tsx
@@ -2684,7 +2684,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm --filter @avd/content exec vitest run tests/seed-from-yaml.test.ts`
 Expected: PASS (6 tests). If the JSON-array test fails because YAML parses
@@ -2694,7 +2694,7 @@ open `apps/web/src/content/cats/lluna.yaml` and confirm the actual order
 and array validation preserve input order except for de-duplication, so the
 test must match the YAML's literal order.
 
-- [ ] **Step 5: Add the `seed:generate` script check**
+- [x] **Step 5: Add the `seed:generate` script check**
 
 ```bash
 pnpm --filter @avd/content run seed:generate
@@ -2703,7 +2703,7 @@ cat packages/content/seed.sql | head -1
 
 Expected: one line starting `INSERT INTO cats (id, slug_ca, ...`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add packages/content/scripts/seed-from-yaml.ts \
@@ -2727,7 +2727,7 @@ git commit -m "feat(content): add seed-from-yaml script converting Keystatic fix
 - Produces: `getDb(locals: unknown): Db | undefined`, used by Phase 3's cat
   pages and the featured-cats server island.
 
-- [ ] **Step 1: Add the D1 binding to `apps/web/wrangler.toml`**
+- [x] **Step 1: Add the D1 binding to `apps/web/wrangler.toml`**
 
 Open `docs/superpowers/plans/2026-09-03-content-r2-pipeline/phase-0-results.md`
 (written by Phase 0) and copy the `database_id` value recorded there for the
@@ -2747,7 +2747,7 @@ Replace `<AVD_CONTENT_DATABASE_ID>` with the real id from
 `phase-0-results.md` before committing — do not leave the placeholder token
 in the committed file.
 
-- [ ] **Step 2: Write the failing test for `getDb`**
+- [x] **Step 2: Write the failing test for `getDb`**
 
 ```ts
 // apps/web/tests/db.test.ts
@@ -2779,12 +2779,12 @@ describe('getDb', () => {
 });
 ```
 
-- [ ] **Step 3: Run test to verify it fails**
+- [x] **Step 3: Run test to verify it fails**
 
 Run: `pnpm --filter web exec vitest run tests/db.test.ts`
 Expected: FAIL — `Cannot find module '../src/lib/db'`
 
-- [ ] **Step 4: Write `apps/web/src/lib/db.ts`**
+- [x] **Step 4: Write `apps/web/src/lib/db.ts`**
 
 Follows the same defensive-narrowing style as
 `apps/web/src/lib/rate-limit.ts`'s `extractRuntimeEnv` (same null/type
@@ -2829,12 +2829,12 @@ export function getDb(locals: unknown): Db | undefined {
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `pnpm --filter web exec vitest run tests/db.test.ts`
 Expected: PASS (5 tests)
 
-- [ ] **Step 6: Update `apps/web/tests/wrangler-config.test.ts`**
+- [x] **Step 6: Update `apps/web/tests/wrangler-config.test.ts`**
 
 Add a `d1_databases` field to the parsed-config type, a new `describe` block
 asserting the binding, and extend the "every binding is referenced in src/"
@@ -2895,14 +2895,14 @@ does not appear verbatim there — `sourceText.includes('DB')` still passes
 because `extractRuntimeEnv`'s caller accesses `env?.DB` (the property name
 `DB` appears literally in `d1 = env?.DB`), satisfying the substring check.
 
-- [ ] **Step 7: Run the full wrangler-config test**
+- [x] **Step 7: Run the full wrangler-config test**
 
 Run: `pnpm --filter web exec vitest run tests/wrangler-config.test.ts`
 Expected: PASS (all tests, including the two new/changed ones). The
 `'has no r2_buckets entry'` test must still pass — this task adds
 `d1_databases`, not `r2_buckets`.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add apps/web/wrangler.toml apps/web/src/lib/db.ts \
@@ -2931,7 +2931,7 @@ rows-written/day budget, which per `research/cloudflare-platform-facts.md` §3
 is hard-enforced (queries error until 00:00 UTC once exceeded); nothing here
 risks tripping it.
 
-- [ ] **Step 1: Add `packages/content/seed.sql` to `.gitignore`**
+- [x] **Step 1: Add `packages/content/seed.sql` to `.gitignore`**
 
 `seed.sql` is generated data (nanoid ids and `new Date().toISOString()`
 timestamps that change on every run) — regenerate it, don't diff it in git.
@@ -2944,7 +2944,7 @@ committed; the SQL output is not. Append to the repo-root `.gitignore`:
 packages/content/seed.sql
 ```
 
-- [ ] **Step 2: Apply the migration to the local D1 database (sanity check)**
+- [x] **Step 2: Apply the migration to the local D1 database (sanity check)**
 
 ```bash
 pnpm --filter web exec wrangler d1 migrations apply avd-content --local
@@ -2963,7 +2963,7 @@ Expected: wrangler reports migration `0000_cats` applied against the remote
 database. This is the first write to production `avd-content` — it only
 creates schema, no data yet.
 
-- [ ] **Step 4: Generate the seed SQL**
+- [x] **Step 4: Generate the seed SQL**
 
 ```bash
 pnpm --filter @avd/content run seed:generate
@@ -2986,7 +2986,7 @@ pnpm --filter web exec wrangler d1 execute avd-content --remote --command "selec
 Expected output: three rows — `garfield | treatment`, `lluna | available`,
 `misi | available` (order may vary; presence and values must match).
 
-- [ ] **Step 7: Commit the `.gitignore` change (and nothing else — `seed.sql` must not be staged)**
+- [x] **Step 7: Commit the `.gitignore` change (and nothing else — `seed.sql` must not be staged)**
 
 ```bash
 git status --short packages/content/seed.sql   # expect no output (ignored)
@@ -3003,7 +3003,7 @@ git commit -m "chore(content): gitignore generated seed.sql"
 **Interfaces:** none — this task only runs the checks the definition-of-done
 for this phase depends on.
 
-- [ ] **Step 1: Run every test in the monorepo**
+- [x] **Step 1: Run every test in the monorepo**
 
 ```bash
 pnpm turbo test
@@ -3012,7 +3012,7 @@ pnpm turbo test
 Expected: all packages (`web`, `@avd/content`) green, including every test
 file added in Tasks 1–8.
 
-- [ ] **Step 2: Run every build**
+- [x] **Step 2: Run every build**
 
 ```bash
 pnpm turbo build
@@ -3027,7 +3027,7 @@ script for `turbo build` to succeed cleanly, add
 `"build": "echo 'no build step'"` to `packages/content/package.json` and
 commit that as part of this task.
 
-- [ ] **Step 3: Run the type-check task**
+- [x] **Step 3: Run the type-check task**
 
 ```bash
 pnpm turbo check
@@ -3038,7 +3038,7 @@ added to `packages/content/package.json` in Task 1). This is a separate
 `turbo.json` task from `build`/`test` per the spec's Workspace contract —
 `check` is not implied by a passing `build` or `test`.
 
-- [ ] **Step 4: Confirm no stray `packages/content/seed.sql` or `.wrangler` state is staged**
+- [x] **Step 4: Confirm no stray `packages/content/seed.sql` or `.wrangler` state is staged**
 
 ```bash
 git status --short
