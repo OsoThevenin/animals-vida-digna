@@ -1,8 +1,4 @@
-export type CatStatus =
-  | 'available'
-  | 'adopted'
-  | 'treatment'
-  | 'unavailable';
+export type CatStatus = 'available' | 'adopted' | 'treatment' | 'unavailable';
 
 export interface BadgeProps {
   /** Already-translated status text. */
@@ -22,8 +18,7 @@ const FALLBACK = 'bg-gray-100 text-gray-600';
 
 export function Badge({ label, status, size = 'sm' }: BadgeProps) {
   const color = status ? STATUS_COLORS[status] : FALLBACK;
-  const sizing =
-    size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-3 py-1 text-sm';
+  const sizing = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-3 py-1 text-sm';
 
   return (
     <span

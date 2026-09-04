@@ -104,7 +104,7 @@ export function CatTraits({
       ) : null}
       {specialNeeds ? (
         <div className="mt-4 rounded-lg bg-amber-50 p-3">
-          <p className="text-sm text-amber-800">{specialNeeds}</p>
+          <p className="text-amber-800 text-sm">{specialNeeds}</p>
         </div>
       ) : null}
     </div>

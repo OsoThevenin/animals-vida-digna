@@ -11,10 +11,7 @@ export interface FieldProps {
 export function Field({ id, label, error, children }: FieldProps) {
   return (
     <div className="mb-5">
-      <label
-        className="mb-1 block font-medium text-sm text-text"
-        htmlFor={id}
-      >
+      <label className="mb-1 block font-medium text-sm text-text" htmlFor={id}>
         {label}
       </label>
       {children}

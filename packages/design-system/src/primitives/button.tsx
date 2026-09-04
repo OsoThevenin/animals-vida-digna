@@ -15,8 +15,7 @@ export interface ButtonProps {
 }
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  accent:
-    'bg-accent text-text transition-colors hover:bg-accent-light',
+  accent: 'bg-accent text-text transition-colors hover:bg-accent-light',
   primary:
     'bg-primary text-surface transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60',
   outline:

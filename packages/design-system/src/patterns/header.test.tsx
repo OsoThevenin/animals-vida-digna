@@ -30,7 +30,9 @@ describe('Header', () => {
   });
 
   it('renders the brand name', () => {
-    const html = renderMarkup(<Header brand="Animals Vida Digna" links={links} />);
+    const html = renderMarkup(
+      <Header brand="Animals Vida Digna" links={links} />
+    );
     expect(html).toContain('Animals Vida Digna');
   });
 });

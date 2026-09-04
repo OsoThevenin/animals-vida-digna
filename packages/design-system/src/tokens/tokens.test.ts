@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 const tokensCss = readFileSync(join(__dirname, 'tokens.css'), 'utf8');
 const siteCss = readFileSync(
-  join(__dirname, '../../../../src/styles/global.css'),
+  join(__dirname, '../../../../apps/web/src/styles/global.css'),
   'utf8'
 );
 

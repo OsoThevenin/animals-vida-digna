@@ -1,7 +1,7 @@
 import { LOGO_DATA_URI } from '../assets/logo';
 import { Button } from '../primitives/button';
-import type { CtaLink } from './hero';
 import type { NavLink } from './header';
+import type { CtaLink } from './hero';
 
 export interface FooterProps {
   brand?: string;
@@ -77,9 +77,11 @@ export function Footer({
               <h3 className={COLUMN_TITLE}>{socialTitle}</h3>
             ) : null}
             <div className="flex gap-4">
+              {/* Placeholder social links - URLs will come from CMS settings in Phase 2 */}
               <a
                 aria-label="Facebook"
                 className="text-surface/50 transition-colors hover:text-accent-light"
+                // biome-ignore lint/a11y/useValidAnchor: placeholder href, see comment above
                 href="#"
               >
                 <svg
@@ -94,6 +96,7 @@ export function Footer({
               <a
                 aria-label="Instagram"
                 className="text-surface/50 transition-colors hover:text-accent-light"
+                // biome-ignore lint/a11y/useValidAnchor: placeholder href, see comment above
                 href="#"
               >
                 <svg
