@@ -1,6 +1,12 @@
+import {
+  DEFAULT_IMAGES_ORIGIN,
+  DEFAULT_SIZES,
+  DEFAULT_WIDTHS,
+  imageSrcset,
+  imageUrl,
+} from '@avd/content/image-url';
 import { useState } from 'preact/hooks';
-import { filterCats, type CatFilterData } from '../../lib/cat-filters';
-import { imageUrl, generateSrcset, DEFAULT_WIDTHS, DEFAULT_SIZES } from '../../lib/image-utils';
+import { type CatFilterData, filterCats } from '../../lib/cat-filters';
 
 interface Translations {
   filterStatus: string;
@@ -38,6 +44,9 @@ const statusColors: Record<string, string> = {
   treatment: 'bg-amber-100 text-amber-800',
   unavailable: 'bg-gray-100 text-gray-600',
 };
+
+const IMAGES_ORIGIN =
+  import.meta.env.PUBLIC_IMAGES_ORIGIN ?? DEFAULT_IMAGES_ORIGIN;
 
 export default function CatFilters({ cats, locale, translations: t }: Props) {
   const [statusFilter, setStatusFilter] = useState('all');
@@ -125,22 +134,26 @@ export default function CatFilters({ cats, locale, translations: t }: Props) {
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((cat) => (
             <a
-              key={cat.keystatic_slug}
+              key={cat.id}
               href={`${detailBase}${cat.slug}`}
               class="group block overflow-hidden rounded-xl bg-surface shadow-sm transition-shadow hover:shadow-md"
             >
-              {cat.coverImage?.src ? (
+              {cat.coverImage ? (
                 <div class="aspect-[4/3] overflow-hidden">
                   <img
-                    src={imageUrl(cat.coverImage.src, DEFAULT_WIDTHS[DEFAULT_WIDTHS.length - 1], import.meta.env.DEV)}
-                    srcset={generateSrcset(cat.coverImage.src, DEFAULT_WIDTHS, import.meta.env.DEV)}
+                    src={imageUrl(
+                      cat.coverImage.key,
+                      DEFAULT_WIDTHS[DEFAULT_WIDTHS.length - 1],
+                      IMAGES_ORIGIN,
+                    )}
+                    srcset={imageSrcset(cat.coverImage.key, DEFAULT_WIDTHS, IMAGES_ORIGIN)}
                     sizes={DEFAULT_SIZES}
                     alt={cat.coverImage.alt || cat.name}
                     class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
                     decoding="async"
-                    width={1280}
-                    height={960}
+                    width={cat.coverImage.width}
+                    height={cat.coverImage.height}
                   />
                 </div>
               ) : (

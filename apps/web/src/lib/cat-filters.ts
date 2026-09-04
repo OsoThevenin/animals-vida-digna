@@ -4,14 +4,19 @@
  */
 
 export interface CatFilterData {
-  keystatic_slug: string;
+  id: string;
   name: string;
   slug: string;
   status: string;
   age: number | null;
   gender: string;
   personality: string[];
-  coverImage: { src: string; alt: string } | null;
+  coverImage: {
+    key: string;
+    alt: string;
+    width: number;
+    height: number;
+  } | null;
   shortDescription: string;
   featured: boolean;
 }
@@ -29,11 +34,13 @@ export interface CatFilterState {
  */
 export function filterCats(
   cats: CatFilterData[],
-  filters: CatFilterState,
+  filters: CatFilterState
 ): CatFilterData[] {
   return cats.filter((cat) => {
-    if (filters.status !== 'all' && cat.status !== filters.status) return false;
-    if (filters.gender !== 'all' && cat.gender !== filters.gender) return false;
+    if (filters.status !== 'all' && cat.status !== filters.status)
+      return false;
+    if (filters.gender !== 'all' && cat.gender !== filters.gender)
+      return false;
     if (
       filters.personality !== 'all' &&
       !cat.personality.includes(filters.personality)
