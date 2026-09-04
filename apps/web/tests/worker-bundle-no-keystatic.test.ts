@@ -81,3 +81,43 @@ describeIfBuilt('Worker API route bundles (dist/_worker.js/pages/api)', () => {
     });
   }
 });
+
+/**
+ * Companion guard for the cats listing route: now that src/pages/cats/index.astro
+ * and src/pages/es/cats/index.astro read from D1 instead of the Keystatic
+ * reader (Phase 3), their bundled module graph must stay filesystem-free --
+ * a node:fs import here would risk the same class of production 500 the
+ * guard above protects contact/adopt against. (These routes still legitimately
+ * import @keystatic/core, via reader.singletons.settings.read() for donateUrl
+ * -- migrating settings off Keystatic is out of scope for this phase, see the
+ * spec's Non-goals -- so that import is not asserted against here.)
+ *
+ * Astro's build flattens `src/pages/cats/index.astro` to
+ * `dist/_worker.js/pages/cats.astro.mjs` (no `cats/index.astro.mjs`
+ * subdirectory) -- confirmed against the actual build output.
+ */
+
+const describeCatsIfBuilt = existsSync(join(WORKER_DIR, 'pages', 'cats.astro.mjs'))
+  ? describe
+  : describe.skip;
+
+describeCatsIfBuilt('Public cats listing bundle (dist/_worker.js/pages)', () => {
+  for (const [label, entry] of [
+    ['cats/index', join(WORKER_DIR, 'pages', 'cats.astro.mjs')],
+    ['es/cats/index', join(WORKER_DIR, 'pages', 'es', 'cats.astro.mjs')],
+  ] as const) {
+    it(`${label} route's transitive module graph is filesystem-free (no node:fs)`, () => {
+      const graph = collectModuleGraph(entry);
+
+      expect(graph.length).toBeGreaterThan(1);
+
+      for (const modulePath of graph) {
+        const source = readFileSync(modulePath, 'utf-8');
+        expect(
+          /from\s+['"]node:fs|require\(['"]node:fs/.test(source),
+          `${modulePath} must not import node:fs`
+        ).toBe(false);
+      }
+    });
+  }
+});
