@@ -27,11 +27,14 @@ function actionStub(): unknown {
 export const actions = actionStub();
 
 /**
- * Mirrors astro's real `isInputError` (astro/dist/actions/runtime/shared.js):
- * a type guard checking `error.type === 'AstroActionInputError'`. cat-form
- * tests only need it to resolve and behave like the real guard against a
- * plain object shape — no test here dispatches a real submit (no jsdom —
- * see vitest.config.ts), so this never needs to see a real ActionError.
+ * Mirrors astro's real `isInputError` (astro/dist/actions/runtime/shared.js)
+ * exactly, including its `'issues' in error && Array.isArray(error.issues)`
+ * check (fix-round-1 MINOR 6: an earlier version of this shim only checked
+ * `error.type`, which made it accept objects the real guard would reject —
+ * more permissive than production). cat-form tests only need it to resolve
+ * and behave like the real guard against a plain object shape — no test
+ * here dispatches a real submit (no jsdom — see vitest.config.ts), so this
+ * never needs to see a real ActionError.
  */
 export function isInputError(error: unknown): error is {
   type: 'AstroActionInputError';
@@ -42,6 +45,8 @@ export function isInputError(error: unknown): error is {
     typeof error === 'object' &&
     error !== null &&
     'type' in error &&
-    (error as { type: unknown }).type === 'AstroActionInputError'
+    (error as { type: unknown }).type === 'AstroActionInputError' &&
+    'issues' in error &&
+    Array.isArray((error as { issues: unknown }).issues)
   );
 }

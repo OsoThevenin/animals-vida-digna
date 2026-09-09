@@ -219,4 +219,23 @@ describe('inputErrorsToFieldErrors', () => {
     );
     expect(result).toEqual({ id: 'Required' });
   });
+
+  it('collapses an item-level array error to its root field (fix-round-1 MINOR 3)', () => {
+    // A path like ["personality", 0] (an invalid value at index 0 of the
+    // personality array) has no matching "personality.0" error slot
+    // anywhere in cat-form.tsx — only the bare "personality" key does.
+    const result = inputErrorsToFieldErrors(
+      [{ path: ['personality', 0], message: 'Invalid enum value' }],
+      'create'
+    );
+    expect(result).toEqual({ personality: 'Invalid enum value' });
+  });
+
+  it('collapses a nested edit-mode array error the same way', () => {
+    const result = inputErrorsToFieldErrors(
+      [{ path: ['data', 'goodWith', 1], message: 'Invalid enum value' }],
+      'edit'
+    );
+    expect(result).toEqual({ goodWith: 'Invalid enum value' });
+  });
 });

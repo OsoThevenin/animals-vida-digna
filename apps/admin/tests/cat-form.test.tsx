@@ -120,6 +120,18 @@ describe('CatForm create mode', () => {
     expect(html).toContain('for="cat-good-with-children"');
   });
 
+  it('groups the personality and good-with checkboxes under a named <fieldset>/<legend>', () => {
+    // fix-round-1 MINOR 4: a bare <span> label above the checkboxes gave
+    // screen-reader users no group name when tabbing through the
+    // options. A native <fieldset>/<legend> pair (biome's own suggestion
+    // over role="group" + aria-labelledby on a <div>) announces the
+    // group name automatically, no extra ARIA wiring needed.
+    expect(html).toMatch(/<fieldset[^>]*><legend[^>]*>Personalitat<\/legend>/);
+    expect(html).toMatch(
+      /<fieldset[^>]*><legend[^>]*>Es porta bé amb<\/legend>/
+    );
+  });
+
   it('does not render field errors when there are none', () => {
     expect(html).not.toContain('role="alert"');
   });

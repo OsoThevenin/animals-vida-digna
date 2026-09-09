@@ -181,8 +181,15 @@ export interface FieldErrorIssue {
  * each issue's full path array, so per-field attribution has to be
  * rebuilt from that instead. In edit mode the leading `"data"` segment is
  * dropped; a top-level issue with no nested path (e.g. on `id`) is kept
- * as-is. Only the first message per field is kept (FormField only
- * renders one).
+ * as-is.
+ *
+ * A remaining path longer than one segment — e.g. `["personality", 0]`
+ * for an item-level error inside the `personality` array — collapses to
+ * its root field (`"personality"`), since `FormField`/the checkbox-group
+ * error slots only ever key on the bare top-level field name; a joined
+ * key like `"personality.0"` would match nothing and silently vanish
+ * (fix-round-1 MINOR 3). Only the first message per field is kept
+ * (FormField only renders one).
  */
 export function inputErrorsToFieldErrors(
   issues: FieldErrorIssue[],
@@ -195,7 +202,7 @@ export function inputErrorsToFieldErrors(
         ? issue.path.slice(1)
         : issue.path;
     if (path.length === 0) continue;
-    const key = path.join('.');
+    const key = String(path[0]);
     if (key in errors) continue;
     errors[key] = issue.message;
   }

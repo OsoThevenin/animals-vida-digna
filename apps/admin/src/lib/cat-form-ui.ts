@@ -78,3 +78,26 @@ export function previewOrFallback(src: string): string {
   const hasVisibleContent = html.replace(/<[^>]*>/g, '').trim() !== '';
   return hasVisibleContent ? html : PREVIEW_UNAVAILABLE_MESSAGE;
 }
+
+export interface FieldAriaProps {
+  'aria-describedby'?: string;
+  'aria-invalid'?: boolean;
+}
+
+/**
+ * Computes the `aria-describedby`/`aria-invalid` pair a form control needs
+ * to be programmatically associated with its error text, given that
+ * error's id. Shared by `FormField` (which injects this into whatever
+ * control it wraps) and the two Markdoc textareas in `cat-form.tsx`
+ * (which render their own error paragraph instead of going through
+ * `FormField`) so both paths compute the association the same way
+ * (fix-round-1 IMPORTANT 1: `FormField` previously computed an `errorId`
+ * and used it only on the error `<p>`, never on the control itself, and
+ * the two Markdoc textareas' error `<p>` had no `id` at all).
+ */
+export function fieldAriaProps(
+  errorId: string,
+  hasError: boolean
+): FieldAriaProps {
+  return hasError ? { 'aria-describedby': errorId, 'aria-invalid': true } : {};
+}

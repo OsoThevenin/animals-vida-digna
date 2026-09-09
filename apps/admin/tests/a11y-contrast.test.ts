@@ -70,6 +70,14 @@ describe('admin shadcn token pairs meet WCAG AA', () => {
       'destructive-foreground',
       'destructive',
     ],
+    // `cat-form.tsx`'s Markdoc preview-toggle button (`text-primary` on
+    // the page background) and its server-error banner / FormField error
+    // slot (`text-destructive` on the page background) — pre-existing
+    // pairings inherited from `cats-table.tsx`/`login-form.tsx`, not new
+    // raw-palette classes, but not previously asserted here
+    // (fix-round-1 MINOR 5).
+    ['primary on background', 'primary', 'background'],
+    ['destructive on background', 'destructive', 'background'],
   ];
 
   for (const [name, fg, bg] of pairs) {

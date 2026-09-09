@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { emptyCatInput } from '../src/lib/cat-form';
 import {
   applyNameChange,
+  fieldAriaProps,
   previewOrFallback,
   toggleListValue,
 } from '../src/lib/cat-form-ui';
@@ -84,5 +85,18 @@ describe('previewOrFallback', () => {
     const result = previewOrFallback('{% bad-tag %}');
     expect(result).not.toBe('');
     expect(result.toLowerCase()).toMatch(/no s'ha pogut previsualitzar/);
+  });
+});
+
+describe('fieldAriaProps', () => {
+  it('returns no aria props when there is no error', () => {
+    expect(fieldAriaProps('cat-name-ca-error', false)).toEqual({});
+  });
+
+  it('points aria-describedby at the error id and sets aria-invalid when there is an error', () => {
+    expect(fieldAriaProps('cat-name-ca-error', true)).toEqual({
+      'aria-describedby': 'cat-name-ca-error',
+      'aria-invalid': true,
+    });
   });
 });

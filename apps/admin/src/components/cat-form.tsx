@@ -31,6 +31,7 @@ import {
 } from '@/lib/cat-form';
 import {
   applyNameChange,
+  fieldAriaProps,
   previewOrFallback,
   toggleListValue,
 } from '@/lib/cat-form-ui';
@@ -359,10 +360,10 @@ export default function CatForm({ mode, cat }: CatFormProps) {
           </FormField>
         </div>
 
-        <div className="mb-5">
-          <span className="mb-1 block font-medium text-foreground text-sm">
+        <fieldset className="m-0 mb-5 border-0 p-0">
+          <legend className="mb-1 block font-medium text-foreground text-sm">
             Personalitat
-          </span>
+          </legend>
           <div className="flex flex-wrap gap-4">
             {CAT_PERSONALITIES.map((value) => {
               const id = `cat-personality-${value}`;
@@ -380,12 +381,12 @@ export default function CatForm({ mode, cat }: CatFormProps) {
               );
             })}
           </div>
-        </div>
+        </fieldset>
 
-        <div className="mb-5">
-          <span className="mb-1 block font-medium text-foreground text-sm">
+        <fieldset className="m-0 mb-5 border-0 p-0">
+          <legend className="mb-1 block font-medium text-foreground text-sm">
             Es porta bé amb
-          </span>
+          </legend>
           <div className="flex flex-wrap gap-4">
             {CAT_GOOD_WITH.map((value) => {
               const id = `cat-good-with-${value}`;
@@ -403,7 +404,7 @@ export default function CatForm({ mode, cat }: CatFormProps) {
               );
             })}
           </div>
-        </div>
+        </fieldset>
 
         <div className="mb-5 flex flex-wrap gap-6">
           <div className="flex items-center gap-1.5">
@@ -567,6 +568,10 @@ export default function CatForm({ mode, cat }: CatFormProps) {
             </button>
           </div>
           <Textarea
+            {...fieldAriaProps(
+              'cat-description-ca-error',
+              Boolean(fieldErrors.descriptionCa)
+            )}
             id="cat-description-ca"
             onChange={(event) =>
               update('descriptionCa', event.currentTarget.value)
@@ -575,7 +580,11 @@ export default function CatForm({ mode, cat }: CatFormProps) {
             value={state.descriptionCa}
           />
           {fieldErrors.descriptionCa ? (
-            <p className="mt-1 text-destructive text-xs" role="alert">
+            <p
+              className="mt-1 text-destructive text-xs"
+              id="cat-description-ca-error"
+              role="alert"
+            >
               {fieldErrors.descriptionCa}
             </p>
           ) : null}
@@ -604,6 +613,10 @@ export default function CatForm({ mode, cat }: CatFormProps) {
             </button>
           </div>
           <Textarea
+            {...fieldAriaProps(
+              'cat-description-es-error',
+              Boolean(fieldErrors.descriptionEs)
+            )}
             id="cat-description-es"
             onChange={(event) =>
               update('descriptionEs', event.currentTarget.value)
@@ -612,7 +625,11 @@ export default function CatForm({ mode, cat }: CatFormProps) {
             value={state.descriptionEs}
           />
           {fieldErrors.descriptionEs ? (
-            <p className="mt-1 text-destructive text-xs" role="alert">
+            <p
+              className="mt-1 text-destructive text-xs"
+              id="cat-description-es-error"
+              role="alert"
+            >
               {fieldErrors.descriptionEs}
             </p>
           ) : null}
