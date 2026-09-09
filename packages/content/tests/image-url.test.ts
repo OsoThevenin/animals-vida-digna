@@ -86,3 +86,69 @@ describe('imageSrcset', () => {
     );
   });
 });
+
+/**
+ * Phase 5 Deferred Verification item 2 (task-11-report.md): a production
+ * WAF rule in front of images.animalsvidadigna.org allowlists ONLY the
+ * exact transform string
+ *   /cdn-cgi/image/width=<W>,fit=scale-down,quality=80,format=auto,onerror=redirect/<key>
+ * for W in {320, 640, 960, 1280}, in exactly this parameter order and
+ * spelling — anything else (a reordered/renamed/added/dropped param, a
+ * non-allowlisted width, extra whitespace) 403s to a real visitor. This
+ * sandbox cannot reach the live WAF, so this suite encodes the contract
+ * as a regex that models the rule and asserts BOTH directions: every
+ * `imageUrl`/`imageSrcset` output for the real code matches it, AND a
+ * set of deliberately deviated strings — the exact kind of drift a future
+ * refactor of image-url.ts could introduce — do NOT match it. A future
+ * change to the transform string shape must fail this test before it can
+ * ever reach production and 403 real visitors.
+ */
+describe('WAF canonical transform contract', () => {
+  const CANONICAL_TRANSFORM_PATTERN =
+    /^https:\/\/images\.animalsvidadigna\.org\/cdn-cgi\/image\/width=(320|640|960|1280),fit=scale-down,quality=80,format=auto,onerror=redirect\/.+$/;
+
+  it.each(
+    DEFAULT_WIDTHS
+  )('imageUrl(%i) against the default origin matches the canonical WAF pattern', (width) => {
+    const result = imageUrl('cats/cat_abc/img_xyz.webp', width);
+    expect(result).toMatch(CANONICAL_TRANSFORM_PATTERN);
+  });
+
+  it('every entry in imageSrcset (default origin) matches the canonical WAF pattern', () => {
+    const srcset = imageSrcset('cats/cat_abc/img_xyz.webp');
+    const urls = srcset.split(', ').map((entry) => entry.split(' ')[0]);
+    expect(urls).toHaveLength(DEFAULT_WIDTHS.length);
+    for (const url of urls) {
+      expect(url).toMatch(CANONICAL_TRANSFORM_PATTERN);
+    }
+  });
+
+  it.each([
+    [
+      'non-allowlisted width (500 is not one of 320/640/960/1280)',
+      'https://images.animalsvidadigna.org/cdn-cgi/image/width=500,fit=scale-down,quality=80,format=auto,onerror=redirect/cats/cat_abc/img_xyz.webp',
+    ],
+    [
+      'reordered parameters (fit before width)',
+      'https://images.animalsvidadigna.org/cdn-cgi/image/fit=scale-down,width=640,quality=80,format=auto,onerror=redirect/cats/cat_abc/img_xyz.webp',
+    ],
+    [
+      'dropped parameter (onerror missing)',
+      'https://images.animalsvidadigna.org/cdn-cgi/image/width=640,fit=scale-down,quality=80,format=auto/cats/cat_abc/img_xyz.webp',
+    ],
+    [
+      'added parameter not in the allowlisted set',
+      'https://images.animalsvidadigna.org/cdn-cgi/image/width=640,fit=scale-down,quality=80,format=auto,onerror=redirect,sharpen=1/cats/cat_abc/img_xyz.webp',
+    ],
+    [
+      'deviated quality value (81 instead of 80)',
+      'https://images.animalsvidadigna.org/cdn-cgi/image/width=640,fit=scale-down,quality=81,format=auto,onerror=redirect/cats/cat_abc/img_xyz.webp',
+    ],
+    [
+      'extra whitespace after a comma',
+      'https://images.animalsvidadigna.org/cdn-cgi/image/width=640, fit=scale-down,quality=80,format=auto,onerror=redirect/cats/cat_abc/img_xyz.webp',
+    ],
+  ])('rejects a deviated transform string: %s', (_label, deviated) => {
+    expect(deviated).not.toMatch(CANONICAL_TRANSFORM_PATTERN);
+  });
+});
