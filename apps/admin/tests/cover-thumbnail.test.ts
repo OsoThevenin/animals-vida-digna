@@ -34,8 +34,6 @@ describe('coverThumbnailUrl', () => {
       'cats/cat_abc/img_xyz.webp',
       'http://localhost:4322/r2'
     );
-    expect(result).toBe(
-      'http://localhost:4322/r2/cats/cat_abc/img_xyz.webp'
-    );
+    expect(result).toBe('http://localhost:4322/r2/cats/cat_abc/img_xyz.webp');
   });
 });
