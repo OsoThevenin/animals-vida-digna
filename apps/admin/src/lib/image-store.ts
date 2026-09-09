@@ -19,7 +19,13 @@ export async function uploadImageToBucket(
   db: Db,
   params: UploadImageParams
 ): Promise<CatImage> {
-  await bucket.put(params.key, params.file.stream(), {
+  // Pass the File/Blob itself, not params.file.stream(): a bare
+  // ReadableStream has no known length in Workers/Miniflare unless it is
+  // the direct body of an incoming Request, so bucket.put throws
+  // "Provided readable stream must have a known length" against a real R2
+  // binding. A Blob/File carries its own length, so R2 can stream it
+  // without that constraint.
+  await bucket.put(params.key, params.file, {
     httpMetadata: {
       contentType: 'image/webp',
       cacheControl: 'public, max-age=31536000, immutable',

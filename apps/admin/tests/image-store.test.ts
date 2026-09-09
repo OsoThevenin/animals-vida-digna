@@ -32,24 +32,33 @@ describe('uploadImageToBucket', () => {
       createdAt: '2026-01-01T00:00:00.000Z',
     });
 
+    const file = fakeFile();
     const result = await uploadImageToBucket(bucket, db, {
       catId: 'cat_1',
       key: 'cats/cat_1/img_1.webp',
-      file: fakeFile(),
+      file,
       width: 800,
       height: 600,
     });
 
-    expect(put).toHaveBeenCalledWith(
-      'cats/cat_1/img_1.webp',
-      expect.anything(),
-      {
-        httpMetadata: {
-          contentType: 'image/webp',
-          cacheControl: 'public, max-age=31536000, immutable',
-        },
-      }
-    );
+    // The body passed to bucket.put must be the File/Blob itself, not a
+    // ReadableStream from file.stream(). A ReadableStream body has no
+    // known length in Workers/Miniflare unless it is the direct body of
+    // an incoming Request, so bucket.put throws "Provided readable stream
+    // must have a known length" against a real R2 binding. A mock that
+    // accepts `expect.anything()` here cannot catch that regression.
+    expect(put).toHaveBeenCalledTimes(1);
+    const [putKey, putBody, putOptions] = put.mock.calls[0];
+    expect(putKey).toBe('cats/cat_1/img_1.webp');
+    expect(putBody).toBe(file);
+    expect(putBody).toBeInstanceOf(File);
+    expect(putBody).not.toBeInstanceOf(ReadableStream);
+    expect(putOptions).toEqual({
+      httpMetadata: {
+        contentType: 'image/webp',
+        cacheControl: 'public, max-age=31536000, immutable',
+      },
+    });
     expect(addCatImage).toHaveBeenCalledWith(db, 'cat_1', {
       r2Key: 'cats/cat_1/img_1.webp',
       width: 800,
