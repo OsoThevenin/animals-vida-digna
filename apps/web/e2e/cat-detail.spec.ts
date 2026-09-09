@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { assertCanonicalTransformUrl } from './support/assert-canonical-transform-url';
 
 test.describe('cat detail page (reached by clicking through from /cats)', () => {
   test('renders the clicked cat title and its back link', async ({ page }) => {
@@ -21,32 +22,33 @@ test.describe('cat detail page (reached by clicking through from /cats)', () => 
     ).toBeVisible();
   });
 
-  // The plan asks this page to be checked for its cover image and gallery.
-  // The R2 image pipeline (this phase) is implemented and works -- see
-  // e2e/cats-d1.spec.ts's "renders title, description and cover image for a
-  // cat with real image data" test, which asserts a real cover image on
-  // /cat/lluna via e2e/fixtures/seed-e2e-image.sql (an E2E-only fixture:
-  // packages/content's own seed fixtures deliberately carry no images, see
-  // that SQL file's header for why).
-  //
-  // Misi specifically, and gallery images generally, still have no real
-  // content: packages/content/tests/fixtures/cats/*.yaml (the source for
-  // packages/content's `seed:generate`, migrated verbatim from the old
-  // Keystatic `src/content/cats/*.yaml`) all have `coverImage.src: null`
-  // and `gallery: []` — a genuine content/data gap, not an application bug.
-  // OptimizedImage and CatGallery correctly render nothing when there's no
-  // source (see the `{cat.coverImage && (...)}` / `{images.length > 0 &&
-  // (...)}` guards in src/pages/cat/[slug].astro and
-  // src/components/cats/CatGallery.astro). Kept fixme rather than asserted
-  // against fabricated data; re-enable once a cat has a real gallery (e.g.
-  // once a volunteer uploads photos through the admin app, Phase 5).
-  test.fixme('renders the cover image and photo gallery', async ({ page }) => {
+  // Re-enabled by Task 11 (Phase 5 Deferred Verification item 4). Misi's
+  // own packages/content fixture still has `coverImage.src: null` /
+  // `gallery: []` (no real photo of this cat exists yet -- a genuine
+  // content gap, not an application bug), so this asserts against
+  // e2e/fixtures/seed-e2e-image.sql's e2e-test-img-3 (cover, 1500x1125,
+  // NOT an allowlisted width) / e2e-test-img-4 (gallery, 640x480,
+  // already allowlisted) — the same synthetic-but-real-shape pattern
+  // already used for Lluna in e2e/cats-d1.spec.ts. Pins the exact
+  // canonical WAF transform URL (see assertCanonicalTransformUrl), not
+  // just "an <img> exists".
+  test('renders the cover image and photo gallery', async ({ page }) => {
     await page.goto('/cat/misi');
-    await expect(
-      page.getByRole('article').getByRole('img').first()
-    ).toBeVisible();
+
+    const coverImg = page.getByRole('article').getByRole('img').first();
+    await expect(coverImg).toBeVisible();
+    const coverSrc = await coverImg.getAttribute('src');
+    expect(coverSrc).not.toBeNull();
+    assertCanonicalTransformUrl(coverSrc as string, 1280, 'e2e-test-img-3.webp');
+    expect(await coverImg.getAttribute('width')).toBe('1500');
+
     await expect(
       page.getByRole('heading', { level: 2, name: 'Galeria' })
     ).toBeVisible();
+    const galleryImg = page.locator('.lightbox img').first();
+    await expect(galleryImg).toBeVisible();
+    const gallerySrc = await galleryImg.getAttribute('src');
+    expect(gallerySrc).not.toBeNull();
+    assertCanonicalTransformUrl(gallerySrc as string, 640, 'e2e-test-img-4.webp');
   });
 });

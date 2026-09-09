@@ -38,3 +38,21 @@ SELECT 'e2e-test-img-2', id, 'cats/' || id || '/e2e-test-img-2.webp', 'Lluna jug
 FROM cats WHERE slug_ca = 'lluna';
 
 UPDATE cats SET cover_image_id = 'e2e-test-img-1' WHERE slug_ca = 'lluna';
+
+-- Task 11 (Phase 5 Deferred Verification item 4): gives "Misi" a cover +
+-- gallery image too, on the same synthetic-but-real-shape pattern as
+-- Lluna above, so e2e/cat-detail.spec.ts's "renders the cover image and
+-- photo gallery" test has something real to assert against instead of
+-- staying `test.fixme`. Misi's own packages/content fixture still has
+-- `coverImage.src: null` / `gallery: []` (no real photo exists for this
+-- cat yet) -- this is the same kind of e2e-only stand-in as Lluna's, not
+-- a claim that Misi has a real uploaded photo.
+INSERT OR IGNORE INTO cat_images (id, cat_id, r2_key, alt_ca, alt_es, width, height, position, created_at)
+SELECT 'e2e-test-img-3', id, 'cats/' || id || '/e2e-test-img-3.webp', 'Misi, gata europeu disponible per adopcio', 'Misi, gata europeo disponible para adopcion', 1500, 1125, 0, '2026-09-04T00:00:00.000Z'
+FROM cats WHERE slug_ca = 'misi';
+
+INSERT OR IGNORE INTO cat_images (id, cat_id, r2_key, alt_ca, alt_es, width, height, position, created_at)
+SELECT 'e2e-test-img-4', id, 'cats/' || id || '/e2e-test-img-4.webp', 'Misi jugant', 'Misi jugando', 640, 480, 1, '2026-09-04T00:00:00.000Z'
+FROM cats WHERE slug_ca = 'misi';
+
+UPDATE cats SET cover_image_id = 'e2e-test-img-3' WHERE slug_ca = 'misi';
