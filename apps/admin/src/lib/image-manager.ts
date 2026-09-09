@@ -222,7 +222,16 @@ export async function processUploadFile<Image>(
 
   deps.onUploading?.();
 
-  const { data, error } = await deps.upload(formData);
+  let data: Image | undefined;
+  let error: unknown;
+  try {
+    ({ data, error } = await deps.upload(formData));
+  } catch (uploadError) {
+    return {
+      status: 'error',
+      message: describeActionError(uploadError, 'Error pujant la imatge.'),
+    };
+  }
   if (error || !data) {
     return {
       status: 'error',

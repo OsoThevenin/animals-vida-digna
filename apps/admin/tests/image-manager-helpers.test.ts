@@ -292,6 +292,43 @@ describe('processUploadFile', () => {
     const result = await processUploadFile(okFile, 'cat_1', deps);
     expect(result.status).toBe('done');
   });
+
+  /**
+   * Final fix wave, FIX 2: `compress` and `readDimensions` were both
+   * wrapped in try/catch, but the `deps.upload(formData)` network call
+   * right below them was awaited bare — the exact defect fixed one step
+   * earlier in this same function. A rejected fetch (flaky shelter wifi,
+   * a 401 session revocation, anything) propagates out of
+   * `processUploadFile` uncaught instead of resolving to an error result,
+   * which strands that row and, worse, drops every remaining queued file
+   * in the caller's loop (image-manager.tsx's handleFiles).
+   */
+  it('returns a Catalan error result instead of throwing when upload rejects', async () => {
+    const deps = {
+      ...makeDeps(),
+      upload: vi.fn(async () => {
+        throw new Error('network error');
+      }),
+    };
+    const result = await processUploadFile(okFile, 'cat_1', deps);
+    expect(result.status).toBe('error');
+    expect(result.status === 'error' && result.message).toBeTruthy();
+  });
+
+  it('a rejected upload for one file does not stop the next file in a batch', async () => {
+    const failingDeps = {
+      ...makeDeps(),
+      upload: vi.fn(async () => {
+        throw new Error('network error');
+      }),
+    };
+    const results = [];
+    for (const deps of [failingDeps, makeDeps()]) {
+      results.push(await processUploadFile(okFile, 'cat_1', deps));
+    }
+    expect(results[0].status).toBe('error');
+    expect(results[1]).toEqual({ status: 'done', image: { id: 'img_1' } });
+  });
 });
 
 /**
