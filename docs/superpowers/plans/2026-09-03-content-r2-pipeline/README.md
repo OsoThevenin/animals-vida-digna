@@ -40,14 +40,15 @@
 Total ≈ 6–7 working days. Phases 1→2→3 and 4→5 are two chains; Phase 4 may start
 once Phase 2 is merged, in parallel with Phase 3, if two people/agents work at once.
 
-## Status as of 2026-09-04
+## Status as of 2026-09-09
 
-Phases **0–4 are implemented** on branch `worktree-content-r2-impl` (worktree
+Phases **0–5 are implemented** on branch `worktree-content-r2-impl` (worktree
 `.claude/worktrees/content-r2-impl`). Nothing is pushed, merged or deployed.
-Pipeline is green: `pnpm turbo test build check lint --force` → 15 tasks, 502+
-tests; `pnpm --filter web test:e2e` → 60 passed / 2 skipped.
+Pipeline is green: `pnpm turbo test build check lint --force` → 15 tasks;
+admin 256 / web 276 / content 98 tests; `pnpm --filter web test:e2e` → 62
+passed. Admin bundle 842.15 KiB gzip, 28% of the 3 MB Workers Free limit.
 
-Two records to read before continuing:
+Three records to read before continuing:
 
 - **`phase-0-results.md`** — the platform spike, GO verdict, and five findings
   (the `fit=scale-down` amendment, the Sources fix, the quota threat model, and
@@ -58,10 +59,19 @@ Two records to read before continuing:
   future session. Includes the *Before any deploy* checklist and the maintainer
   actions (secrets, second Workers Builds project, `admin.` custom domain).
 
-**Next up: Phase 5** (cats CRUD + image uploader), which also owes the
-*Deferred verification owed by this phase* checks recorded in
-`phase-5-admin-cats-images.md` — the end-to-end image-chain verification that
-could not run while no real cat photo existed. Then Phase 6.
+- **`phase-5-results.md`** — ⚠ **read before deploying.** Phase 5's outcome:
+  the three defects that only live verification caught (R2 rejecting every
+  upload, a non-allowlisted thumbnail width that would 403 in production, and
+  session revocation silently hanging the UI), the triaged deferred findings,
+  the honest status of all five *Deferred verification* items, and the
+  maintainer-only checklist for everything the sandbox could not reach —
+  remote D1, the live WAF matrix, and a real browser click-through.
+
+**Next up: Phase 6** (cutover, docs, revoking volunteers' GitHub write access).
+
+Before deploying `apps/admin`, both `phase-4-security-review.md`'s *Before any
+deploy* list and `phase-5-results.md`'s *Maintainer-only checklist* must be
+worked through — they are complementary, not duplicates.
 
 Also integrated along the way, outside the numbered phases: the `design-system`
 branch (13 commits rebased in, its obsolete workspace-conversion commit
