@@ -1,3 +1,6 @@
+# PUBLIC_IMAGES_ORIGIN is NOT a .dev.vars entry — it's a PUBLIC_ build-time
+# variable read by Astro/Vite, not a Cloudflare runtime secret/binding. See
+# apps/admin/.env.development.
 BETTER_AUTH_SECRET=dev-only-not-a-real-secret-please-rotate-in-prod
 BETTER_AUTH_URL=http://localhost:4322
 RESEND_API_KEY=re_xxxxxxxxxxxx
