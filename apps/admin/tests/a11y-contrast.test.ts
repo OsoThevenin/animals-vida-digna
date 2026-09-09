@@ -54,6 +54,10 @@ const NON_TEXT = 3;
 describe('admin shadcn token pairs meet WCAG AA', () => {
   const pairs: Array<[string, string, string]> = [
     ['foreground on background', 'foreground', 'background'],
+    // The image-manager save-status banner (Task 9) renders `text-
+    // foreground` on `bg-muted` — an existing token pair not previously
+    // asserted anywhere in this matrix.
+    ['foreground on muted', 'foreground', 'muted'],
     ['card-foreground on card', 'card-foreground', 'card'],
     ['popover-foreground on popover', 'popover-foreground', 'popover'],
     ['primary-foreground on primary', 'primary-foreground', 'primary'],

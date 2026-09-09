@@ -3,6 +3,7 @@
  * separate from the component so the state-update and error-formatting
  * logic can be unit tested without a DOM or `astro:actions`.
  */
+import { validateUploadFile } from '@/lib/image-upload';
 
 /**
  * `browser-image-compression`'s target output size. Astro caps action
@@ -14,7 +15,13 @@
  */
 export const UPLOAD_COMPRESSION_TARGET_MB = 0.9;
 
-/** Astro's action request body cap in this app. */
+/**
+ * Conservative round-number budget for a compressed upload. Astro's real
+ * action request body cap, measured live against `wrangler dev` in this
+ * app, is 1,048,576 bytes (1 MiB exactly — the response body was
+ * `"Request body exceeds 1048576 bytes"`). This constant is kept a little
+ * below that on purpose, not because it *is* the cap.
+ */
 export const MAX_ACTION_BODY_BYTES = 1_000_000;
 
 /**
@@ -76,6 +83,13 @@ export function coverAfterRemoval(
 }
 
 export interface UploadProgressItem {
+  /**
+   * Unique per upload attempt, NOT `file.name` — two files selected in
+   * the same batch can share a name, and keying by name made them collide
+   * on both the React `key` and every `withUploadStatus` patch (task-9
+   * fix-round-1 MINOR 6).
+   */
+  id: string;
   name: string;
   status: 'compressing' | 'uploading' | 'done' | 'error';
   message?: string;
@@ -90,12 +104,10 @@ export function withUploadItem(
 
 export function withUploadStatus(
   items: UploadProgressItem[],
-  name: string,
+  id: string,
   patch: Partial<UploadProgressItem>
 ): UploadProgressItem[] {
-  return items.map((item) =>
-    item.name === name ? { ...item, ...patch } : item
-  );
+  return items.map((item) => (item.id === id ? { ...item, ...patch } : item));
 }
 
 /**
@@ -117,4 +129,136 @@ export function describeActionError(error: unknown, fallback: string): string {
     return (error as { message: string }).message;
   }
   return fallback;
+}
+
+export interface ProcessUploadDeps<Image> {
+  compress: (file: File) => Promise<File>;
+  readDimensions: (file: File) => Promise<{ width: number; height: number }>;
+  upload: (formData: FormData) => Promise<{ data?: Image; error?: unknown }>;
+}
+
+export type ProcessUploadResult<Image> =
+  | { status: 'done'; image: Image }
+  | { status: 'error'; message: string };
+
+/**
+ * Runs one selected file through compress -> size-gate -> validate -> read
+ * dimensions -> upload, never throwing: every step that can fail returns
+ * an error result instead of rejecting. Dependencies are injected so this
+ * is unit-testable without a browser (no `createImageBitmap`, no network).
+ *
+ * Fixes task-9 fix-round-1 IMPORTANT 1: the previous inline version had
+ * no `catch` around reading dimensions, unlike every step around it.
+ * `createImageBitmap` rejects on a decode failure or an
+ * unsupported/animated source, which left that upload row stuck at
+ * "comprimint…" forever AND, because the failure propagated out of the
+ * `for` loop in `handleFiles`, silently dropped every file queued after
+ * it. Returning `{ status: 'error' }` here instead means the caller's
+ * loop always proceeds to the next file.
+ */
+export async function processUploadFile<Image>(
+  file: File,
+  catId: string,
+  deps: ProcessUploadDeps<Image>
+): Promise<ProcessUploadResult<Image>> {
+  let compressed: File;
+  try {
+    compressed = await deps.compress(file);
+  } catch {
+    return { status: 'error', message: "No s'ha pogut comprimir la imatge." };
+  }
+
+  const sizeError = describeCompressedSizeError(compressed.size);
+  if (sizeError) {
+    return { status: 'error', message: sizeError };
+  }
+
+  const validation = validateUploadFile({
+    type: compressed.type,
+    size: compressed.size,
+  });
+  if (!validation.ok) {
+    return {
+      status: 'error',
+      message:
+        validation.reason === 'type'
+          ? 'Format no vàlid.'
+          : 'Fitxer massa gran.',
+    };
+  }
+
+  let dimensions: { width: number; height: number };
+  try {
+    dimensions = await deps.readDimensions(compressed);
+  } catch {
+    return {
+      status: 'error',
+      message: "No s'ha pogut llegir la imatge. Prova amb un altre fitxer.",
+    };
+  }
+
+  const formData = new FormData();
+  formData.append('catId', catId);
+  formData.append('file', compressed, file.name);
+  formData.append('width', String(dimensions.width));
+  formData.append('height', String(dimensions.height));
+
+  const { data, error } = await deps.upload(formData);
+  if (error || !data) {
+    return {
+      status: 'error',
+      message: describeActionError(error, 'Error pujant la imatge.'),
+    };
+  }
+  return { status: 'done', image: data };
+}
+
+interface OrderableImage {
+  id: string;
+  altCa: string;
+  altEs: string;
+  position: number;
+}
+
+/**
+ * True when `current` no longer matches what was actually sent as `sent`
+ * — i.e. the volunteer reordered or re-edited alt text while a save was
+ * in flight. `images.update` always resolves `{ ok: true }` regardless,
+ * so this is the only way to tell a genuine save apart from a stale one
+ * (task-9 fix-round-1 IMPORTANT 2). `saveOrderAndAlts` uses this to warn
+ * instead of claiming "Desat." for a version the server no longer holds.
+ */
+export function ordersDiffer(
+  sent: OrderableImage[],
+  current: OrderableImage[]
+): boolean {
+  if (sent.length !== current.length) return true;
+  const byId = new Map(current.map((image) => [image.id, image]));
+  return sent.some((image) => {
+    const now = byId.get(image.id);
+    return (
+      !now ||
+      now.position !== image.position ||
+      now.altCa !== image.altCa ||
+      now.altEs !== image.altEs
+    );
+  });
+}
+
+/**
+ * True when `requestId` is still the most recently dispatched
+ * `setCover` call. `setCover` keeps only one `savingCoverId`/`previous`
+ * pair per call, so a response for an older, superseded request must be
+ * ignored entirely — otherwise it can roll back a newer optimistic
+ * update it knows nothing about, or clear the saving indicator out from
+ * under the request that's actually still in flight (task-9 fix-round-1
+ * IMPORTANT 3): cover=A; click B (dispatched, latest=B); click C
+ * (dispatched, latest=C); C succeeds first; B then fails — B's response
+ * must be ignored, not rolled back to A over the top of C.
+ */
+export function shouldApplyCoverResponse(
+  requestId: string,
+  latestRequestId: string | null
+): boolean {
+  return requestId === latestRequestId;
 }

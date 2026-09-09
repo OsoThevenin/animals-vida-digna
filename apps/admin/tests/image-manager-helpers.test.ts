@@ -1,10 +1,13 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   buildCompressionOptions,
   coverAfterRemoval,
   describeActionError,
   describeCompressedSizeError,
   MAX_ACTION_BODY_BYTES,
+  ordersDiffer,
+  processUploadFile,
+  shouldApplyCoverResponse,
   UPLOAD_SIZE_HEADROOM_BYTES,
   withAltEdit,
   withoutImage,
@@ -88,8 +91,9 @@ describe('coverAfterRemoval', () => {
 
 describe('withUploadItem / withUploadStatus', () => {
   it('appends a new upload item immutably', () => {
-    const items = [{ name: 'a.jpg', status: 'compressing' as const }];
+    const items = [{ id: '1', name: 'a.jpg', status: 'compressing' as const }];
     const next = withUploadItem(items, {
+      id: '2',
       name: 'b.jpg',
       status: 'compressing',
     });
@@ -97,22 +101,36 @@ describe('withUploadItem / withUploadStatus', () => {
     expect(items).toHaveLength(1);
   });
 
-  it('patches only the matching item by name, immutably', () => {
+  it('patches only the matching item by id, immutably', () => {
     const items = [
-      { name: 'a.jpg', status: 'compressing' as const },
-      { name: 'b.jpg', status: 'compressing' as const },
+      { id: '1', name: 'a.jpg', status: 'compressing' as const },
+      { id: '2', name: 'a.jpg', status: 'compressing' as const },
     ];
-    const next = withUploadStatus(items, 'a.jpg', {
+    const next = withUploadStatus(items, '1', {
       status: 'error',
       message: 'boom',
     });
     expect(next[0]).toEqual({
+      id: '1',
       name: 'a.jpg',
       status: 'error',
       message: 'boom',
     });
     expect(next[1]).toBe(items[1]);
     expect(items[0].status).toBe('compressing');
+  });
+
+  it('never collides two same-named files (fix-round-1 MINOR 6)', () => {
+    // Two files picked in the same <input multiple> selection can share
+    // a name — keying by id (not name) is what keeps their status
+    // independent.
+    const items = [
+      { id: 'req-1', name: 'foto.jpg', status: 'compressing' as const },
+      { id: 'req-2', name: 'foto.jpg', status: 'compressing' as const },
+    ];
+    const next = withUploadStatus(items, 'req-1', { status: 'done' });
+    expect(next[0].status).toBe('done');
+    expect(next[1].status).toBe('compressing');
   });
 });
 
@@ -131,5 +149,162 @@ describe('describeActionError', () => {
 
   it('falls back when the message is an empty string', () => {
     expect(describeActionError({ message: '' }, 'fallback')).toBe('fallback');
+  });
+});
+
+/**
+ * fix-round-1 IMPORTANT 1: `handleFiles`' loop had no `catch`/`continue`
+ * around reading dimensions, unlike the compress/size-gate/validate steps
+ * around it. `createImageBitmap` rejecting (a decode failure, or an
+ * unsupported/animated source) left that row stuck at "comprimint…"
+ * forever and dropped every subsequent queued file. `processUploadFile`
+ * makes every step — including this one — return an error result instead
+ * of throwing, so a caller looping over files always reaches the next
+ * iteration.
+ */
+describe('processUploadFile', () => {
+  const okFile = new File(['x'], 'photo.jpg', { type: 'image/webp' });
+
+  // A factory, not a shared object: each test needs its own `vi.fn()`
+  // instances so call-count assertions (`not.toHaveBeenCalled()`) aren't
+  // polluted by calls made in an earlier test.
+  function makeDeps() {
+    return {
+      compress: vi.fn(async (f: File) => f),
+      readDimensions: vi.fn(async () => ({ width: 800, height: 600 })),
+      upload: vi.fn(async () => ({ data: { id: 'img_1' } })),
+    };
+  }
+
+  it('uploads successfully through every step', async () => {
+    const result = await processUploadFile(okFile, 'cat_1', makeDeps());
+    expect(result).toEqual({ status: 'done', image: { id: 'img_1' } });
+  });
+
+  it('returns a Catalan error and does not throw when reading dimensions rejects', async () => {
+    const deps = {
+      ...makeDeps(),
+      readDimensions: vi.fn(async () => {
+        throw new Error('decode failed');
+      }),
+    };
+    const result = await processUploadFile(okFile, 'cat_1', deps);
+    expect(result.status).toBe('error');
+    expect(result.status === 'error' && result.message).toBeTruthy();
+    // The point of the fix: upload is never reached once dimensions fail.
+    expect(deps.upload).not.toHaveBeenCalled();
+  });
+
+  it('processing a failing file does not stop the next file in a batch', async () => {
+    // Reproduces the exact bug: a decode failure on file 1 must not
+    // prevent file 2 (queued after it in the same <input multiple>
+    // selection) from being processed.
+    const failingDeps = {
+      ...makeDeps(),
+      readDimensions: vi.fn(async () => {
+        throw new Error('decode failed');
+      }),
+    };
+    const results = [];
+    for (const deps of [failingDeps, makeDeps()]) {
+      // Sequential on purpose — mirrors the component's own per-file loop,
+      // which is exactly what's under test.
+      results.push(await processUploadFile(okFile, 'cat_1', deps));
+    }
+    expect(results[0].status).toBe('error');
+    expect(results[1]).toEqual({ status: 'done', image: { id: 'img_1' } });
+  });
+
+  it('still returns an error result (not a throw) when compression fails', async () => {
+    const deps = {
+      ...makeDeps(),
+      compress: vi.fn(async () => {
+        throw new Error('boom');
+      }),
+    };
+    const result = await processUploadFile(okFile, 'cat_1', deps);
+    expect(result.status).toBe('error');
+  });
+
+  it('gates on the compressed size before ever validating or uploading', async () => {
+    const deps = makeDeps();
+    deps.compress.mockResolvedValue({
+      type: 'image/webp',
+      size: 2_000_000,
+    } as unknown as File);
+    const result = await processUploadFile(okFile, 'cat_1', deps);
+    expect(result.status).toBe('error');
+    expect(deps.upload).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * fix-round-1 IMPORTANT 2: `images.update` always resolves `{ ok: true }`,
+ * even when the volunteer reordered or edited alt text again while the
+ * save was still in flight — the server only ever held what was actually
+ * sent. `ordersDiffer` is what lets `saveOrderAndAlts` tell a genuine
+ * save apart from a stale one instead of always saying "Desat.".
+ */
+describe('ordersDiffer', () => {
+  const sent = [
+    { id: 'a', altCa: 'A', altEs: 'A', position: 0 },
+    { id: 'b', altCa: 'B', altEs: 'B', position: 1 },
+    { id: 'c', altCa: 'C', altEs: 'C', position: 2 },
+  ];
+
+  it('is false when the current state still matches what was sent', () => {
+    expect(
+      ordersDiffer(
+        sent,
+        sent.map((image) => ({ ...image }))
+      )
+    ).toBe(false);
+  });
+
+  it('is true after a reorder happened while the save was in flight', () => {
+    // Reproduces the exact bug: click Desa (order a,b,c sent), then click
+    // "Mou avall" on b before the response arrives (local becomes a,c,b).
+    const current = [
+      { id: 'a', altCa: 'A', altEs: 'A', position: 0 },
+      { id: 'c', altCa: 'C', altEs: 'C', position: 1 },
+      { id: 'b', altCa: 'B', altEs: 'B', position: 2 },
+    ];
+    expect(ordersDiffer(sent, current)).toBe(true);
+  });
+
+  it('is true after an alt-text edit happened while the save was in flight', () => {
+    const current = sent.map((image) =>
+      image.id === 'b' ? { ...image, altCa: 'Edited mid-save' } : image
+    );
+    expect(ordersDiffer(sent, current)).toBe(true);
+  });
+
+  it('is true when an image was removed or added while the save was in flight', () => {
+    expect(ordersDiffer(sent, sent.slice(0, 2))).toBe(true);
+  });
+});
+
+/**
+ * fix-round-1 IMPORTANT 3: `setCover` captured `previous` per call while
+ * `savingCoverId` was a single slot, so an older, superseded response
+ * could roll back over a newer optimistic update or clear the saving
+ * indicator out from under the request that was actually still in
+ * flight. `shouldApplyCoverResponse` is the guard that makes a stale
+ * response a no-op.
+ */
+describe('shouldApplyCoverResponse', () => {
+  it('applies when this response is still for the latest dispatched request', () => {
+    expect(shouldApplyCoverResponse('C', 'C')).toBe(true);
+  });
+
+  it('ignores a stale response once a newer request has been dispatched', () => {
+    // cover=A; click B (dispatched, latest=B); click C (dispatched,
+    // latest=C); C settles first; B's response (an error) then arrives —
+    // it must be ignored, not rolled back over C.
+    expect(shouldApplyCoverResponse('B', 'C')).toBe(false);
+  });
+
+  it('treats no dispatched request as never current', () => {
+    expect(shouldApplyCoverResponse('A', null)).toBe(false);
   });
 });

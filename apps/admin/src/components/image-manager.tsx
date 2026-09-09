@@ -3,7 +3,7 @@ import type { CatImage } from '@avd/content/cats';
 import { imageUrl, MAX_UPLOAD_EDGE } from '@avd/content/image-url';
 import imageCompression from 'browser-image-compression';
 import { ArrowDown, ArrowUp, Star, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { FormField } from '@/components/form-field';
 import {
   AlertDialog,
@@ -23,14 +23,15 @@ import {
   buildCompressionOptions,
   coverAfterRemoval,
   describeActionError,
-  describeCompressedSizeError,
+  ordersDiffer,
+  processUploadFile,
+  shouldApplyCoverResponse,
   type UploadProgressItem,
   withAltEdit,
   withoutImage,
   withUploadItem,
   withUploadStatus,
 } from '@/lib/image-manager';
-import { validateUploadFile } from '@/lib/image-upload';
 
 export interface ImageManagerProps {
   catId: string;
@@ -53,6 +54,19 @@ export default function ImageManager({
   const [saving, setSaving] = useState(false);
   const [savingCoverId, setSavingCoverId] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState('');
+
+  // Always holds the latest `images` value, readable from inside an
+  // in-flight save's closure even after the volunteer keeps editing —
+  // see `ordersDiffer` usage in `saveOrderAndAlts` (fix-round-1
+  // IMPORTANT 2).
+  const imagesRef = useRef(images);
+  imagesRef.current = images;
+
+  // The most recently dispatched `setCover` call's image id. A response
+  // whose id no longer matches this is stale and must be ignored — see
+  // `shouldApplyCoverResponse` usage in `setCover` (fix-round-1
+  // IMPORTANT 3).
+  const latestCoverRequestRef = useRef<string | null>(null);
 
   function move(index: number, direction: -1 | 1) {
     setImages((prev) => moveImage(prev, index, index + direction));
@@ -104,16 +118,37 @@ export default function ImageManager({
       })),
     });
     setSaving(false);
+    if (error) {
+      setSaveMessage(describeActionError(error, "No s'ha pogut desar."));
+      return;
+    }
+    // `images.update` always resolves `{ ok: true }`, even when the
+    // volunteer reordered or re-edited alt text while this save was in
+    // flight (the server only ever has `positioned`, sent above). Compare
+    // against the *current* state — via the ref, since this closure's own
+    // `images`/`positioned` are the pre-await snapshot — before claiming
+    // success (fix-round-1 IMPORTANT 2).
     setSaveMessage(
-      error ? describeActionError(error, "No s'ha pogut desar.") : 'Desat.'
+      ordersDiffer(positioned, imagesRef.current)
+        ? "S'ha desat una versió anterior: hi ha canvis nous. Torna a prémer «Desa» per guardar-los."
+        : 'Desat.'
     );
   }
 
   async function setCover(id: string) {
     const previous = coverImageId;
+    latestCoverRequestRef.current = id;
     setCoverImageIdState(id);
     setSavingCoverId(id);
     const { error } = await actions.images.setCover({ catId, imageId: id });
+    if (!shouldApplyCoverResponse(id, latestCoverRequestRef.current)) {
+      // A newer setCover call has been dispatched since this one — that
+      // request, not this response, owns coverImageId/savingCoverId now.
+      // Applying this stale response (success or failure) could roll
+      // back a newer optimistic update, or clear the saving indicator
+      // out from under the request that's actually still in flight.
+      return;
+    }
     setSavingCoverId(null);
     if (error) {
       setCoverImageIdState(previous);
@@ -123,88 +158,52 @@ export default function ImageManager({
     }
   }
 
-  async function handleFiles(fileList: FileList | null) {
+  async function handleFiles(
+    fileList: FileList | null,
+    inputEl: HTMLInputElement | null
+  ) {
     if (!fileList || fileList.length === 0) return;
     const files = Array.from(fileList);
 
     for (const file of files) {
+      // A unique id per attempt, not `file.name` — two files picked in
+      // the same selection can share a name, which made them collide on
+      // both the React `key` and every status patch (fix-round-1
+      // MINOR 6).
+      const uploadId = crypto.randomUUID();
       setUploads((prev) =>
-        withUploadItem(prev, { name: file.name, status: 'compressing' })
+        withUploadItem(prev, {
+          id: uploadId,
+          name: file.name,
+          status: 'compressing',
+        })
       );
 
-      let compressed: File;
-      try {
-        compressed = await imageCompression(
-          file,
-          buildCompressionOptions(MAX_UPLOAD_EDGE)
-        );
-      } catch {
-        setUploads((prev) =>
-          withUploadStatus(prev, file.name, {
-            status: 'error',
-            message: "No s'ha pogut comprimir la imatge.",
-          })
-        );
-        continue;
-      }
-
-      const sizeError = describeCompressedSizeError(compressed.size);
-      if (sizeError) {
-        setUploads((prev) =>
-          withUploadStatus(prev, file.name, {
-            status: 'error',
-            message: sizeError,
-          })
-        );
-        continue;
-      }
-
-      const validation = validateUploadFile({
-        type: compressed.type,
-        size: compressed.size,
+      const result = await processUploadFile<CatImage>(file, catId, {
+        compress: (f) =>
+          imageCompression(f, buildCompressionOptions(MAX_UPLOAD_EDGE)),
+        readDimensions: readImageDimensions,
+        upload: (formData) => actions.images.upload(formData),
       });
-      if (!validation.ok) {
+
+      if (result.status === 'error') {
         setUploads((prev) =>
-          withUploadStatus(prev, file.name, {
+          withUploadStatus(prev, uploadId, {
             status: 'error',
-            message:
-              validation.reason === 'type'
-                ? 'Format no vàlid.'
-                : 'Fitxer massa gran.',
+            message: result.message,
           })
         );
         continue;
       }
 
-      const dimensions = await readImageDimensions(compressed);
-
+      setImages((prev) => [...prev, result.image]);
       setUploads((prev) =>
-        withUploadStatus(prev, file.name, { status: 'uploading' })
-      );
-
-      const formData = new FormData();
-      formData.append('catId', catId);
-      formData.append('file', compressed, file.name);
-      formData.append('width', String(dimensions.width));
-      formData.append('height', String(dimensions.height));
-
-      const { data, error } = await actions.images.upload(formData);
-
-      if (error || !data) {
-        setUploads((prev) =>
-          withUploadStatus(prev, file.name, {
-            status: 'error',
-            message: describeActionError(error, 'Error pujant la imatge.'),
-          })
-        );
-        continue;
-      }
-
-      setImages((prev) => [...prev, data as CatImage]);
-      setUploads((prev) =>
-        withUploadStatus(prev, file.name, { status: 'done' })
+        withUploadStatus(prev, uploadId, { status: 'done' })
       );
     }
+
+    // Reset so re-selecting the identical file(s) fires onChange again.
+    if (inputEl) inputEl.value = '';
   }
 
   return (
@@ -219,113 +218,122 @@ export default function ImageManager({
       ) : null}
 
       <ul className="mb-6 space-y-4">
-        {images.map((image, index) => (
-          <li
-            className="flex flex-col gap-3 rounded-lg border border-border p-4 md:flex-row md:items-start"
-            key={image.id}
-          >
-            <img
-              alt={image.altCa || image.altEs || 'Foto del gat'}
-              className="h-32 w-32 shrink-0 rounded-lg object-cover"
-              height={128}
-              src={imageUrl(image.r2Key, 320, origin)}
-              width={128}
-            />
-            <div className="flex-1">
-              <div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-                <FormField
-                  id={`alt-ca-${image.id}`}
-                  label="Text alternatiu (CA)"
-                >
-                  <Input
+        {images.map((image, index) => {
+          const imageLabel = image.altCa || image.altEs || 'aquesta foto';
+          const isCover = coverImageId === image.id;
+          return (
+            <li
+              className="flex flex-col gap-3 rounded-lg border border-border p-4 md:flex-row md:items-start"
+              key={image.id}
+            >
+              <img
+                alt={image.altCa || image.altEs || 'Foto del gat'}
+                className="h-32 w-32 shrink-0 rounded-lg object-cover"
+                height={128}
+                src={imageUrl(image.r2Key, 320, origin)}
+                width={128}
+              />
+              <div className="flex-1">
+                <div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <FormField
                     id={`alt-ca-${image.id}`}
-                    onChange={(event) =>
-                      updateAlt(image.id, 'altCa', event.currentTarget.value)
-                    }
-                    value={image.altCa}
-                  />
-                </FormField>
-                <FormField
-                  id={`alt-es-${image.id}`}
-                  label="Text alternatiu (ES)"
-                >
-                  <Input
+                    label="Text alternatiu (CA)"
+                  >
+                    <Input
+                      id={`alt-ca-${image.id}`}
+                      onChange={(event) =>
+                        updateAlt(image.id, 'altCa', event.currentTarget.value)
+                      }
+                      value={image.altCa}
+                    />
+                  </FormField>
+                  <FormField
                     id={`alt-es-${image.id}`}
-                    onChange={(event) =>
-                      updateAlt(image.id, 'altEs', event.currentTarget.value)
+                    label="Text alternatiu (ES)"
+                  >
+                    <Input
+                      id={`alt-es-${image.id}`}
+                      onChange={(event) =>
+                        updateAlt(image.id, 'altEs', event.currentTarget.value)
+                      }
+                      value={image.altEs}
+                    />
+                  </FormField>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    aria-label={
+                      isCover
+                        ? `"${imageLabel}" és la portada`
+                        : `Fes portada "${imageLabel}"`
                     }
-                    value={image.altEs}
-                  />
-                </FormField>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Button
-                  aria-pressed={coverImageId === image.id}
-                  disabled={savingCoverId === image.id}
-                  onClick={() => setCover(image.id)}
-                  size="sm"
-                  type="button"
-                  variant={coverImageId === image.id ? 'default' : 'outline'}
-                >
-                  <Star aria-hidden="true" />
-                  {coverImageId === image.id ? 'És la portada' : 'Fes portada'}
-                </Button>
-                <Button
-                  aria-label={`Mou "${image.altCa || image.altEs || 'aquesta foto'}" amunt`}
-                  disabled={index === 0}
-                  onClick={() => move(index, -1)}
-                  size="icon-sm"
-                  type="button"
-                  variant="outline"
-                >
-                  <ArrowUp aria-hidden="true" />
-                </Button>
-                <Button
-                  aria-label={`Mou "${image.altCa || image.altEs || 'aquesta foto'}" avall`}
-                  disabled={index === images.length - 1}
-                  onClick={() => move(index, 1)}
-                  size="icon-sm"
-                  type="button"
-                  variant="outline"
-                >
-                  <ArrowDown aria-hidden="true" />
-                </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      aria-label={`Elimina "${image.altCa || image.altEs || 'aquesta foto'}"`}
-                      size="icon-sm"
-                      type="button"
-                      variant="destructive"
-                    >
-                      <Trash2 aria-hidden="true" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Eliminar aquesta foto?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Aquesta acció no es pot desfer. La foto s'eliminarà del
-                        gat i del magatzem.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel·la</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => removeImage(image.id)}
+                    aria-pressed={isCover}
+                    disabled={savingCoverId === image.id}
+                    onClick={() => setCover(image.id)}
+                    size="sm"
+                    type="button"
+                    variant={isCover ? 'default' : 'outline'}
+                  >
+                    <Star aria-hidden="true" />
+                    {isCover ? 'És la portada' : 'Fes portada'}
+                  </Button>
+                  <Button
+                    aria-label={`Mou "${imageLabel}" amunt`}
+                    disabled={index === 0}
+                    onClick={() => move(index, -1)}
+                    size="icon-sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    <ArrowUp aria-hidden="true" />
+                  </Button>
+                  <Button
+                    aria-label={`Mou "${imageLabel}" avall`}
+                    disabled={index === images.length - 1}
+                    onClick={() => move(index, 1)}
+                    size="icon-sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    <ArrowDown aria-hidden="true" />
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        aria-label={`Elimina "${imageLabel}"`}
+                        size="icon-sm"
+                        type="button"
                         variant="destructive"
                       >
-                        Elimina
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                        <Trash2 aria-hidden="true" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Eliminar aquesta foto?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Aquesta acció no es pot desfer. La foto s'eliminarà
+                          del gat i del magatzem.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel·la</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => removeImage(image.id)}
+                          variant="destructive"
+                        >
+                          Elimina
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
-            </div>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
 
       <Button disabled={saving} onClick={saveOrderAndAlts} type="button">
@@ -343,13 +351,15 @@ export default function ImageManager({
           accept="image/*"
           id="cat-image-upload"
           multiple
-          onChange={(event) => handleFiles(event.currentTarget.files)}
+          onChange={(event) =>
+            handleFiles(event.currentTarget.files, event.currentTarget)
+          }
           type="file"
         />
         {uploads.length > 0 ? (
           <ul className="mt-3 space-y-1 text-sm">
             {uploads.map((item) => (
-              <li key={item.name}>
+              <li key={item.id}>
                 {item.name} — {item.status === 'compressing' && 'comprimint…'}
                 {item.status === 'uploading' && 'pujant…'}
                 {item.status === 'done' && 'fet'}
