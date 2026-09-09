@@ -123,7 +123,11 @@ describe('middleware /_actions/* unauthenticated handling', () => {
     const contentType = response.headers.get('content-type') ?? '';
     expect(contentType).toContain('application/json');
 
-    const body = await response.json();
+    const body = (await response.json()) as {
+      type: string;
+      code: string;
+      message: string;
+    };
     expect(body).toMatchObject({
       type: 'AstroActionError',
       code: 'UNAUTHORIZED',
