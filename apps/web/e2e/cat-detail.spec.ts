@@ -39,7 +39,11 @@ test.describe('cat detail page (reached by clicking through from /cats)', () => 
     await expect(coverImg).toBeVisible();
     const coverSrc = await coverImg.getAttribute('src');
     expect(coverSrc).not.toBeNull();
-    assertCanonicalTransformUrl(coverSrc as string, 1280, 'e2e-test-img-3.webp');
+    assertCanonicalTransformUrl(
+      coverSrc as string,
+      1280,
+      'e2e-test-img-3.webp'
+    );
     expect(await coverImg.getAttribute('width')).toBe('1500');
 
     await expect(
@@ -49,6 +53,10 @@ test.describe('cat detail page (reached by clicking through from /cats)', () => 
     await expect(galleryImg).toBeVisible();
     const gallerySrc = await galleryImg.getAttribute('src');
     expect(gallerySrc).not.toBeNull();
-    assertCanonicalTransformUrl(gallerySrc as string, 640, 'e2e-test-img-4.webp');
+    assertCanonicalTransformUrl(
+      gallerySrc as string,
+      640,
+      'e2e-test-img-4.webp'
+    );
   });
 });

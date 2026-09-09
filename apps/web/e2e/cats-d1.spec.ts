@@ -83,7 +83,11 @@ test.describe('cat detail page reached by clicking through (D1-backed)', () => {
     await expect(coverImg).toBeVisible();
     const coverSrc = await coverImg.getAttribute('src');
     expect(coverSrc).not.toBeNull();
-    assertCanonicalTransformUrl(coverSrc as string, 1280, 'e2e-test-img-1.webp');
+    assertCanonicalTransformUrl(
+      coverSrc as string,
+      1280,
+      'e2e-test-img-1.webp'
+    );
 
     // The intrinsic (non-allowlisted) width must still be exposed as the
     // HTML width attribute, so the browser can reserve layout space.
@@ -99,7 +103,10 @@ test.describe('cat detail page reached by clicking through (D1-backed)', () => {
     const catSchema = jsonLdScripts
       .map((text) => JSON.parse(text) as Record<string, unknown>)
       .find((schema) => schema['@type'] === 'Thing');
-    expect(catSchema, 'expected a Thing (cat) JSON-LD schema on the page').not.toBeUndefined();
+    expect(
+      catSchema,
+      'expected a Thing (cat) JSON-LD schema on the page'
+    ).not.toBeUndefined();
     assertCanonicalTransformUrl(
       catSchema?.image as string,
       1280,
@@ -113,7 +120,11 @@ test.describe('cat detail page reached by clicking through (D1-backed)', () => {
     await expect(galleryImg).toBeVisible();
     const gallerySrc = await galleryImg.getAttribute('src');
     expect(gallerySrc).not.toBeNull();
-    assertCanonicalTransformUrl(gallerySrc as string, 640, 'e2e-test-img-2.webp');
+    assertCanonicalTransformUrl(
+      gallerySrc as string,
+      640,
+      'e2e-test-img-2.webp'
+    );
   });
 });
 
@@ -135,9 +146,7 @@ test.describe('unknown or unpublished cat slug (M5 fix)', () => {
 
 test.describe('cache headers on the cat pages (M9 fix)', () => {
   for (const path of ['/cats', '/es/cats', '/cat/lluna', '/es/cat/luna']) {
-    test(`${path} sets a short-TTL Cache-Control header`, async ({
-      page,
-    }) => {
+    test(`${path} sets a short-TTL Cache-Control header`, async ({ page }) => {
       const response = await page.goto(path);
       expect(response?.status()).toBe(200);
       const cacheControl = response?.headers()['cache-control'];
@@ -161,7 +170,9 @@ test.describe('sitemap-cats.xml', () => {
     expect(body).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
 
     // At least one CA and one ES cat URL.
-    expect(body).toMatch(/<loc>https:\/\/animalsvidadigna\.org\/cat\/[^<]+<\/loc>/);
+    expect(body).toMatch(
+      /<loc>https:\/\/animalsvidadigna\.org\/cat\/[^<]+<\/loc>/
+    );
     expect(body).toMatch(
       /<loc>https:\/\/animalsvidadigna\.org\/es\/cat\/[^<]+<\/loc>/
     );
