@@ -1,7 +1,13 @@
 /**
- * Pure, framework-free helpers for the `image-manager.tsx` island. Kept
- * separate from the component so the state-update and error-formatting
- * logic can be unit tested without a DOM or `astro:actions`.
+ * Framework-free helpers for the `image-manager.tsx` island: state-update
+ * predicates, Catalan error formatting, and the file-upload pipeline
+ * (`processUploadFile`, which does construct a real `FormData` and calls
+ * `@/lib/image-upload`'s `validateUploadFile`). None of it touches React
+ * or the DOM, and every network/browser call it makes is dependency-
+ * injected — that, not purity in the strict sense, is what keeps this
+ * module unit-testable without a DOM or `astro:actions` (task-9
+ * fix-round-2: this docstring previously called the module "pure", which
+ * stopped being accurate once `processUploadFile` landed in fix-round-1).
  */
 import { validateUploadFile } from '@/lib/image-upload';
 
@@ -134,6 +140,17 @@ export function describeActionError(error: unknown, fallback: string): string {
 export interface ProcessUploadDeps<Image> {
   compress: (file: File) => Promise<File>;
   readDimensions: (file: File) => Promise<{ width: number; height: number }>;
+  /**
+   * Called once, synchronously, right before the network `upload` call —
+   * after compression, the size gate, validation, and reading dimensions
+   * have all already succeeded. Lets the caller flip that row's progress
+   * status to "uploading" for the network step specifically (task-9
+   * fix-round-2: fix-round-1 moved the whole pipeline in here without a
+   * progress hook, so nothing ever set 'uploading' any more and a
+   * successful upload's row was stuck reading "comprimint…" for the
+   * entire network transfer — the longest of the three steps).
+   */
+  onUploading?: () => void;
   upload: (formData: FormData) => Promise<{ data?: Image; error?: unknown }>;
 }
 
@@ -203,6 +220,8 @@ export async function processUploadFile<Image>(
   formData.append('width', String(dimensions.width));
   formData.append('height', String(dimensions.height));
 
+  deps.onUploading?.();
+
   const { data, error } = await deps.upload(formData);
   if (error || !data) {
     return {
@@ -261,4 +280,53 @@ export function shouldApplyCoverResponse(
   latestRequestId: string | null
 ): boolean {
   return requestId === latestRequestId;
+}
+
+export interface CoverResponseOutcome {
+  requestId: string;
+  latestRequestId: string | null;
+  /** The last cover id the server is actually known to hold. */
+  confirmedCoverId: string | null;
+  error: boolean;
+}
+
+export type CoverResponseDecision =
+  | { applied: false }
+  | {
+      applied: true;
+      coverImageId: string | null;
+      confirmedCoverId: string | null;
+    };
+
+/**
+ * Resolves what `setCover` should do with one response, including WHERE
+ * to roll back to on failure. Fixes a residual on IMPORTANT 3 (task-9
+ * fix-round-2): `shouldApplyCoverResponse` alone stops a stale response
+ * from clobbering a newer one, but the original fix still rolled back to
+ * `previous` — whatever was on screen when that particular call started.
+ * If B and C are both dispatched (cover=A; click B; click C) and BOTH
+ * fail, C is the latest, passes the staleness guard, and would roll back
+ * to `previous === B` — a value the server never actually held (B never
+ * succeeded either). Rolling back to `confirmedCoverId` instead — the
+ * last cover a *successful* response actually confirmed — never restores
+ * an unconfirmed optimistic value, no matter how many requests raced.
+ */
+export function resolveCoverResponse(
+  outcome: CoverResponseOutcome
+): CoverResponseDecision {
+  if (!shouldApplyCoverResponse(outcome.requestId, outcome.latestRequestId)) {
+    return { applied: false };
+  }
+  if (outcome.error) {
+    return {
+      applied: true,
+      coverImageId: outcome.confirmedCoverId,
+      confirmedCoverId: outcome.confirmedCoverId,
+    };
+  }
+  return {
+    applied: true,
+    coverImageId: outcome.requestId,
+    confirmedCoverId: outcome.requestId,
+  };
 }

@@ -3,7 +3,7 @@ import type { CatImage } from '@avd/content/cats';
 import { imageUrl, MAX_UPLOAD_EDGE } from '@avd/content/image-url';
 import imageCompression from 'browser-image-compression';
 import { ArrowDown, ArrowUp, Star, Trash2 } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FormField } from '@/components/form-field';
 import {
   AlertDialog,
@@ -25,7 +25,7 @@ import {
   describeActionError,
   ordersDiffer,
   processUploadFile,
-  shouldApplyCoverResponse,
+  resolveCoverResponse,
   type UploadProgressItem,
   withAltEdit,
   withoutImage,
@@ -58,15 +58,28 @@ export default function ImageManager({
   // Always holds the latest `images` value, readable from inside an
   // in-flight save's closure even after the volunteer keeps editing —
   // see `ordersDiffer` usage in `saveOrderAndAlts` (fix-round-1
-  // IMPORTANT 2).
+  // IMPORTANT 2). Updated in an effect, not during render: assigning a
+  // ref mid-render is a render side effect React's concurrent mode does
+  // not guarantee will only happen once (task-9 fix-round-2 cleanup).
   const imagesRef = useRef(images);
-  imagesRef.current = images;
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
 
   // The most recently dispatched `setCover` call's image id. A response
   // whose id no longer matches this is stale and must be ignored — see
-  // `shouldApplyCoverResponse` usage in `setCover` (fix-round-1
-  // IMPORTANT 3).
+  // `resolveCoverResponse` usage in `setCover` (fix-round-1 IMPORTANT 3).
   const latestCoverRequestRef = useRef<string | null>(null);
+
+  // The last cover id a *successful* `setCover` response actually
+  // confirmed the server holds (seeded from the initial prop, which came
+  // from the server). `setCover` rolls back to this on failure, not to
+  // whatever was optimistically on screen when that call started — see
+  // `resolveCoverResponse` (task-9 fix-round-2, residual on IMPORTANT 3):
+  // if two cover changes are in flight and BOTH fail, rolling back to
+  // "whatever was on screen when the second one started" can restore the
+  // first one's optimistic value, which the server never held either.
+  const confirmedCoverIdRef = useRef(initialCoverImageId);
 
   function move(index: number, direction: -1 | 1) {
     setImages((prev) => moveImage(prev, index, index + direction));
@@ -99,6 +112,11 @@ export default function ImageManager({
             "La foto s'ha eliminat, però no s'ha pogut netejar la portada."
           )
         );
+      } else {
+        // nextCover is always null here (the removed image was the
+        // cover) — keep the rollback source in `setCover` in sync with
+        // what the server actually confirmed.
+        confirmedCoverIdRef.current = null;
       }
     }
   }
@@ -136,12 +154,17 @@ export default function ImageManager({
   }
 
   async function setCover(id: string) {
-    const previous = coverImageId;
     latestCoverRequestRef.current = id;
     setCoverImageIdState(id);
     setSavingCoverId(id);
     const { error } = await actions.images.setCover({ catId, imageId: id });
-    if (!shouldApplyCoverResponse(id, latestCoverRequestRef.current)) {
+    const decision = resolveCoverResponse({
+      requestId: id,
+      latestRequestId: latestCoverRequestRef.current,
+      confirmedCoverId: confirmedCoverIdRef.current,
+      error: Boolean(error),
+    });
+    if (!decision.applied) {
       // A newer setCover call has been dispatched since this one — that
       // request, not this response, owns coverImageId/savingCoverId now.
       // Applying this stale response (success or failure) could roll
@@ -150,8 +173,9 @@ export default function ImageManager({
       return;
     }
     setSavingCoverId(null);
+    confirmedCoverIdRef.current = decision.confirmedCoverId;
+    setCoverImageIdState(decision.coverImageId);
     if (error) {
-      setCoverImageIdState(previous);
       setSaveMessage(
         describeActionError(error, "No s'ha pogut triar la portada.")
       );
@@ -183,6 +207,13 @@ export default function ImageManager({
         compress: (f) =>
           imageCompression(f, buildCompressionOptions(MAX_UPLOAD_EDGE)),
         readDimensions: readImageDimensions,
+        // Flips this row to "uploading" right before the network call —
+        // restores the progress step that fix-round-1's extraction
+        // accidentally dropped (fix-round-2 NEW BREAKAGE).
+        onUploading: () =>
+          setUploads((prev) =>
+            withUploadStatus(prev, uploadId, { status: 'uploading' })
+          ),
         upload: (formData) => actions.images.upload(formData),
       });
 

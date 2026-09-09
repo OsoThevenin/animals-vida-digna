@@ -7,6 +7,7 @@ import {
   MAX_ACTION_BODY_BYTES,
   ordersDiffer,
   processUploadFile,
+  resolveCoverResponse,
   shouldApplyCoverResponse,
   UPLOAD_SIZE_HEADROOM_BYTES,
   withAltEdit,
@@ -236,6 +237,61 @@ describe('processUploadFile', () => {
     expect(result.status).toBe('error');
     expect(deps.upload).not.toHaveBeenCalled();
   });
+
+  it('calls onUploading once, after compression/dimensions and before the network upload (fix-round-2 NEW BREAKAGE)', async () => {
+    // fix-round-1 moved the whole pipeline into processUploadFile without
+    // a progress hook, so nothing ever set the row to "uploading" again —
+    // it stayed on "comprimint…" for the entire network transfer. This
+    // asserts the call order onUploading must respect: after the steps
+    // that can still fail (compress, size gate, validate, dimensions),
+    // and strictly before `upload` — the exact restored behaviour.
+    const calls: string[] = [];
+    const deps = {
+      compress: vi.fn(async (f: File) => {
+        calls.push('compress');
+        return f;
+      }),
+      readDimensions: vi.fn(async () => {
+        calls.push('readDimensions');
+        return { width: 800, height: 600 };
+      }),
+      onUploading: vi.fn(() => {
+        calls.push('onUploading');
+      }),
+      upload: vi.fn(async () => {
+        calls.push('upload');
+        return { data: { id: 'img_1' } };
+      }),
+    };
+    const result = await processUploadFile(okFile, 'cat_1', deps);
+    expect(result.status).toBe('done');
+    expect(deps.onUploading).toHaveBeenCalledTimes(1);
+    expect(calls).toEqual([
+      'compress',
+      'readDimensions',
+      'onUploading',
+      'upload',
+    ]);
+  });
+
+  it('never calls onUploading when an earlier step fails', async () => {
+    const deps = {
+      ...makeDeps(),
+      readDimensions: vi.fn(async () => {
+        throw new Error('decode failed');
+      }),
+      onUploading: vi.fn(),
+    };
+    const result = await processUploadFile(okFile, 'cat_1', deps);
+    expect(result.status).toBe('error');
+    expect(deps.onUploading).not.toHaveBeenCalled();
+  });
+
+  it('tolerates a missing onUploading (optional dependency)', async () => {
+    const deps = makeDeps();
+    const result = await processUploadFile(okFile, 'cat_1', deps);
+    expect(result.status).toBe('done');
+  });
 });
 
 /**
@@ -306,5 +362,91 @@ describe('shouldApplyCoverResponse', () => {
 
   it('treats no dispatched request as never current', () => {
     expect(shouldApplyCoverResponse('A', null)).toBe(false);
+  });
+});
+
+/**
+ * fix-round-2 residual on IMPORTANT 3: `shouldApplyCoverResponse` alone
+ * stops a stale response from clobbering a newer one, but rolling back to
+ * "whatever was on screen when this call started" is still wrong if the
+ * newer call *also* fails — that value was never confirmed by the server
+ * either. `resolveCoverResponse` rolls back to `confirmedCoverId`
+ * instead, so a failure can never restore an unconfirmed value.
+ */
+describe('resolveCoverResponse', () => {
+  it('applies a successful response and confirms its cover id', () => {
+    const decision = resolveCoverResponse({
+      requestId: 'B',
+      latestRequestId: 'B',
+      confirmedCoverId: 'A',
+      error: false,
+    });
+    expect(decision).toEqual({
+      applied: true,
+      coverImageId: 'B',
+      confirmedCoverId: 'B',
+    });
+  });
+
+  it('rolls back to the last confirmed cover on a solo failure', () => {
+    const decision = resolveCoverResponse({
+      requestId: 'B',
+      latestRequestId: 'B',
+      confirmedCoverId: 'A',
+      error: true,
+    });
+    expect(decision).toEqual({
+      applied: true,
+      coverImageId: 'A',
+      confirmedCoverId: 'A',
+    });
+  });
+
+  it('ignores a stale response entirely, regardless of error', () => {
+    expect(
+      resolveCoverResponse({
+        requestId: 'B',
+        latestRequestId: 'C',
+        confirmedCoverId: 'A',
+        error: true,
+      })
+    ).toEqual({ applied: false });
+    expect(
+      resolveCoverResponse({
+        requestId: 'B',
+        latestRequestId: 'C',
+        confirmedCoverId: 'A',
+        error: false,
+      })
+    ).toEqual({ applied: false });
+  });
+
+  it('never restores an unconfirmed value when two in-flight requests BOTH fail', () => {
+    // The residual this fix closes: cover=A (confirmed=A); click B
+    // (dispatched, latest=B); click C (dispatched, latest=C, confirmed
+    // still A — B never succeeded). C settles first and fails: this must
+    // roll back to A, the last confirmed cover — NOT to B, which was
+    // only ever an optimistic, unconfirmed value.
+    const cResolution = resolveCoverResponse({
+      requestId: 'C',
+      latestRequestId: 'C',
+      confirmedCoverId: 'A',
+      error: true,
+    });
+    expect(cResolution).toEqual({
+      applied: true,
+      coverImageId: 'A',
+      confirmedCoverId: 'A',
+    });
+
+    // B's response (also an error) arrives after C was dispatched — it
+    // must be ignored, not applied over the top of C's rollback.
+    const bResolution = resolveCoverResponse({
+      requestId: 'B',
+      latestRequestId: 'C',
+      confirmedCoverId: 'A',
+      error: true,
+    });
+    expect(bResolution).toEqual({ applied: false });
   });
 });
