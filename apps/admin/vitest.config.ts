@@ -19,6 +19,11 @@ export default defineConfig({
       'astro:middleware': fileURLToPath(
         new URL('./tests/support/astro-middleware-shim.ts', import.meta.url)
       ),
+      // Same reasoning as astro:middleware above: astro:actions is a
+      // virtual module only Astro's Vite plugin provides.
+      'astro:actions': fileURLToPath(
+        new URL('./tests/support/astro-actions-shim.ts', import.meta.url)
+      ),
     },
   },
   test: {
