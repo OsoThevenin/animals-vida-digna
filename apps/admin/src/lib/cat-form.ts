@@ -160,25 +160,44 @@ export function deriveSlugs(
   return { slugCa: slugify(nameCa), slugEs: slugify(nameEs) };
 }
 
+export interface FieldErrorIssue {
+  path: (string | number)[];
+  message: string;
+}
+
 /**
- * Maps an Astro Action's isInputError().fields to a flat
- * { fieldName: message } object cat-form.tsx can index into. In edit mode
- * the action's input is `{ id, data: catInputSchema }`, so Zod reports
- * field paths as `data.nameCa`; this strips that prefix so the same
- * <Field error={fieldErrors.nameCa}> lookup works in both create and edit
- * mode. Only the first message per field is kept (Field only renders one).
+ * Maps an Astro Action's isInputError().issues to a flat
+ * { fieldName: message } object cat-form.tsx can index into.
+ *
+ * This deliberately reads `.issues` (each Zod issue's full `path`), not
+ * `.fields` — verified live under `wrangler dev` against the real
+ * `cats.update` action (task-8 correction, not in the original brief):
+ * Astro's `ActionInputError` (astro/dist/actions/runtime/shared.js)
+ * builds `.fields` by keying on `issue.path[0]` only, so in edit mode,
+ * where the action's input is `{ id, data: catInputSchema }` and every
+ * issue's path is `["data", "nameCa"]`, `.fields` collapses to a single
+ * `{ data: [...] }` bucket holding every nested message — there never is
+ * a `"data.nameCa"` key to strip a prefix from. `.issues` still carries
+ * each issue's full path array, so per-field attribution has to be
+ * rebuilt from that instead. In edit mode the leading `"data"` segment is
+ * dropped; a top-level issue with no nested path (e.g. on `id`) is kept
+ * as-is. Only the first message per field is kept (FormField only
+ * renders one).
  */
 export function inputErrorsToFieldErrors(
-  fields: Record<string, string[] | undefined>,
+  issues: FieldErrorIssue[],
   mode: 'create' | 'edit'
 ): Record<string, string> {
-  const prefix = mode === 'edit' ? 'data.' : '';
   const errors: Record<string, string> = {};
-  for (const [field, messages] of Object.entries(fields)) {
-    if (!messages || messages.length === 0) continue;
-    const key =
-      prefix && field.startsWith(prefix) ? field.slice(prefix.length) : field;
-    errors[key] = messages[0];
+  for (const issue of issues) {
+    const path =
+      mode === 'edit' && issue.path[0] === 'data'
+        ? issue.path.slice(1)
+        : issue.path;
+    if (path.length === 0) continue;
+    const key = path.join('.');
+    if (key in errors) continue;
+    errors[key] = issue.message;
   }
   return errors;
 }

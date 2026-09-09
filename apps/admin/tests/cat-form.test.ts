@@ -164,17 +164,28 @@ describe('deriveSlugs', () => {
 });
 
 describe('inputErrorsToFieldErrors', () => {
+  // Reads `.issues` (each Zod issue's full `path`), not `.fields` — Astro's
+  // real ActionInputError.fields keys only on `issue.path[0]`, so in edit
+  // mode (where every issue's path is `["data", "<field>"]`) it collapses
+  // to one `{ data: [...] }` bucket and never produces a "data.<field>"
+  // key to strip a prefix from. Verified live under `wrangler dev` against
+  // the real `cats.update` action — see task-8-report.md. This corrects
+  // Task 3's original `.fields`-based signature and its tests, which
+  // encoded that (unverified, and wrong) key shape.
   it('keeps bare field names as-is in create mode', () => {
     const result = inputErrorsToFieldErrors(
-      { nameCa: ['Required'], nameEs: ['Required'] },
+      [
+        { path: ['nameCa'], message: 'Required' },
+        { path: ['nameEs'], message: 'Required' },
+      ],
       'create'
     );
     expect(result).toEqual({ nameCa: 'Required', nameEs: 'Required' });
   });
 
-  it('strips the "data." prefix in edit mode', () => {
+  it('drops the leading "data" path segment in edit mode', () => {
     const result = inputErrorsToFieldErrors(
-      { 'data.nameCa': ['Required'] },
+      [{ path: ['data', 'nameCa'], message: 'Required' }],
       'edit'
     );
     expect(result).toEqual({ nameCa: 'Required' });
@@ -182,24 +193,30 @@ describe('inputErrorsToFieldErrors', () => {
 
   it('takes only the first message per field', () => {
     const result = inputErrorsToFieldErrors(
-      { 'data.nameCa': ['Required', 'Too short'] },
+      [
+        { path: ['data', 'nameCa'], message: 'Required' },
+        { path: ['data', 'nameCa'], message: 'Too short' },
+      ],
       'edit'
     );
     expect(result).toEqual({ nameCa: 'Required' });
   });
 
-  it('skips fields with no messages', () => {
+  it('skips issues with an empty path', () => {
     const result = inputErrorsToFieldErrors(
-      { nameCa: undefined, nameEs: [] },
+      [{ path: [], message: 'Invalid input' }],
       'create'
     );
     expect(result).toEqual({});
   });
 
-  it('leaves an edit-mode field without the "data." prefix unchanged', () => {
-    // Defensive: a top-level Zod issue (e.g. on the whole input object)
-    // would not carry the "data." prefix; the mapper must not corrupt it.
-    const result = inputErrorsToFieldErrors({ id: ['Required'] }, 'edit');
+  it('keeps an edit-mode top-level issue (no nested field) as-is', () => {
+    // Defensive: a Zod issue on the action's whole input (e.g. `id`
+    // itself) has no "data" segment to drop.
+    const result = inputErrorsToFieldErrors(
+      [{ path: ['id'], message: 'Required' }],
+      'edit'
+    );
     expect(result).toEqual({ id: 'Required' });
   });
 });

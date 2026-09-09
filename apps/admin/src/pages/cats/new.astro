@@ -1,0 +1,11 @@
+---
+import CatForm from '../../components/cat-form';
+import AdminLayout from '../../layouts/admin-layout.astro';
+
+export const prerender = false;
+---
+
+<AdminLayout title="Nou gat">
+  <h1 class="mb-6 font-semibold text-2xl text-foreground">Nou gat</h1>
+  <CatForm client:load mode="create" />
+</AdminLayout>
