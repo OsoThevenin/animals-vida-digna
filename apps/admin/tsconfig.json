@@ -8,6 +8,11 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*", "tests/**/*", "worker-configuration.d.ts"],
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "worker-configuration.d.ts",
+    ".astro/types.d.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

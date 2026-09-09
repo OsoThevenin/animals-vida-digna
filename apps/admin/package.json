@@ -9,7 +9,7 @@
     "preview": "wrangler dev",
     "deploy": "astro build && wrangler deploy",
     "test": "vitest run",
-    "check": "tsc --noEmit",
+    "check": "tsc --noEmit && astro check",
     "types": "wrangler types"
   },
   "dependencies": {
@@ -34,6 +34,7 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.10",
     "@cloudflare/workers-types": "^5.20260903.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",

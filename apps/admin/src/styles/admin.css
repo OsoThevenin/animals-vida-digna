@@ -54,6 +54,12 @@
   --status-treatment-foreground: #92400e;
   --status-unavailable: #ede4da;
   --status-unavailable-foreground: #4a3b2f;
+
+  /* Published/draft pill on the cats list (Task 7). */
+  --status-published: #dcfce7;
+  --status-published-foreground: #166534;
+  --status-draft: #ede4da;
+  --status-draft-foreground: #4a3b2f;
 }
 
 @theme inline {
@@ -85,6 +91,10 @@
   --color-status-treatment-foreground: var(--status-treatment-foreground);
   --color-status-unavailable: var(--status-unavailable);
   --color-status-unavailable-foreground: var(--status-unavailable-foreground);
+  --color-status-published: var(--status-published);
+  --color-status-published-foreground: var(--status-published-foreground);
+  --color-status-draft: var(--status-draft);
+  --color-status-draft-foreground: var(--status-draft-foreground);
 
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);

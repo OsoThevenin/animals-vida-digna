@@ -1,5 +1,6 @@
 import type { CatStatus } from '@avd/content/validate';
 import { CatStatusBadge } from '@/components/cat-status-badge';
+import { PublishedBadge } from '@/components/published-badge';
 import {
   Table,
   TableBody,
@@ -23,9 +24,14 @@ import {
 export interface CatsTableRow {
   id: string;
   nameCa: string;
+  nameEs: string;
   status: CatStatus;
   published: boolean;
   updatedAt: string;
+  updatedBy: string;
+  /** null when the cat has no cover image yet (the common case today). */
+  coverImageUrl: string | null;
+  coverImageAlt: string;
 }
 
 export interface CatsTableProps {
@@ -41,22 +47,55 @@ export function CatsTable({ cats }: CatsTableProps) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Nom</TableHead>
+          <TableHead>
+            <span className="sr-only">Foto</span>
+          </TableHead>
+          <TableHead>Nom (CA)</TableHead>
+          <TableHead>Nom (ES)</TableHead>
           <TableHead>Estat</TableHead>
           <TableHead>Publicat</TableHead>
           <TableHead>Actualitzat</TableHead>
+          <TableHead>
+            <span className="sr-only">Accions</span>
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {cats.map((cat) => (
           <TableRow key={cat.id}>
+            <TableCell>
+              {cat.coverImageUrl ? (
+                <img
+                  alt={cat.coverImageAlt}
+                  className="h-16 w-16 rounded-md object-cover"
+                  height={64}
+                  src={cat.coverImageUrl}
+                  width={64}
+                />
+              ) : (
+                <div className="flex h-16 w-16 items-center justify-center rounded-md bg-muted text-center text-[10px] text-muted-foreground">
+                  Sense foto
+                </div>
+              )}
+            </TableCell>
             <TableCell className="font-medium">{cat.nameCa}</TableCell>
+            <TableCell>{cat.nameEs}</TableCell>
             <TableCell>
               <CatStatusBadge status={cat.status} />
             </TableCell>
-            <TableCell>{cat.published ? 'Sí' : 'No'}</TableCell>
+            <TableCell>
+              <PublishedBadge published={cat.published} />
+            </TableCell>
             <TableCell className="text-muted-foreground">
-              {cat.updatedAt}
+              {cat.updatedAt} · {cat.updatedBy}
+            </TableCell>
+            <TableCell>
+              <a
+                className="font-medium text-primary text-sm hover:underline"
+                href={`/cats/${cat.id}`}
+              >
+                Edita
+              </a>
             </TableCell>
           </TableRow>
         ))}

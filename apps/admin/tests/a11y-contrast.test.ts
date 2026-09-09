@@ -90,6 +90,19 @@ describe('admin cat-status badge pairs meet WCAG AA', () => {
   }
 });
 
+describe('admin published/draft pill pairs meet WCAG AA', () => {
+  for (const pill of ['published', 'draft']) {
+    it(`${pill} pill text on its own background is at least ${AA}:1`, () => {
+      expect(
+        contrastRatio(
+          tokenHex(`status-${pill}-foreground`),
+          tokenHex(`status-${pill}`)
+        )
+      ).toBeGreaterThanOrEqual(AA);
+    });
+  }
+});
+
 describe('admin non-text tokens meet WCAG 1.4.11', () => {
   it(`the control border is at least ${NON_TEXT}:1 against the page`, () => {
     expect(

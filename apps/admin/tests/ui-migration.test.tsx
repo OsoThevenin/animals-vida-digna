@@ -117,16 +117,24 @@ describe('CatsTable', () => {
     {
       id: 'a1',
       nameCa: 'Lluna',
+      nameEs: 'Luna',
       status: 'available',
       published: true,
       updatedAt: '2026-09-01T10:00:00Z',
+      updatedBy: 'vol@example.org',
+      coverImageUrl: null,
+      coverImageAlt: 'Lluna',
     },
     {
       id: 'b2',
       nameCa: 'Misi',
+      nameEs: 'Misi',
       status: 'treatment',
       published: false,
       updatedAt: '2026-09-02T10:00:00Z',
+      updatedBy: 'vol@example.org',
+      coverImageUrl: 'https://images.example.org/cats/b2/cover.webp',
+      coverImageAlt: 'Misi',
     },
   ] as const;
 
@@ -146,8 +154,21 @@ describe('CatsTable', () => {
   });
 
   it('distinguishes published from draft cats', () => {
-    expect(table).toContain('Sí');
-    expect(table).toContain('No');
+    expect(table).toContain('Publicat');
+    expect(table).toContain('Esborrany');
+  });
+
+  it('renders a cover thumbnail when present and a placeholder when not', () => {
+    expect(table).toContain(
+      'src="https://images.example.org/cats/b2/cover.webp"'
+    );
+    expect(table).toContain('Sense foto');
+  });
+
+  it('links each row to its edit page', () => {
+    expect(table).toContain('href="/cats/a1"');
+    expect(table).toContain('href="/cats/b2"');
+    expect(table).toContain('Edita');
   });
 
   it('renders an empty state instead of a table when there are no cats', () => {

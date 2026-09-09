@@ -1,15 +1,69 @@
 ---
-import { createDb, listAllCats } from '@avd/content';
+import { createDb, listAllCats } from '@avd/content/cats';
+import { imageUrl } from '@avd/content/image-url';
+import type { CatStatus } from '@avd/content/validate';
 import { CatsTable } from '../../components/cats-table';
+import { buttonVariants } from '../../components/ui/button';
 import AdminLayout from '../../layouts/admin-layout.astro';
+import { CAT_STATUS_LABELS_CA } from '../../lib/cat-status-labels';
+import { parseStatusFilter } from '../../lib/cats-status-filter';
 
 export const prerender = false;
 
-const db = createDb(Astro.locals.runtime.env.DB);
-const cats = await listAllCats(db);
+const env = Astro.locals.runtime.env;
+const db = createDb(env.DB);
+const allCats = await listAllCats(db);
+
+const validStatuses = Object.keys(CAT_STATUS_LABELS_CA) as CatStatus[];
+const activeStatus = parseStatusFilter(Astro.url.searchParams.get('status'));
+
+const cats = activeStatus
+  ? allCats.filter((cat) => cat.status === activeStatus)
+  : allCats;
+
+const origin = import.meta.env.PUBLIC_IMAGES_ORIGIN;
+
+const rows = cats.map((cat) => ({
+  id: cat.id,
+  nameCa: cat.nameCa,
+  nameEs: cat.nameEs,
+  status: cat.status,
+  published: cat.published,
+  updatedAt: cat.updatedAt,
+  updatedBy: cat.updatedBy,
+  coverImageUrl: cat.coverImage
+    ? imageUrl(cat.coverImage.r2Key, 128, origin)
+    : null,
+  coverImageAlt: cat.coverImage?.altCa || cat.nameCa,
+}));
 ---
 
 <AdminLayout title="Gats">
-  <h1 class="mb-6 font-semibold text-2xl text-primary">Gats</h1>
-  <CatsTable cats={cats} />
+  <div class="mb-6 flex items-center justify-between">
+    <h1 class="font-semibold text-2xl text-primary">Gats</h1>
+    <a class={buttonVariants()} href="/cats/new">Nou gat</a>
+  </div>
+
+  <form class="mb-4 flex items-center gap-2" method="get">
+    <label class="text-muted-foreground text-sm" for="status-filter">
+      Filtra per estat
+    </label>
+    <select
+      class="h-9 rounded-md border border-input bg-background px-3 text-sm"
+      id="status-filter"
+      name="status"
+      onchange="this.form.submit()"
+    >
+      <option selected={!activeStatus} value="">Tots</option>
+      {
+        validStatuses.map((status) => (
+          <option selected={status === activeStatus} value={status}>
+            {CAT_STATUS_LABELS_CA[status]}
+          </option>
+        ))
+      }
+    </select>
+  </form>
+
+  <CatsTable cats={rows} />
 </AdminLayout>
