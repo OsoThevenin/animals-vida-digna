@@ -100,6 +100,13 @@ export const server = {
           });
         }
         const db = createDb(context.locals.runtime.env.DB);
+        const cat = await getCatById(db, input.catId);
+        if (!cat) {
+          throw new ActionError({
+            code: 'NOT_FOUND',
+            message: 'Gat no trobat.',
+          });
+        }
         const imageId = nanoid();
         const key = imageKey(input.catId, imageId);
         return uploadImageToBucket(

@@ -27,6 +27,78 @@ function actionStub(): unknown {
 export const actions = actionStub();
 
 /**
+ * Minimal stand-in for astro's real `ActionError`
+ * (astro/dist/actions/runtime/shared.js) — just enough for handler-level
+ * tests (e.g. tests/actions-images-upload.test.ts) to assert a specific
+ * `code` was thrown, mirroring the real class's shape closely enough
+ * that `instanceof ActionError` and `.code` both work as expected.
+ */
+export class ActionError extends Error {
+  type = 'AstroActionError' as const;
+  code: string;
+  constructor(params: { code: string; message?: string }) {
+    super(params.message);
+    this.code = params.code;
+  }
+}
+
+/**
+ * Minimal stand-in for astro's real `defineAction`
+ * (astro/dist/actions/runtime/server.js) — enough to let a test call
+ * `server.someAction.orThrow.call(fakeContext, input)` and exercise the
+ * real handler directly, without booting Astro's Vite plugin. For
+ * `accept: 'form'` actions, mirrors the real behaviour of converting the
+ * FormData into a plain object before validating it against the Zod
+ * schema (real astro also unwraps optional/nullable/default field
+ * shapes; this project's `accept: 'form'` action has no such fields, so
+ * a plain `Object.fromEntries` is sufficient here).
+ */
+export function defineAction<Input, Output>({
+  accept,
+  input: inputSchema,
+  handler,
+}: {
+  accept?: 'form' | 'json';
+  input?: {
+    safeParseAsync: (
+      value: unknown
+    ) => Promise<
+      { success: true; data: Input } | { success: false; error: unknown }
+    >;
+  };
+  handler: (input: Input, context: unknown) => Promise<Output>;
+}) {
+  async function run(unparsedInput: unknown, context: unknown) {
+    let parsedInput: unknown = unparsedInput;
+    if (accept === 'form') {
+      if (!(unparsedInput instanceof FormData)) {
+        throw new ActionError({
+          code: 'UNSUPPORTED_MEDIA_TYPE',
+          message: 'This action only accepts FormData.',
+        });
+      }
+      parsedInput = Object.fromEntries(unparsedInput.entries());
+    }
+    if (inputSchema) {
+      const parsed = await inputSchema.safeParseAsync(parsedInput);
+      if (!parsed.success) {
+        throw new ActionError({
+          code: 'BAD_REQUEST',
+          message: 'Invalid input.',
+        });
+      }
+      parsedInput = parsed.data;
+    }
+    return handler(parsedInput as Input, context);
+  }
+  return {
+    orThrow(this: unknown, unparsedInput: unknown) {
+      return run(unparsedInput, this);
+    },
+  };
+}
+
+/**
  * Mirrors astro's real `isInputError` (astro/dist/actions/runtime/shared.js)
  * exactly, including its `'issues' in error && Array.isArray(error.issues)`
  * check (fix-round-1 MINOR 6: an earlier version of this shim only checked
