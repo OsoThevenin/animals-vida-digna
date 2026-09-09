@@ -1,12 +1,12 @@
 ---
 import { createDb, listAllCats } from '@avd/content/cats';
-import { imageUrl } from '@avd/content/image-url';
 import type { CatStatus } from '@avd/content/validate';
 import { CatsTable } from '../../components/cats-table';
 import { buttonVariants } from '../../components/ui/button';
 import AdminLayout from '../../layouts/admin-layout.astro';
 import { CAT_STATUS_LABELS_CA } from '../../lib/cat-status-labels';
 import { parseStatusFilter } from '../../lib/cats-status-filter';
+import { coverThumbnailUrl } from '../../lib/cover-thumbnail';
 
 export const prerender = false;
 
@@ -32,7 +32,7 @@ const rows = cats.map((cat) => ({
   updatedAt: cat.updatedAt,
   updatedBy: cat.updatedBy,
   coverImageUrl: cat.coverImage
-    ? imageUrl(cat.coverImage.r2Key, 128, origin)
+    ? coverThumbnailUrl(cat.coverImage.r2Key, origin)
     : null,
   coverImageAlt: cat.coverImage?.altCa || cat.nameCa,
 }));
