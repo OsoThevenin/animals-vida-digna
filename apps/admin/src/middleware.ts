@@ -34,6 +34,30 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return next();
   }
   if (!context.locals.user) {
+    if (context.url.pathname.startsWith('/_actions/')) {
+      // A 302 here is correct for a browser page load, but Astro's
+      // client action helper (node_modules/astro/dist/actions/runtime/
+      // virtual.js) follows redirects and treats a 200 response (the
+      // login page) as a successful action result, then tries to
+      // `devalueParse` its HTML — an uncaught throw no call site
+      // handles. Returning a JSON body shaped exactly like
+      // `deserializeActionResult`'s error branch expects (see
+      // node_modules/astro/dist/actions/runtime/shared.js,
+      // `ActionError.fromJson`/`isActionError`) makes `rawResult.ok`
+      // false instead, so the helper deserializes a real ActionError
+      // and the app's `describeActionError` renders it in Catalan.
+      return new Response(
+        JSON.stringify({
+          type: 'AstroActionError',
+          code: 'UNAUTHORIZED',
+          message: 'Cal iniciar sessió (session required).',
+        }),
+        {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
     return context.redirect('/login');
   }
   return next();
