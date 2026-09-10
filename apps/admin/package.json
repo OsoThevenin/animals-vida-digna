@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "astro dev --port 4322",
     "build": "astro build",
+    "lint": "find src tests \\( -name '*.ts' -o -name '*.tsx' \\) -print | xargs biome check",
     "preview": "wrangler dev",
     "deploy": "astro build && wrangler deploy",
     "test": "vitest run",
@@ -23,7 +24,7 @@
     "better-auth": "^1.7.2",
     "browser-image-compression": "2.0.2",
     "class-variance-authority": "^0.7.1",
-    "cn": "^0.2.5",
+    "cn": "0.2.5",
     "drizzle-orm": "^0.45.2",
     "lucide-react": "^1.41.0",
     "nanoid": "^6.0.1",
