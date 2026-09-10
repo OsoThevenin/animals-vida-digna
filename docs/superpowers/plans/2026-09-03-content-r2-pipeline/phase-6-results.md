@@ -171,6 +171,26 @@ against real R2/D1. See the consolidated checklist below.
   a `rateLimit.customRules` window staying ≥ the throttle window, enforced
   only by a regression test — a dedicated counter table would remove both
   residuals and is a recommended follow-up.
+- **M2 Residual 4 (whole-branch review Important-5) — the per-address
+  throttle is a silent sign-in denial vector for a known volunteer.**
+  `consumeEmailSendThrottle` runs, and writes to the counter, before the
+  allowlist check and before better-auth's own `type` check, and a denial
+  never advances `lastRequest`. An attacker who knows a volunteer's email
+  (published on the shelter's website) can therefore keep two IPs sending
+  `{email, type: "anything"}` — 2 × 15 per 300s (the per-IP max, raised in
+  fix round 2) comfortably exceeds the per-address max of 5 — and hold
+  that address's counter permanently saturated. The victim's genuine
+  request then lands in the same saturated window and gets
+  `{ success: true }` with no email sent, indistinguishable by design from
+  a real send. This is judged inherent to any per-address rate limit and
+  not a design defect to fix; what was missing before this fix round was
+  that it was undocumented, with no operator remedy. Both are now
+  addressed: `docs/admin-runbook.md`'s "Sign-in rate limits" section
+  documents how to recognise it (a volunteer confirmed present in
+  `ADMIN_ALLOWED_EMAILS` reports never receiving a code) and the fix
+  (`delete from rate_limit where key = 'email-otp-address:<email>'`
+  against the real D1), and `docs/admin-guide.md`'s "No rebo el codi"
+  section tells the volunteer to wait a few minutes before escalating.
 - **The orphan sweep script's network half has never executed.** Only its
   pure functions (`packages/content/src/orphans.ts`) are tested via
   `packages/content/tests/orphans.test.ts`. The maintainer must run the dry
