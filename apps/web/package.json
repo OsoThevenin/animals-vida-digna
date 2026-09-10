@@ -14,8 +14,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "check": "tsc --noEmit",
-    "lint": "biome check src/lib/db.ts",
-    "sync-images": "npx tsx scripts/sync-images.ts"
+    "lint": "biome check src/lib/db.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.13",

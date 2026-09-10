@@ -80,3 +80,6 @@ packages/content/seed.sql
 .design-sync/node_modules
 .ds-sync/
 ds-bundle/
+
+# superpowers subagent-driven-development scratch workspace
+.superpowers/
