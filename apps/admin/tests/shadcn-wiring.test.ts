@@ -43,7 +43,11 @@ describe('shadcn/ui wiring', () => {
     expect(config.tailwind.css).toBe('src/styles/admin.css');
     expect(config.tailwind.cssVariables).toBe(true);
     expect(config.aliases.ui).toBe('@/components/ui');
-    expect(config.aliases.utils).toBe('@/lib/utils');
+    // The registry template does `import { cn } from "${aliases.utils}"`
+    // verbatim, so this must match how every vendored src/components/ui/*
+    // file already imports it — the `cn` npm package, not a local
+    // src/lib/utils.ts (which this app has never had; see the test below).
+    expect(config.aliases.utils).toBe('cn');
   });
 
   it('declares the @/* path alias TypeScript and Astro both read', () => {
