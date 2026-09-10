@@ -28,5 +28,12 @@ export default defineConfig({
   },
   test: {
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
+    // The default environment stays `node` — real Miniflare tests
+    // (tests/verification-row-allowlist.test.ts, tests/r2-route.test.ts,
+    // and others using `getPlatformProxy`) need it. A file that needs a
+    // DOM opts in per-file with a `// @vitest-environment jsdom` docblock
+    // (`environmentMatchGlobs` was removed in Vitest 4, so this is the
+    // supported per-file mechanism instead of flipping the whole suite).
+    setupFiles: ['./tests/support/dom-setup.ts'],
   },
 });
