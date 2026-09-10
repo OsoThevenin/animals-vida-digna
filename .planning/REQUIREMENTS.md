@@ -32,7 +32,7 @@
 
 - [x] **ADMIN-01**: A dedicated admin app (`apps/admin`, `admin.animalsvidadigna.org`) lets an allowlisted volunteer sign in with email + one-time code and edit cats without a GitHub account or a pull request
 - [x] **ADMIN-02**: Cat edits (data and photos) are live on the public site within seconds of saving, with no review step, while the code repository keeps its existing pull-request review rule
-- [ ] **ADMIN-03**: Volunteers hold no GitHub repository access; the admin app's own allowlist (`ADMIN_ALLOWED_EMAILS`) is the sole access control for cat editing. **Status:** implementation-complete and verified on the branch; the actual GitHub collaborator removal is a human-only action the maintainer must perform — see "Task 8: Remove volunteer GitHub collaborator access" in `docs/admin-runbook.md`.
+- [ ] **ADMIN-03**: Volunteers hold no GitHub repository access; the admin app's own allowlist (`ADMIN_ALLOWED_EMAILS`) is the sole access control for cat editing. **Status:** half-verified, half-pending — do not tick until both halves hold. (1) The "no GitHub access" clause is **verified true as of 2026-09-10** by direct read-only `gh api` checks: the collaborators list contains only the maintainer (`OsoThevenin`, full permissions), there are no pending repository invitations (which the plan's own Task 8 check would otherwise miss — an accepted invitation grants Write the moment it's accepted, so invitations had to be checked separately from collaborators), and no deploy keys exist. This is a snapshot of *current state*, not a removal this plan performed — it is not yet known whether volunteers never held GitHub access in the first place or were removed earlier; the maintainer should confirm which, since if they were never onboarded to GitHub, this migration's framing of "revoking volunteer access" describes a situation that never existed. (2) The "admin app's allowlist is the sole access control" clause is **pending first deploy** — `apps/admin` is not deployed and no volunteer is using it, so nothing is actually being controlled by `ADMIN_ALLOWED_EMAILS` yet; today the sole access control for cat editing is that nobody but the maintainer can edit anything at all. See `docs/admin-runbook.md` for the remaining deploy checklist.
 
 ### Cats Directory
 
@@ -150,7 +150,7 @@
 | CMS-05 | Phase 1 | Pending |
 | ADMIN-01 | content-r2-pipeline Phase 4 | Complete |
 | ADMIN-02 | content-r2-pipeline Phase 5 | Complete |
-| ADMIN-03 | content-r2-pipeline Phase 6 | Pending maintainer action (GitHub collaborator removal) |
+| ADMIN-03 | content-r2-pipeline Phase 6 | GitHub-access clause verified 2026-09-10 (no volunteer collaborators, invitations, or deploy keys); allowlist-as-sole-control clause pending first deploy of `apps/admin` |
 | CATS-01 | Phase 2 | Complete |
 | CATS-02 | Phase 2 | Complete |
 | CATS-03 | Phase 2 | Complete |
