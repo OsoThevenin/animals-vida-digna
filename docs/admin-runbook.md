@@ -305,14 +305,100 @@ export) or the S3-compatible API's batch download tools.
 
 - **This phase (Phase 6):** revert its merge commit. This restores
   `apps/web/scripts/sync-images.ts` and any other deleted files, and
-  reverts the `.planning`/README changes — it does **not** restore
-  volunteers' GitHub Write access or the deleted collaborator invitations,
-  which must be redone manually via the GitHub API's collaborators
-  endpoints if reverting is genuinely needed.
+  reverts the `.planning`/README changes. It has no effect on GitHub
+  collaborator state either way — this repository revert does not touch
+  GitHub account permissions in either direction, so if you have run the
+  Task 8 checklist above (and want the old collaborators back), that must
+  be redone manually via the GitHub API's collaborators endpoints; a code
+  revert alone will not do it.
 - **Earlier phases:** each phase's own doc states its rollback (revert the
   merge commit; D1/R2 state from an already-merged phase is not
   automatically rolled back and must be handled per the migration plan's
   rollout-order and safety guidance).
+
+## Deploy-time checklist (maintainer only)
+
+Several items in the content/R2/admin-app migration can only be run by the
+maintainer, with real Cloudflare/GitHub credentials, against production —
+this sandbox has neither. This section is the durable, maintainer-facing
+home for that checklist (`.planning/REQUIREMENTS.md`, `.planning/STATE.md`,
+and `.planning/ROADMAP.md` all point here). Work through it before
+considering the milestone shipped:
+
+1. **Task 8 — remove volunteer GitHub collaborator access.** List current
+   collaborators and their permissions:
+   ```bash
+   gh api repos/OsoThevenin/animals-vida-digna/collaborators \
+     --jq '.[] | "\(.login) — \(.permissions | to_entries | map(select(.value)) | map(.key) | join(","))"'
+   ```
+   Cross-reference against who needs ongoing access to review pull requests
+   against `main` (the maintainer, and anyone else who reviews PRs). Remove
+   everyone else:
+   ```bash
+   gh api -X DELETE repos/OsoThevenin/animals-vida-digna/collaborators/<login>
+   ```
+   **The collaborator list alone is not enough** — it does not show
+   *pending*, unaccepted invitations. A volunteer invited with Write who
+   never accepted is invisible to that check yet gains Write the instant
+   they accept, possibly long after you believe access is closed. Always
+   also check:
+   ```bash
+   gh api repos/OsoThevenin/animals-vida-digna/invitations \
+     --jq '.[] | "\(.invitee.login) — \(.permissions)"'
+   ```
+   Expected: no output. Revoke any that appear:
+   ```bash
+   gh api -X DELETE repos/OsoThevenin/animals-vida-digna/invitations/<invitation_id>
+   ```
+   Also check for deploy keys, a separate access path entirely:
+   ```bash
+   gh api repos/OsoThevenin/animals-vida-digna/keys --jq '.[].title'
+   ```
+   Expected: no output, unless you knowingly provisioned one. Finally,
+   confirm the branch-protection ruleset was not touched as a side effect,
+   and re-list everything to confirm the end state:
+   ```bash
+   gh api repos/OsoThevenin/animals-vida-digna/rulesets/22118349 --jq '.rules[].type'
+   gh api repos/OsoThevenin/animals-vida-digna/collaborators \
+     --jq '.[] | "\(.login) — \(.permissions | to_entries | map(select(.value)) | map(.key) | join(","))"'
+   gh api repos/OsoThevenin/animals-vida-digna/invitations --jq '.[] | "\(.invitee.login) — \(.permissions)"'
+   gh api repos/OsoThevenin/animals-vida-digna/keys --jq '.[].title'
+   ```
+   Expected ruleset output: `deletion`, `non_fast_forward`, `pull_request`
+   (unchanged — changing it is explicitly out of scope for this migration).
+   Expected final state: only the maintainer(s) who review PRs remain as
+   collaborators; no invitations; no unexpected deploy keys.
+
+   As of 2026-09-10, a read-only pass (no removal performed) found:
+   collaborators = only `OsoThevenin` (`admin,maintain,pull,push,triage`),
+   invitations = none, deploy keys = none, ruleset unchanged. That is the
+   *current state* this step wants, but it is not established whether it is
+   the result of a deliberate removal during this migration or whether no
+   volunteer was ever added as a GitHub collaborator in the first place —
+   confirm which before ticking `ADMIN-03` in `.planning/REQUIREMENTS.md`.
+
+2. **`wrangler secret list`.** See the Secrets section above — exactly the
+   5 named secrets, with `AUTH_INSECURE_COOKIES` and `AUTH_DEV_LOG_OTP`
+   absent.
+3. **Apply migrations to production D1.** See "D1 migrations workflow"
+   above — `wrangler d1 migrations apply avd-content --remote`.
+4. **Create the second Workers Builds project**, for `apps/admin` (root
+   directory `apps/admin`, build command `pnpm build`, deploy command
+   `npx wrangler deploy`, watch paths `apps/admin/**`, `packages/**`,
+   `pnpm-lock.yaml`). Then run `pnpm build && npx wrangler deploy` from
+   `apps/admin` once, which creates the `admin.animalsvidadigna.org`
+   custom domain, DNS, and TLS records.
+5. **Live WAF matrix.** Confirm the zone-level WAF rule referenced in
+   "Image transformation budget" above allowlists exactly the four
+   `DEFAULT_WIDTHS` values on `/cdn-cgi/image/...` and 403s any other
+   width, against the real zone.
+6. **Browser click-through.** Sign in to
+   `https://admin.animalsvidadigna.org` with a real allowlisted email,
+   edit a cat, upload a photo, and confirm it is live on the public site
+   within seconds — see `docs/admin-guide.md` for the expected flow.
+7. **Orphan-sweep dry run** against real R2/D1 — see "Orphan image sweep"
+   above. Its network/CLI half has never executed in any sandbox; read the
+   printed list carefully before ever passing `--delete`.
 
 ## Monitoring
 
