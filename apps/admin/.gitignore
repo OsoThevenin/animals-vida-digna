@@ -2,5 +2,10 @@ dist/
 .astro/
 node_modules/
 .wrangler/
-worker-configuration.d.ts
 .dev.vars
+
+# worker-configuration.d.ts is committed (see M3 in phase-4-security-review.md):
+# it is the sole definition of `Env`, and regenerating it correctly requires
+# .dev.vars to exist first, which is not guaranteed on a fresh clone. Keep it
+# tracked and regenerate with `wrangler types` (after `cp .dev.vars.example
+# .dev.vars`) whenever a binding or secret changes.
