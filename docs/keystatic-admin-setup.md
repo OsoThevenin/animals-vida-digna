@@ -1,17 +1,23 @@
-# Keystatic admin: setup and volunteer access
+# Keystatic admin: maintainer setup (settings, landing, pages)
 
-The site's content (cats, pages, settings) lives as files in this repository.
-Keystatic is the admin UI that lets people edit those files through a web form
-instead of writing Markdown by hand.
+The site's settings, landing page, and static pages live as files in this
+repository. **Cats no longer live here** — cat data and photos moved to D1
+and R2, edited through the separate admin app documented in
+`docs/admin-guide.md` (volunteers) and `docs/admin-runbook.md` (maintainer).
+Keystatic is the admin UI that lets people edit those files through a web
+form instead of writing Markdown by hand.
 
-Volunteers use it at **https://animalsvidadigna.org/keystatic**.
+Since Phase 6 of the content/R2/admin-app migration, **only the maintainer**
+uses this Keystatic UI, at **https://animalsvidadigna.org/keystatic**, to
+edit site settings, the landing page, and static pages. Volunteers use
+**https://admin.animalsvidadigna.org** instead — see `docs/admin-guide.md`.
 
 ## How it works
 
 Keystatic runs in **GitHub mode** in production. There is no separate user
 database and no passwords to manage:
 
-1. A volunteer signs in with their GitHub account.
+1. The maintainer signs in with their GitHub account.
 2. GitHub checks they are a collaborator on this repository. If they are not,
    they get no access — that repo invite *is* the permission system.
 3. When they save, Keystatic pushes their changes to a new `content/*` branch
@@ -65,9 +71,12 @@ generate a client secret.
 ### 2. Set the secrets in Cloudflare
 
 Keystatic reads its credentials from the Cloudflare **runtime** environment
-(`locals.runtime.env`) on each request, so they are ordinary Worker secrets:
+(`locals.runtime.env`) on each request, so they are ordinary Worker secrets.
+Since the monorepo move, `wrangler.toml` lives in `apps/web`, so run these
+from `apps/web` (or pass `-c apps/web/wrangler.toml` from the repo root):
 
 ```sh
+cd apps/web
 wrangler secret put KEYSTATIC_GITHUB_CLIENT_ID
 wrangler secret put KEYSTATIC_GITHUB_CLIENT_SECRET
 wrangler secret put KEYSTATIC_SECRET
@@ -98,24 +107,42 @@ Repository **Settings → Branches → Add branch ruleset** for `main`:
 - Require a pull request before merging
 - Block force pushes
 
-Without this, a volunteer can publish straight to the live site.
+Without this, whoever is signed in can publish straight to the live site.
 
-### 4. Invite volunteers
+### 4. Repository collaborators
 
-Repository **Settings → Collaborators → Add people**, with the **Write** role.
-Write is required — Keystatic pushes the volunteer's branch using their own
-GitHub token, so Read access is not enough to save anything.
+Only the maintainer (and anyone else who needs to review pull requests
+against `main`) should be a collaborator on this repository, at whatever
+role GitHub's PR-review workflow requires for them — Keystatic's
+GitHub-mode saves are now used exclusively by the maintainer, editing
+settings/landing/pages, so this is no longer a volunteer-facing permission.
 
-Removing someone's collaborator access immediately revokes their admin access.
+**Current state, verified 2026-09-10 by read-only `gh api` checks:** the
+repository's only collaborator is the maintainer, there are no pending
+collaborator invitations, and no deploy keys exist. That is the state this
+step wants — but it is a snapshot of what is true today, not a record of an
+action this migration performed. It is not established whether a volunteer
+previously held Write access and was removed, or whether no volunteer was
+ever added as a GitHub collaborator in the first place; if you know which,
+note it here. Either way, before treating this as settled, run the removal
+checklist yourself — see `docs/admin-runbook.md`'s "Task 8: Remove volunteer
+GitHub collaborator access" section, which also covers the pending-invitation
+and deploy-key checks above (a collaborator-list check alone misses an
+invitation that grants Write the moment it's accepted). See that same file
+for how volunteer access to the *admin app* (not this repository) is
+managed.
 
-## For volunteers
+## For the maintainer (settings, landing page, static pages only)
 
-1. Accept the repository invitation that arrives by email (needs a free GitHub
-   account — sign up at <https://github.com/signup>).
+1. If you are not already a collaborator on this repository, accept the
+   invitation that arrives by email (needs a free GitHub account — sign up
+   at <https://github.com/signup>).
 2. Go to <https://animalsvidadigna.org/keystatic> and click sign in with GitHub.
-3. Edit a cat, page, or setting.
+3. Edit a page or setting — the `cats` collection no longer appears in this
+   Keystatic instance's navigation (Phase 3 removed it; see the spec at
+   `docs/superpowers/specs/2026-09-03-content-r2-pipeline-design.md`).
 4. Click **Save**, and choose **create a new branch** — give it a short name
-   describing the change, e.g. "new cat Nala".
+   describing the change, e.g. "update donate URL".
 5. Done. The change is queued for review and goes live once approved.
 
 If sign-in fails, the invitation was probably not accepted yet.

@@ -1,0 +1,71 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { buildCanonicalUrl } from '../../lib/seo';
+import { getAlternateUrl } from '../../i18n/index';
+import { reader } from '../../lib/keystatic';
+import { getLocalizedField } from '../../i18n/content';
+import HeroSection from '../../components/landing/HeroSection.astro';
+import AboutSection from '../../components/landing/AboutSection.astro';
+import StatsSection from '../../components/landing/StatsSection.astro';
+import ColoniesSection from '../../components/landing/ColoniesSection.astro';
+import AdoptSection from '../../components/landing/AdoptSection.astro';
+import CollaborateSection from '../../components/landing/CollaborateSection.astro';
+import ContactCtaSection from '../../components/landing/ContactCtaSection.astro';
+import FeaturedCatsSection from '../../components/landing/FeaturedCatsSection.astro';
+
+const locale = 'es' as const;
+
+const settings = await reader.singletons.settings.read();
+const landing = await reader.singletons.landing.read();
+
+const donateUrl = settings?.donateUrl ?? '#';
+const seoTitle = settings?.seo?.title_es || 'Inicio';
+const seoDescription = settings?.seo?.description_es || 'Protectora de animales en Catalunya';
+
+const sections = landing?.sections ?? [];
+
+const site = Astro.site?.href?.replace(/\/$/, '') || 'https://animalsvidadigna.org';
+const canonicalUrl = buildCanonicalUrl(Astro.url.pathname, site);
+const alternateUrl = buildCanonicalUrl(getAlternateUrl(Astro.url, 'ca'), site);
+---
+
+<BaseLayout title={seoTitle} description={seoDescription} donateUrl={donateUrl} canonicalUrl={canonicalUrl} alternateUrl={alternateUrl}>
+  {sections.map((section) => {
+    switch (section.discriminant) {
+      case 'hero':
+        return <HeroSection data={section.value as Record<string, unknown>} locale={locale} donateUrl={donateUrl} />;
+      case 'about':
+        return <AboutSection data={section.value as Record<string, unknown>} locale={locale} />;
+      case 'stats':
+        return <StatsSection data={section.value as Record<string, unknown>} locale={locale} />;
+      case 'colonies':
+        return <ColoniesSection data={section.value as Record<string, unknown>} locale={locale} />;
+      case 'adopt':
+        return <AdoptSection data={section.value as Record<string, unknown>} locale={locale} />;
+      case 'collaborate':
+        return <CollaborateSection data={section.value as Record<string, unknown>} locale={locale} />;
+      case 'contactCta':
+        return <ContactCtaSection data={section.value as Record<string, unknown>} locale={locale} />;
+      case 'newsletter':
+        return <div class="py-8 text-center text-text-muted">{/* TODO: Newsletter section (v2) */}</div>;
+      case 'faq':
+        return <div class="py-8 text-center text-text-muted">{/* TODO: FAQ section (v2) */}</div>;
+      default:
+        return null;
+    }
+  })}
+  <FeaturedCatsSection server:defer locale={locale}>
+    <div slot="fallback" class="bg-surface py-16 sm:py-24">
+      <div class="mx-auto max-w-7xl px-4 text-center sm:px-6">
+        <h2 class="mb-10 font-display text-3xl font-bold text-primary sm:text-4xl">
+          Gatos destacados
+        </h2>
+        <div class="grid animate-pulse gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="aspect-[4/3] rounded-xl bg-primary/5"></div>
+          <div class="aspect-[4/3] rounded-xl bg-primary/5"></div>
+          <div class="aspect-[4/3] rounded-xl bg-primary/5"></div>
+        </div>
+      </div>
+    </div>
+  </FeaturedCatsSection>
+</BaseLayout>

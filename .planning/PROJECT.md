@@ -24,7 +24,9 @@ Visitors can discover adoptable cats and take action (adopt, donate, contact) in
 - [ ] Teaming donation CTA (CMS-configurable, prominent in header/hero/footer)
 - [ ] Contact and adoption forms via Resend email
 - [ ] Full localized SEO (hreflang, OG, structured data, sitemap)
-- [ ] CMS image uploads to R2 via Worker-signed URLs
+- [x] CMS image uploads to R2 via the admin app's `images.upload` Astro
+  Action (superseded the original Worker-signed-URL approach; see
+  `docs/superpowers/specs/2026-09-03-content-r2-pipeline-design.md`)
 - [ ] Cloudflare Image Resizing for responsive/optimized delivery
 - [ ] Landing page with configurable sections (hero, about, featured cats, FAQ, contact CTA, etc.)
 - [ ] Language switcher with deep-linking to alternate locale slugs
@@ -54,7 +56,11 @@ Visitors can discover adoptable cats and take action (adopt, donate, contact) in
 - **Email**: Resend for transactional email (contact/adoption forms)
 - **Images**: R2 storage + Cloudflare Image Resizing — no other CDN or image service
 - **Performance**: Lighthouse >= 95 on all four categories (mobile) in both locales
-- **CMS**: Git-backed Keystatic — no database dependency for content
+- **CMS**: Keystatic for site settings, landing page, and static pages
+  (git-backed, PR-reviewed). Cats live in Cloudflare D1 (`avd-content`) and
+  are edited through a dedicated admin app (`apps/admin`,
+  `admin.animalsvidadigna.org`) with no PR step — see
+  `docs/superpowers/specs/2026-09-03-content-r2-pipeline-design.md`.
 - **Accessibility**: WCAG AA minimum
 
 ## Key Decisions
@@ -66,6 +72,12 @@ Visitors can discover adoptable cats and take action (adopt, donate, contact) in
 | Cloudflare over Vercel | R2 for image storage + Image Resizing + Workers — unified platform, cost-effective for nonprofit | — Pending |
 | Localized fields in single entity | cats collection uses slug_ca/slug_es, name_ca/name_es pattern — avoids content duplication across locale collections | — Pending |
 | Path-based i18n (not subdomain) | Simpler DNS, single deployment, standard for bilingual sites | — Pending |
+| Cats moved from git/Keystatic to D1/R2 (2026-09-09) | Weekly content changes forced a PR + maintainer review each time; the repository's branch-protection ruleset must stay for code but must not gate routine cat edits | Implementation complete on branch, pending maintainer deploy checklist |
+| Separate `apps/admin` Astro app rather than `/admin` routes in the site | Independent deploy/failure domain; public Worker keeps zero auth code; cookies scoped to `admin.` subdomain | Implementation complete on branch, pending maintainer deploy checklist |
+| better-auth `emailOTP` rather than Cloudflare Access for admin login | Keeps login inside the app, no Zero Trust dependency, room for roles later; both are free at this scale | Implementation complete on branch, pending maintainer deploy checklist |
+| Cloudflare Images URL transformations rather than the Images binding | The binding requires the Paid plan; URL transformations are free (5,000/month) and work over the R2 custom domain | Implementation complete on branch, pending maintainer deploy checklist |
 
 ---
-*Last updated: 2026-03-17 after initialization*
+*Last updated: 2026-09-10 — content-r2-pipeline milestone Phase 6 (cutover
+& docs) in progress on branch `worktree-content-r2-impl`; nothing merged or
+deployed*

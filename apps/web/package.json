@@ -1,0 +1,46 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "prebuild": "tsx scripts/generate-settings.ts",
+    "build": "astro build",
+    "preview": "astro preview",
+    "preview:worker": "astro build && wrangler dev",
+    "deploy": "astro build && wrangler deploy",
+    "astro": "astro",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "check": "tsc --noEmit",
+    "lint": "biome check src/lib/db.ts"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^12.6.13",
+    "@astrojs/markdoc": "^0.15.11",
+    "@astrojs/preact": "^4.1.3",
+    "@astrojs/react": "^4.4.2",
+    "@astrojs/sitemap": "^3.7.1",
+    "@avd/content": "workspace:*",
+    "@keystatic/astro": "^5.0.6",
+    "@keystatic/core": "^0.5.48",
+    "@markdoc/markdoc": "^0.5.6",
+    "@midzer/tobii": "^3.1.3",
+    "@tailwindcss/vite": "^4.2.1",
+    "astro": "^5.18.1",
+    "preact": "^10.29.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "resend": "^6.9.4",
+    "tailwindcss": "^4.2.1",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260904.1",
+    "@playwright/test": "^1.62.1",
+    "tsx": "^4.23.13",
+    "vitest": "^4.1.0",
+    "wrangler": "^4.75.0"
+  }
+}

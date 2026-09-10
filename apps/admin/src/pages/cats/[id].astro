@@ -1,0 +1,38 @@
+---
+import { createDb, getCatById } from '@avd/content/cats';
+import CatForm from '../../components/cat-form';
+import DeleteCatButton from '../../components/delete-cat-button';
+import ImageManager from '../../components/image-manager';
+import AdminLayout from '../../layouts/admin-layout.astro';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+if (!id) {
+  return new Response(null, { status: 404 });
+}
+
+const env = Astro.locals.runtime.env;
+const db = createDb(env.DB);
+const cat = await getCatById(db, id);
+
+if (!cat) {
+  return new Response(null, { status: 404 });
+}
+---
+
+<AdminLayout title={`Edita ${cat.nameCa}`}>
+  <div class="mb-6 flex items-center justify-between">
+    <h1 class="font-semibold text-2xl text-foreground">Edita {cat.nameCa}</h1>
+    <DeleteCatButton catId={cat.id} catName={cat.nameCa} client:load />
+  </div>
+  <CatForm cat={cat} client:load mode="edit" />
+  <hr class="my-10 border-border" />
+  <h2 class="mb-4 font-semibold text-foreground text-xl">Fotos</h2>
+  <ImageManager
+    catId={cat.id}
+    client:load
+    coverImageId={cat.coverImage?.id ?? null}
+    images={cat.images}
+  />
+</AdminLayout>

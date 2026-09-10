@@ -1,0 +1,167 @@
+---
+import { getCatBySlug } from '@avd/content';
+import { DEFAULT_IMAGES_ORIGIN, imageUrl } from '@avd/content/image-url';
+import { localizeCat } from '@avd/content/localize';
+import CatGallery from '../../../components/cats/CatGallery.astro';
+import CatTraits from '../../../components/cats/CatTraits.astro';
+import AdoptionForm from '../../../components/forms/AdoptionForm.tsx';
+import OptimizedImage from '../../../components/OptimizedImage.astro';
+import { t } from '../../../i18n/index';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { requireDb } from '../../../lib/db';
+import { siteSettings } from '../../../generated/settings';
+import { renderMarkdocSource } from '../../../lib/markdoc';
+import { buildCanonicalUrl, buildCatSchema } from '../../../lib/seo';
+
+export const prerender = false;
+
+const locale = 'es' as const;
+
+const slug = Astro.params.slug as string;
+
+const db = requireDb(Astro.locals);
+const catRow = await getCatBySlug(db, locale, slug);
+
+if (!catRow) {
+  // M5: see src/pages/cat/[slug].astro for why this is a real 404, not a
+  // redirect -- deliberate deviation from the phase plan.
+  return new Response('Not found', { status: 404 });
+}
+
+const cat = localizeCat(catRow, locale);
+
+// M9: see src/pages/cat/[slug].astro for why 60s.
+Astro.response.headers.set('Cache-Control', 'public, max-age=60');
+
+const descriptionHtml = renderMarkdocSource(cat.description ?? '');
+
+// See src/pages/cats/index.astro for why this reads the build-time-generated
+// settings module instead of the Keystatic filesystem reader.
+const donateUrl = siteSettings.donateUrl;
+
+const seoTitle = cat.seo?.title || cat.name;
+const seoDescription = cat.seo?.description || cat.shortDescription || '';
+
+const site =
+  Astro.site?.href?.replace(/\/$/, '') || 'https://animalsvidadigna.org';
+const canonicalUrl = buildCanonicalUrl(Astro.url.pathname, site);
+const alternateUrl = buildCanonicalUrl(`/cat/${catRow.slugCa}`, site);
+
+const imagesOrigin =
+  import.meta.env.PUBLIC_IMAGES_ORIGIN ?? DEFAULT_IMAGES_ORIGIN;
+const catJsonLd = buildCatSchema({
+  name: cat.name,
+  description: seoDescription,
+  // See src/pages/cat/[slug].astro for why this must be 1280, not 1200.
+  image: cat.coverImage ? imageUrl(cat.coverImage.key, 1280, imagesOrigin) : '',
+  url: canonicalUrl,
+  inLanguage: locale,
+});
+
+const adoptionFormTranslations = {
+  name: t(locale, 'form.name'),
+  email: t(locale, 'form.email'),
+  phone: t(locale, 'form.phone'),
+  livingSituation: t(locale, 'form.livingSituation'),
+  message: t(locale, 'form.message'),
+  submit: t(locale, 'form.submit'),
+  sending: t(locale, 'form.sending'),
+  successAdoption: t(locale, 'form.success.adoption'),
+  errorRequired: t(locale, 'form.error.required'),
+  errorInvalidEmail: t(locale, 'form.error.invalidEmail'),
+  errorServer: t(locale, 'form.error.server'),
+  errorRateLimited: t(locale, 'form.error.rateLimited'),
+  livingSituationFlat: t(locale, 'form.livingSituation.flat'),
+  livingSituationHouse: t(locale, 'form.livingSituation.house'),
+  livingSituationHouseGarden: t(locale, 'form.livingSituation.houseGarden'),
+  livingSituationRural: t(locale, 'form.livingSituation.rural'),
+  livingSituationOther: t(locale, 'form.livingSituation.other'),
+};
+---
+
+<BaseLayout title={seoTitle} description={seoDescription} donateUrl={donateUrl} canonicalUrl={canonicalUrl} alternateUrl={alternateUrl} jsonLd={catJsonLd}>
+  <article class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    {/* Back link */}
+    <a href="/es/cats" class="mb-6 inline-flex items-center gap-1 text-sm text-primary hover:text-primary-dark">
+      &larr; {t(locale, 'cat.backToList')}
+    </a>
+
+    {/* Cover image */}
+    {cat.coverImage && (
+      <div class="mb-8 overflow-hidden rounded-2xl">
+        <OptimizedImage
+          r2Key={cat.coverImage.key}
+          alt={cat.coverImage.alt || cat.name}
+          width={cat.coverImage.width}
+          height={cat.coverImage.height}
+          class="h-64 w-full object-cover sm:h-80 lg:h-96"
+          loading="eager"
+          sizes="100vw"
+        />
+      </div>
+    )}
+
+    {/* Title */}
+    <h1 class="mb-6 font-display text-3xl font-bold text-primary md:text-4xl">
+      {cat.name}
+    </h1>
+
+    {/* Two-column layout: traits sidebar + description */}
+    <div class="grid gap-8 lg:grid-cols-3">
+      {/* Sidebar: traits */}
+      <aside class="lg:col-span-1">
+        {/* See src/pages/cat/[slug].astro for why this heading-order fix
+            is needed. */}
+        <h2 class="sr-only">{t(locale, 'cat.detailsHeading')}</h2>
+        <CatTraits cat={cat} locale={locale} />
+      </aside>
+
+      {/* Main content: description */}
+      <div class="lg:col-span-2">
+        {descriptionHtml && (
+          <div class="prose prose-lg max-w-none text-text" set:html={descriptionHtml} />
+        )}
+
+        {cat.observations && (
+          <div class="mt-6 rounded-lg bg-primary/5 p-4">
+            <p class="text-sm text-text-muted">{cat.observations}</p>
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* Adoption form / status message */}
+    <section class="mt-12">
+      {cat.status === 'available' ? (
+        <div class="mx-auto max-w-2xl">
+          <h2 class="mb-6 font-display text-2xl font-bold text-primary">
+            {t(locale, 'cat.adoptionInquiry')}
+          </h2>
+          <AdoptionForm client:load locale={locale} translations={adoptionFormTranslations} catName={cat.name} />
+        </div>
+      ) : cat.status === 'adopted' ? (
+        <div class="mx-auto max-w-2xl rounded-xl bg-primary/5 p-6 text-center">
+          <p class="text-lg font-medium text-primary">{t(locale, 'cat.status.adopted.message')}</p>
+        </div>
+      ) : cat.status === 'treatment' ? (
+        <div class="mx-auto max-w-2xl rounded-xl bg-amber-50 p-6 text-center">
+          <p class="text-lg font-medium text-amber-800">{t(locale, 'cat.status.treatment.message')}</p>
+        </div>
+      ) : (
+        <div class="mx-auto max-w-2xl rounded-xl bg-gray-50 p-6 text-center">
+          <p class="text-lg font-medium text-gray-600">{t(locale, 'cat.status.unavailable.message')}</p>
+        </div>
+      )}
+    </section>
+
+    {/* Gallery */}
+    {cat.gallery?.length > 0 && (
+      <section class="mt-12">
+        <h2 class="mb-4 font-display text-2xl font-bold text-primary">
+          {t(locale, 'cat.gallery')}
+        </h2>
+        <CatGallery images={cat.gallery} catName={cat.name} />
+      </section>
+    )}
+  </article>
+</BaseLayout>

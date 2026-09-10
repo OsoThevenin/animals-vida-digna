@@ -1,0 +1,73 @@
+---
+import { DEFAULT_IMAGES_ORIGIN, originalImageUrl } from '@avd/content/image-url';
+import OptimizedImage from '../OptimizedImage.astro';
+
+interface GalleryImage {
+  key: string;
+  alt: string;
+  width: number;
+  height: number;
+}
+
+interface Props {
+  images: GalleryImage[];
+  catName: string;
+}
+
+const { images, catName } = Astro.props;
+const imagesOrigin =
+  import.meta.env.PUBLIC_IMAGES_ORIGIN ?? DEFAULT_IMAGES_ORIGIN;
+---
+
+{images.length > 0 && (
+  <div class="mt-8">
+    <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+      {images.map((img, i) => (
+        <a
+          href={originalImageUrl(img.key, imagesOrigin)}
+          class="lightbox group overflow-hidden rounded-lg"
+          data-group="cat-gallery"
+        >
+          <OptimizedImage
+            r2Key={img.key}
+            alt={img.alt || `${catName} - ${i + 1}`}
+            width={img.width}
+            height={img.height}
+            loading="lazy"
+            class="aspect-square h-full w-full rounded-lg object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 768px) 50vw, 25vw"
+          />
+        </a>
+      ))}
+    </div>
+  </div>
+)}
+
+<style>
+  @media (prefers-reduced-motion: reduce) {
+    .lightbox img {
+      transition: none !important;
+    }
+  }
+</style>
+
+<script>
+  async function initLightbox() {
+    const lightboxLinks = document.querySelectorAll('.lightbox');
+    if (lightboxLinks.length > 0) {
+      const [{ default: Tobii }, _css] = await Promise.all([
+        import('@midzer/tobii'),
+        import('@midzer/tobii/dist/tobii.min.css'),
+      ]);
+      new Tobii({ captions: true, zoom: false });
+    }
+  }
+
+  // Initialize on first load
+  initLightbox();
+
+  // Also handle Astro SPA page-load events
+  document.addEventListener('astro:page-load', () => {
+    initLightbox();
+  });
+</script>

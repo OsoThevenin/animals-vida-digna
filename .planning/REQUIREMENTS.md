@@ -23,10 +23,16 @@
 ### CMS Content Model
 
 - [ ] **CMS-01**: Site settings singleton (site name, logo, primary color, social links, donate URL, contact email, default SEO — all with CA/ES variants where applicable)
-- [ ] **CMS-02**: Cats collection with localized fields (slug, name, short/long description, SEO per locale) and non-localized fields (status, age, sex, temperament, weight, cover image, gallery)
+- [x] **CMS-02**: Cats collection with localized fields (slug, name, short/long description, SEO per locale) and non-localized fields (status, age, sex, temperament, weight, cover image, gallery). **Note (2026-09-09):** cats no longer live in Keystatic/git — they live in D1 (`avd-content`, tables `cats`/`cat_images`) and are edited in the separate `apps/admin` app, not this Keystatic instance. See the content/R2/admin-app plan at `docs/superpowers/plans/2026-09-03-content-r2-pipeline/README.md`.
 - [ ] **CMS-03**: Landing page sections configurable as typed blocks (hero, about, how-it-works, featured-cats, testimonials, FAQ, contact-cta) with localized fields and reorderable
 - [ ] **CMS-04**: Optional static pages collection (privacy, legal) with per-locale content and SEO
 - [ ] **CMS-05**: All image fields include alt text in both CA and ES
+
+### Admin app
+
+- [x] **ADMIN-01**: A dedicated admin app (`apps/admin`, `admin.animalsvidadigna.org`) lets an allowlisted volunteer sign in with email + one-time code and edit cats without a GitHub account or a pull request
+- [x] **ADMIN-02**: Cat edits (data and photos) are live on the public site within seconds of saving, with no review step, while the code repository keeps its existing pull-request review rule
+- [ ] **ADMIN-03**: Volunteers hold no GitHub repository access; the admin app's own allowlist (`ADMIN_ALLOWED_EMAILS`) is the sole access control for cat editing. **Status:** half-verified, half-pending — do not tick until both halves hold. (1) The "no GitHub access" clause is **verified true as of 2026-09-10** by direct read-only `gh api` checks: the collaborators list contains only the maintainer (`OsoThevenin`, full permissions), there are no pending repository invitations (which the plan's own Task 8 check would otherwise miss — an accepted invitation grants Write the moment it's accepted, so invitations had to be checked separately from collaborators), and no deploy keys exist. This is a snapshot of *current state*, not a removal this plan performed — it is not yet known whether volunteers never held GitHub access in the first place or were removed earlier; the maintainer should confirm which, since if they were never onboarded to GitHub, this migration's framing of "revoking volunteer access" describes a situation that never existed. (2) The "admin app's allowlist is the sole access control" clause is **pending first deploy** — `apps/admin` is not deployed and no volunteer is using it, so nothing is actually being controlled by `ADMIN_ALLOWED_EMAILS` yet; today the sole access control for cat editing is that nobody but the maintainer can edit anything at all. See `docs/admin-runbook.md` for the remaining deploy checklist.
 
 ### Cats Directory
 
@@ -73,7 +79,7 @@
 ### Images & Performance
 
 - [x] **IMG-01**: Images stored in Cloudflare R2 and served via Cloudflare CDN
-- [x] **IMG-02**: CMS image uploads via Worker-signed URLs to R2
+- [x] **IMG-02**: CMS image uploads via the admin app into R2 (browser resizes to ≤2000px WebP, `apps/admin`'s `images.upload` Astro Action streams it to R2 — see `docs/superpowers/specs/2026-09-03-content-r2-pipeline-design.md`)
 - [x] **IMG-03**: Responsive images using Cloudflare Image Resizing (/cdn-cgi/image/) with AVIF/WebP auto-format
 - [x] **IMG-04**: Long-lived immutable cache headers on image assets
 - [x] **IMG-05**: Lazy loading for below-fold images and gallery thumbnails
@@ -138,10 +144,13 @@
 | I18N-04 | Phase 1 | Complete |
 | I18N-05 | Phase 1 | Complete |
 | CMS-01 | Phase 1 | Pending |
-| CMS-02 | Phase 1 | Pending |
+| CMS-02 | Phase 1 (superseded by content-r2-pipeline Phase 3/5) | Complete |
 | CMS-03 | Phase 1 | Pending |
 | CMS-04 | Phase 1 | Pending |
 | CMS-05 | Phase 1 | Pending |
+| ADMIN-01 | content-r2-pipeline Phase 4 | Complete |
+| ADMIN-02 | content-r2-pipeline Phase 5 | Complete |
+| ADMIN-03 | content-r2-pipeline Phase 6 | GitHub-access clause verified 2026-09-10 (no volunteer collaborators, invitations, or deploy keys); allowlist-as-sole-control clause pending first deploy of `apps/admin` |
 | CATS-01 | Phase 2 | Complete |
 | CATS-02 | Phase 2 | Complete |
 | CATS-03 | Phase 2 | Complete |
@@ -164,7 +173,7 @@
 | FORM-05 | Phase 3 | Complete |
 | FORM-06 | Phase 3 | Complete |
 | IMG-01 | Phase 3 | Complete |
-| IMG-02 | Phase 3 | Complete |
+| IMG-02 | Phase 3 (superseded by content-r2-pipeline Phase 5) | Complete |
 | IMG-03 | Phase 3 | Complete |
 | IMG-04 | Phase 3 | Complete |
 | IMG-05 | Phase 3 | Complete |
@@ -185,10 +194,10 @@
 | PERF-04 | Phase 4 | Complete |
 
 **Coverage:**
-- v1 requirements: 45 total
-- Mapped to phases: 45
+- v1 requirements: 48 total (45 original + ADMIN-01, ADMIN-02, ADMIN-03)
+- Mapped to phases: 48
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-03-17 after roadmap creation*
+*Last updated: 2026-09-10 after content-r2-pipeline Phase 6 (cutover, in progress on branch `worktree-content-r2-impl`)*

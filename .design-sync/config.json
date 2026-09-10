@@ -1,0 +1,10 @@
+{
+  "projectId": "7b476250-b0dc-4ade-b115-5adf986abcc2",
+  "shape": "storybook",
+  "pkg": "@avd/design-system",
+  "globalName": "AvdDesignSystem",
+  "storybookConfigDir": "packages/design-system/.storybook",
+  "storybookStatic": ".design-sync/sb-reference",
+  "buildCmd": "pnpm --filter @avd/design-system build",
+  "readmeHeader": ".design-sync/conventions.md"
+}

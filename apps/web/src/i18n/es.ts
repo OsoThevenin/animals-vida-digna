@@ -1,0 +1,119 @@
+import type { TranslationKey } from './ca';
+
+const es: Record<TranslationKey, string> = {
+  // Navigation
+  'nav.home': 'Inicio',
+  'nav.cats': 'Gatos',
+  'nav.about': 'Quienes somos?',
+  'nav.collaborate': 'Colabora',
+  'nav.colonies': 'Colonias felinas',
+  'nav.contact': 'Contacto',
+
+  // CTAs
+  'cta.adopt': 'Adoptame',
+  'cta.donate': 'Haz un donativo',
+  'cta.contact': 'Contacta',
+  'cta.sponsor': 'Apadriname',
+
+  // Common
+  'common.language': 'Idioma',
+  'common.switchLanguage': 'Catala',
+  'common.siteName': 'Animals Vida Digna',
+  'common.copyright': 'Todos los derechos reservados',
+
+  // Cat fields
+  'cat.age': 'Edad',
+  'cat.gender': 'Genero',
+  'cat.male': 'Macho',
+  'cat.female': 'Hembra',
+  'cat.status': 'Estado',
+  'cat.status.available': 'Disponible',
+  'cat.status.adopted': 'Adoptado',
+  'cat.status.treatment': 'En tratamiento',
+  'cat.status.unavailable': 'No disponible',
+  'cat.size': 'Tamano',
+  'cat.size.small': 'Pequeno',
+  'cat.size.medium': 'Mediano',
+  'cat.size.large': 'Grande',
+  'cat.personality': 'Personalidad',
+  'cat.goodWith': 'Se lleva bien con',
+  'cat.healthStatus': 'Estado de salud',
+  'cat.vaccinated': 'Vacunado',
+  'cat.microchipped': 'Microchipado',
+  'cat.sterilized': 'Esterilizado',
+  'cat.weight': 'Peso',
+  'cat.rescueDate': 'Fecha de rescate',
+  'cat.race': 'Raza',
+  'cat.featured': 'Destacado',
+  'cat.backToList': 'Volver a todos los gatos',
+  'cat.adoptMe': 'Adoptame',
+  'cat.gallery': 'Galeria',
+  'cat.detailsHeading': 'Detalles del gato',
+  'cat.status.adopted.message': 'Este gato ya ha sido adoptado!',
+  'cat.status.treatment.message': 'Este gato esta en tratamiento actualmente.',
+  'cat.status.unavailable.message': 'Este gato no esta disponible para adopcion.',
+  'cat.adoptionInquiry': 'Solicitud de adopcion',
+  'cat.years': 'anos',
+  'cat.kg': 'kg',
+  'cat.personality.playful': 'Jugueton',
+  'cat.personality.calm': 'Tranquilo',
+  'cat.personality.shy': 'Timido',
+  'cat.personality.affectionate': 'Carinoso',
+  'cat.personality.independent': 'Independiente',
+  'cat.personality.social': 'Social',
+  'cat.personality.curious': 'Curioso',
+  'cat.personality.protective': 'Protector',
+  'cat.goodWith.children': 'Ninos',
+  'cat.goodWith.other-cats': 'Otros gatos',
+  'cat.goodWith.dogs': 'Perros',
+  'cat.goodWith.elderly': 'Personas mayores',
+  'cat.healthStatus.healthy': 'Sano',
+  'cat.healthStatus.treatment': 'En tratamiento',
+  'cat.healthStatus.special-needs': 'Necesidades especiales',
+  'cat.yes': 'Si',
+  'cat.no': 'No',
+
+  // Cats listing
+  'cats.title': 'Gatos',
+  'cats.subtitle': 'Descubre nuestros gatos en acogida y adopta a tu companero ideal.',
+  'cats.listHeading': 'Listado de gatos',
+  'cats.showing': 'Mostrando',
+  'cats.noResults': 'No se encontraron gatos con estos filtros.',
+  'cats.filterStatus': 'Estado',
+  'cats.filterGender': 'Genero',
+  'cats.filterPersonality': 'Personalidad',
+  'cats.filterAll': 'Todos',
+
+  // Forms
+  'form.name': 'Nombre',
+  'form.email': 'Correo electronico',
+  'form.message': 'Mensaje',
+  'form.phone': 'Telefono',
+  'form.livingSituation': 'Situacion de vivienda',
+  'form.submit': 'Enviar',
+  'form.sending': 'Enviando...',
+  'form.success.contact': 'Gracias por contactar con nosotros! Te responderemos pronto.',
+  'form.success.adoption': 'Gracias por tu interes en adoptar a {catName}! Te contactaremos pronto.',
+  'form.error.required': 'Este campo es obligatorio',
+  'form.error.invalidEmail': 'El correo electronico no es valido',
+  'form.error.server': 'Ha ocurrido un error. Intentalo de nuevo.',
+  'form.error.rateLimited': 'Has enviado demasiados mensajes. Intentalo mas tarde.',
+  'form.livingSituation.flat': 'Piso',
+  'form.livingSituation.house': 'Casa',
+  'form.livingSituation.houseGarden': 'Casa con jardin',
+  'form.livingSituation.rural': 'Entorno rural',
+  'form.livingSituation.other': 'Otros',
+
+  // Contact page
+  'contact.title': 'Contacto',
+  'contact.subtitle': 'Tienes alguna pregunta o quieres saber mas sobre nosotros? Escribenos!',
+
+  // Accessibility
+  'a11y.skipToContent': 'Saltar al contenido',
+
+  // Footer
+  'footer.shelter': 'Protectora de animales',
+  'footer.socialLinks': 'Redes sociales',
+};
+
+export default es;

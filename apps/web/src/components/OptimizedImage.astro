@@ -1,0 +1,52 @@
+---
+import { resolveOptimizedImageSource } from '../lib/optimized-image-url';
+
+interface Props {
+  src?: string;
+  r2Key?: string;
+  alt: string;
+  widths?: number[];
+  sizes?: string;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  width?: number;
+  height?: number;
+  fetchpriority?: 'high' | 'low' | 'auto';
+}
+
+const {
+  src,
+  r2Key,
+  alt,
+  widths,
+  sizes,
+  class: className,
+  loading = 'lazy',
+  width,
+  height,
+  fetchpriority,
+} = Astro.props;
+
+const resolved = resolveOptimizedImageSource({
+  src,
+  r2Key,
+  widths,
+  sizes,
+  width,
+  isDev: import.meta.env.DEV,
+  imagesOrigin: import.meta.env.PUBLIC_IMAGES_ORIGIN,
+});
+---
+
+<img
+  src={resolved.src}
+  srcset={resolved.srcset}
+  sizes={resolved.sizes}
+  alt={alt}
+  class={className}
+  loading={loading}
+  decoding="async"
+  width={resolved.width}
+  {...(height ? { height } : {})}
+  {...(fetchpriority ? { fetchpriority } : {})}
+/>

@@ -1,0 +1,98 @@
+---
+import { listPublishedCats } from '@avd/content';
+import { localizeCat } from '@avd/content/localize';
+import CatCard from '../../../components/cats/CatCard.astro';
+import CatFilters from '../../../components/cats/CatFilters.tsx';
+import { t, getAlternateUrl } from '../../../i18n/index';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { toCatCardProps } from '../../../lib/cat-card-props';
+import type { CatFilterData } from '../../../lib/cat-filters';
+import { requireDb } from '../../../lib/db';
+import { siteSettings } from '../../../generated/settings';
+import { buildCanonicalUrl } from '../../../lib/seo';
+
+export const prerender = false;
+
+const locale = 'es' as const;
+
+// See src/pages/cats/index.astro for why this reads the build-time-generated
+// settings module instead of the Keystatic filesystem reader.
+const donateUrl = siteSettings.donateUrl;
+
+// M9: see src/pages/cat/[slug].astro for why 60s.
+Astro.response.headers.set('Cache-Control', 'public, max-age=60');
+
+const db = requireDb(Astro.locals);
+const rows = await listPublishedCats(db, locale);
+
+const localizedCats = rows
+  .map((row) => ({ ...localizeCat(row, locale), id: row.id }))
+  .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+const filterData: CatFilterData[] = localizedCats.map((cat) => ({
+  id: cat.id,
+  name: cat.name,
+  slug: cat.slug,
+  status: cat.status,
+  age: cat.age,
+  gender: cat.gender,
+  personality: cat.personality ?? [],
+  coverImage: cat.coverImage,
+  shortDescription: cat.shortDescription ?? '',
+  featured: cat.featured ?? false,
+}));
+
+const translations = {
+  filterStatus: t(locale, 'cats.filterStatus'),
+  filterGender: t(locale, 'cats.filterGender'),
+  filterPersonality: t(locale, 'cats.filterPersonality'),
+  filterAll: t(locale, 'cats.filterAll'),
+  showing: t(locale, 'cats.showing'),
+  noResults: t(locale, 'cats.noResults'),
+  statusAvailable: t(locale, 'cat.status.available'),
+  statusAdopted: t(locale, 'cat.status.adopted'),
+  statusTreatment: t(locale, 'cat.status.treatment'),
+  statusUnavailable: t(locale, 'cat.status.unavailable'),
+  genderMale: t(locale, 'cat.male'),
+  genderFemale: t(locale, 'cat.female'),
+  personalityPlayful: t(locale, 'cat.personality.playful'),
+  personalityCalm: t(locale, 'cat.personality.calm'),
+  personalityShy: t(locale, 'cat.personality.shy'),
+  personalityAffectionate: t(locale, 'cat.personality.affectionate'),
+  personalityIndependent: t(locale, 'cat.personality.independent'),
+  personalitySocial: t(locale, 'cat.personality.social'),
+  personalityCurious: t(locale, 'cat.personality.curious'),
+  personalityProtective: t(locale, 'cat.personality.protective'),
+  catsLabel: t(locale, 'cats.title'),
+};
+
+const site =
+  Astro.site?.href?.replace(/\/$/, '') || 'https://animalsvidadigna.org';
+const canonicalUrl = buildCanonicalUrl(Astro.url.pathname, site);
+const alternateUrl = buildCanonicalUrl(getAlternateUrl(Astro.url, 'ca'), site);
+---
+
+<BaseLayout title={t(locale, 'cats.title')} description={t(locale, 'cats.subtitle')} donateUrl={donateUrl} canonicalUrl={canonicalUrl} alternateUrl={alternateUrl}>
+  <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <h1 class="mb-2 font-display text-3xl font-bold text-primary md:text-4xl">
+      {t(locale, 'cats.title')}
+    </h1>
+    <p class="mb-8 text-text-muted">
+      {t(locale, 'cats.subtitle')}
+    </p>
+
+    {/* See src/pages/cats/index.astro for why this heading-order fix is
+        needed. */}
+    <h2 class="sr-only">{t(locale, 'cats.listHeading')}</h2>
+
+    <CatFilters client:load cats={filterData} locale={locale} translations={translations} />
+
+    <noscript>
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {localizedCats.map((cat) => (
+          <CatCard cat={toCatCardProps(cat)} locale={locale} />
+        ))}
+      </div>
+    </noscript>
+  </section>
+</BaseLayout>
