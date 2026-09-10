@@ -337,6 +337,12 @@ export default defineConfig({
 
 - [x] **Step 5: Write `apps/admin/tsconfig.json`**
 
+> **Note (L5, phase-4-security-review.md):** the snippet below is what this
+> task originally wrote. The real, current `apps/admin/tsconfig.json` also
+> adds `baseUrl`/`paths` (the `@/*` alias) and includes
+> `worker-configuration.d.ts` — both landed in the later shadcn migration
+> and M3's fix, not in this task.
+
 ```json
 {
   "extends": "astro/tsconfigs/strict",
@@ -485,6 +491,13 @@ This links `apps/admin/node_modules/@avd/design-system` and
 `apps/admin/node_modules/@avd/content` to the workspace packages.
 
 - [x] **Step 4: Write `apps/admin/src/styles/admin.css`**
+
+> **Note (L5, phase-4-security-review.md):** superseded by the shadcn
+> migration — see the *Amendment* at the top of this task. The real
+> `src/styles/admin.css` no longer `@import`s `@avd/design-system/styles.css`
+> or declares an `@source` for it; it defines the shadcn semantic tokens
+> directly. Left below as a record of what this task actually wrote at the
+> time.
 
 ```css
 @import 'tailwindcss';
@@ -1102,6 +1115,14 @@ module does not exist).
 
 - [x] **Step 3: Write `apps/admin/src/lib/auth.ts`**
 
+> **Note (L5, phase-4-security-review.md):** this snippet predates both
+> H1 and H2 (see `phase-4-security-review.md`). It has no per-request
+> allowlist re-check (H1 fixed that in `src/middleware.ts`, not here) and
+> `sendVerificationOTP` here ignores the OTP `type` argument, the exact gap
+> H2 closed by gating every `/email-otp/*` route in middleware. The real
+> `src/lib/auth.ts` also fails loudly on a missing `BETTER_AUTH_SECRET`
+> (M1), which this snippet does not show.
+
 ```ts
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import * as schema from '@avd/content/schema';
@@ -1193,6 +1214,12 @@ export function createAuth(env: Env) {
 ```
 
 - [x] **Step 4: Write `apps/admin/src/pages/api/auth/[...all].ts`**
+
+> **Note (L5, phase-4-security-review.md):** this snippet also predates the
+> `cf-connecting-ip` forwarding fix (`ec67ea4`) and the H1/H2 fixes noted
+> above — the real file only fills `x-forwarded-for` when absent, and the
+> request-time gating those fixes require lives in `src/middleware.ts`, not
+> visible in this route file.
 
 ```ts
 import type { APIRoute } from 'astro';
@@ -1710,6 +1737,11 @@ Run: `pnpm vitest run apps/admin/tests/cats-list-status-labels.test.ts`
 Expected: FAIL with "Failed to resolve import ../src/pages/cats/status-labels".
 
 - [x] **Step 3: Write `apps/admin/src/pages/cats/status-labels.ts`**
+
+> **Note (L5, phase-4-security-review.md):** the real file lives at
+> `apps/admin/src/lib/cat-status-labels.ts`, not under `src/pages/cats/` —
+> it moved in `447714e` because Astro routes every `.ts` file under
+> `src/pages/` as an endpoint. The snippet below is otherwise accurate.
 
 ```ts
 import type { CatStatus } from '@avd/content/validate';
