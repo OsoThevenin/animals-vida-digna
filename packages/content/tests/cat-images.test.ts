@@ -168,6 +168,74 @@ describe('updateCatImages', () => {
   });
 });
 
+describe('updateCatImages atomicity', () => {
+  it('leaves all rows unchanged when one image update in the batch fails', async () => {
+    const cat = await createCat(ctx.db, baseInput(), 'a@b.org');
+    const img1 = await addCatImage(ctx.db, cat.id, {
+      r2Key: `cats/${cat.id}/1.webp`,
+      width: 800,
+      height: 600,
+      altCa: 'Original 1',
+      altEs: 'Original 1 es',
+    });
+    const img2 = await addCatImage(ctx.db, cat.id, {
+      r2Key: `cats/${cat.id}/2.webp`,
+      width: 800,
+      height: 600,
+      altCa: 'Original 2',
+      altEs: 'Original 2 es',
+    });
+    const img3 = await addCatImage(ctx.db, cat.id, {
+      r2Key: `cats/${cat.id}/3.webp`,
+      width: 800,
+      height: 600,
+      altCa: 'Original 3',
+      altEs: 'Original 3 es',
+    });
+
+    // img1 and img2 are valid updates that would succeed on their own; img3
+    // carries a null altCa, which violates the cat_images.alt_ca NOT NULL
+    // constraint and makes that single statement fail. If the three
+    // UPDATEs are issued one by one (today's behaviour), img1 and img2's
+    // new values are already committed by the time img3's statement
+    // throws, leaving the gallery in a mixed state that is neither the old
+    // order nor the new one.
+    await expect(
+      updateCatImages(ctx.db, cat.id, [
+        {
+          id: img1.id,
+          altCa: 'Reordered 1',
+          altEs: 'Reordered 1 es',
+          position: 2,
+        },
+        {
+          id: img2.id,
+          altCa: 'Reordered 2',
+          altEs: 'Reordered 2 es',
+          position: 0,
+        },
+        {
+          id: img3.id,
+          altCa: null as unknown as string,
+          altEs: 'Reordered 3 es',
+          position: 1,
+        },
+      ])
+    ).rejects.toThrow();
+
+    const withImages = await getCatById(ctx.db, cat.id);
+    const byId = new Map(withImages?.images.map((i) => [i.id, i]));
+
+    // Every row must still hold its pre-batch value: no partial apply.
+    expect(byId.get(img1.id)?.altCa).toBe('Original 1');
+    expect(byId.get(img1.id)?.position).toBe(0);
+    expect(byId.get(img2.id)?.altCa).toBe('Original 2');
+    expect(byId.get(img2.id)?.position).toBe(1);
+    expect(byId.get(img3.id)?.altCa).toBe('Original 3');
+    expect(byId.get(img3.id)?.position).toBe(2);
+  });
+});
+
 describe('setCoverImage', () => {
   it('sets the cover image when it belongs to the cat', async () => {
     const cat = await createCat(ctx.db, baseInput(), 'a@b.org');

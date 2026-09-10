@@ -1,5 +1,5 @@
 import type { D1Database } from '@cloudflare/workers-types';
-import { and, eq, inArray, max } from 'drizzle-orm';
+import { and, eq, inArray, max, ne } from 'drizzle-orm';
 import { type DrizzleD1Database, drizzle } from 'drizzle-orm/d1';
 import { nanoid } from 'nanoid';
 import * as schema from './schema';
@@ -207,8 +207,17 @@ export async function updateCatImages(
   catId: string,
   images: Array<{ id: string; altCa: string; altEs: string; position: number }>
 ): Promise<void> {
-  for (const image of images) {
-    await db
+  if (images.length === 0) return;
+
+  // A volunteer reordering a gallery expects an all-or-nothing save: either
+  // every image gets its new alt text and position, or none does. Issuing
+  // one UPDATE per image, awaited in sequence, can apply the first few and
+  // then fail on a later one, leaving the gallery in a state that is
+  // neither the old order nor the new one. db.batch sends every statement
+  // in a single D1 batch() call, which D1 executes as one implicit
+  // transaction: a failure in any statement rolls back the whole batch.
+  const [first, ...rest] = images.map((image) =>
+    db
       .update(schema.catImages)
       .set({
         altCa: image.altCa,
@@ -220,8 +229,9 @@ export async function updateCatImages(
           eq(schema.catImages.id, image.id),
           eq(schema.catImages.catId, catId)
         )
-      );
-  }
+      )
+  );
+  await db.batch([first, ...rest]);
 }
 
 export async function removeCatImage(
@@ -234,26 +244,40 @@ export async function removeCatImage(
     .where(eq(schema.catImages.id, imageId));
   if (!row) return null;
 
-  // cats.cover_image_id has ON DELETE SET NULL, so the FK clears it; this
-  // delete is the only statement needed. D1 enforces foreign keys by
-  // default and does not allow disabling them, so no extra PRAGMA is
-  // required in production.
-  await db.delete(schema.catImages).where(eq(schema.catImages.id, imageId));
-
-  // Renumber the remaining images to a contiguous 0..n-1 sequence so
-  // addCatImage's max(position)+1 keeps producing the next slot instead of
-  // drifting upward forever, and so gallery order stays legible.
+  // cats.cover_image_id has ON DELETE SET NULL, so the FK clears it on
+  // delete. Compute the remaining images (excluding the one being removed)
+  // up front so the delete and the renumbering updates can be issued as one
+  // batch below, instead of deleting first and renumbering after: splitting
+  // them into separate awaited statements risks a failure between the two
+  // steps leaving a deleted image but stale, non-contiguous positions.
   const remaining = await db
     .select({ id: schema.catImages.id })
     .from(schema.catImages)
-    .where(eq(schema.catImages.catId, row.catId))
+    .where(
+      and(
+        eq(schema.catImages.catId, row.catId),
+        ne(schema.catImages.id, imageId)
+      )
+    )
     .orderBy(schema.catImages.position);
-  for (const [index, image] of remaining.entries()) {
-    await db
+
+  const deleteStatement = db
+    .delete(schema.catImages)
+    .where(eq(schema.catImages.id, imageId));
+
+  // Renumber the remaining images to a contiguous 0..n-1 sequence so
+  // addCatImage's max(position)+1 keeps producing the next slot instead of
+  // drifting upward forever, and so gallery order stays legible. D1
+  // enforces foreign keys by default and does not allow disabling them, so
+  // no extra PRAGMA is required in production.
+  const renumberStatements = remaining.map((image, index) =>
+    db
       .update(schema.catImages)
       .set({ position: index })
-      .where(eq(schema.catImages.id, image.id));
-  }
+      .where(eq(schema.catImages.id, image.id))
+  );
+
+  await db.batch([deleteStatement, ...renumberStatements]);
 
   return { r2Key: row.r2Key };
 }
