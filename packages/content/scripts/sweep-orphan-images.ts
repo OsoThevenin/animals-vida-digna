@@ -9,6 +9,17 @@
  * (confirmed against wrangler 4.75.0 --help; only get/put/delete exist).
  * Deletion uses `wrangler r2 object delete`, which does exist.
  *
+ * Every wrangler subcommand this script shells out to (D1 and R2 alike)
+ * passes `--remote` EXPLICITLY. This is deliberate, not decorative:
+ * `wrangler r2 object delete` defaults to `--local` when neither flag is
+ * given (verified against wrangler 4.75.0's bundled `cli.js`:
+ * `isLocal(args, defaultValue = true)`), which would silently delete from
+ * the Miniflare store under `.wrangler/state` instead of production R2 —
+ * that directory already exists on any machine that has run this
+ * package's test suite, so the call would not even error. If you add a
+ * new wrangler call to this file, it MUST include `--remote` or it will
+ * quietly do nothing to production.
+ *
  * `parseObjectKeys` (the XML scrape at the heart of the R2 listing step)
  * lives in `../src/orphans.ts`, not here, so it can be unit-tested without
  * executing this script's `main()`. See that file's docstring for a
@@ -26,7 +37,7 @@
  *   npx tsx scripts/sweep-orphan-images.ts --delete     # delete orphans
  */
 
-import { execSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import { AwsClient } from 'aws4fetch';
 import { findOrphans, parseObjectKeys } from '../src/orphans';
 
@@ -92,8 +103,38 @@ function listCatImageKeysInD1(): string[] {
   return parsed[0]?.results.map((row) => row.r2_key) ?? [];
 }
 
+/**
+ * Builds the argv (not a shell string) for the `wrangler r2 object delete`
+ * call that removes one orphan from PRODUCTION R2.
+ *
+ * `--remote` is required: `wrangler r2 object delete` defaults to
+ * `--local` when neither `--local` nor `--remote` is passed (verified
+ * against wrangler 4.75.0's bundled `cli.js`), which would delete from
+ * the local Miniflare store instead of production and print success while
+ * doing nothing. See `tests/sweep-orphan-images.test.ts` for the
+ * regression guard on this exact defect.
+ *
+ * Exported (and returning argv, not an interpolated string) so it is
+ * testable without shelling out, and so the key — which comes from R2
+ * listing output, not a fixed literal — is never interpolated into a
+ * shell command string. `isCatImageKey`'s pattern permits characters like
+ * `"`, `$`, and backticks that would be meaningful to a shell; passing
+ * argv directly to `execFileSync` (no shell) removes that injection class
+ * entirely rather than relying on quoting.
+ */
+export function buildDeleteArgs(key: string): string[] {
+  return [
+    'wrangler',
+    'r2',
+    'object',
+    'delete',
+    `${BUCKET_NAME}/${key}`,
+    '--remote',
+  ];
+}
+
 function deleteFromR2(key: string): void {
-  execSync(`npx wrangler r2 object delete "${BUCKET_NAME}/${key}"`, {
+  execFileSync('npx', buildDeleteArgs(key), {
     stdio: ['pipe', 'pipe', 'pipe'],
   });
 }
@@ -141,7 +182,18 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(err instanceof Error ? err.message : err);
-  process.exit(1);
-});
+// Only run when executed directly (`npx tsx scripts/sweep-orphan-images.ts`),
+// not when imported — `buildDeleteArgs` is imported by
+// `tests/sweep-orphan-images.test.ts` to test command construction without
+// touching any real R2/D1 state, and importing this module must never have
+// the side effect of shelling out to wrangler.
+const isMainModule =
+  process.argv[1] !== undefined &&
+  import.meta.url === `file://${process.argv[1]}`;
+
+if (isMainModule) {
+  main().catch((err) => {
+    console.error(err instanceof Error ? err.message : err);
+    process.exit(1);
+  });
+}
