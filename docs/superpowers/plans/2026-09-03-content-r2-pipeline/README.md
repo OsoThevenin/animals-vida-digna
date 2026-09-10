@@ -40,15 +40,19 @@
 Total ≈ 6–7 working days. Phases 1→2→3 and 4→5 are two chains; Phase 4 may start
 once Phase 2 is merged, in parallel with Phase 3, if two people/agents work at once.
 
-## Status as of 2026-09-09
+## Status as of 2026-09-10
 
-Phases **0–5 are implemented** on branch `worktree-content-r2-impl` (worktree
-`.claude/worktrees/content-r2-impl`). Nothing is pushed, merged or deployed.
-Pipeline is green: `pnpm turbo test build check lint --force` → 15 tasks;
-admin 256 / web 276 / content 98 tests; `pnpm --filter web test:e2e` → 62
-passed. Admin bundle 842.15 KiB gzip, 28% of the 3 MB Workers Free limit.
+Phases **0–6 are implemented** on branch `worktree-content-r2-impl` (worktree
+`.claude/worktrees/content-r2-impl`). **Nothing is pushed, merged or
+deployed** — this is still true after Phase 6; Phase 6 added documentation,
+verification, and residual fixes, not a deploy. Pipeline is green: `pnpm
+turbo test build check lint --force` → 16/16 tasks; admin 265 tests (plus
+web/content). `pnpm --filter web test:e2e` → 62/62 passed under `--workers=2`
+(the sandbox's default unlimited-worker run showed 8 timeout failures from
+CPU contention running parallel Chromium instances, not a real regression).
+Admin bundle 843.01 KiB gzip, 28% of the 3 MB Workers Free limit.
 
-Three records to read before continuing:
+Four records to read before continuing:
 
 - **`phase-0-results.md`** — the platform spike, GO verdict, and five findings
   (the `fit=scale-down` amendment, the Sources fix, the quota threat model, and
@@ -67,11 +71,32 @@ Three records to read before continuing:
   maintainer-only checklist for everything the sandbox could not reach —
   remote D1, the live WAF matrix, and a real browser click-through.
 
-**Next up: Phase 6** (cutover, docs, revoking volunteers' GitHub write access).
+- **`phase-6-results.md`** — ⚠ **read before deploying.** Phase 6's cut-over
+  verification: the automated/git-level checks that genuinely passed in this
+  sandbox (pipeline, e2e, secret scans, doc links, commit count), M2 bounded
+  by a new per-address OTP throttle (not eliminated), the new jsdom + Testing
+  Library harness that caught a real reorder-during-save defect, and a
+  consolidated maintainer-only checklist covering `wrangler secret list`,
+  applying migrations to production D1, creating the second Workers Builds
+  project, Lighthouse ×4×4, the timed volunteer walkthrough, the orphan-sweep
+  dry run, and Task 8's GitHub collaborator removal (observed but **not**
+  deliberately executed by this session — see that file's Definition-of-done
+  table for exactly what was and was not confirmed).
 
-Before deploying `apps/admin`, both `phase-4-security-review.md`'s *Before any
-deploy* list and `phase-5-results.md`'s *Maintainer-only checklist* must be
-worked through — they are complementary, not duplicates.
+**What remains is entirely maintainer-only** (Cloudflare account access,
+GitHub admin decisions, and a real browser — none available in any sandbox
+session so far): confirm/execute Task 8's collaborator removal, apply
+production D1 migrations, create the second Workers Builds project, run the
+Lighthouse ×4×4 pass, do the timed volunteer walkthrough, run the
+orphan-sweep dry run, and confirm Cloudflare billing shows no paid
+subscription. Only after all three maintainer-only checklists
+(`phase-4-security-review.md`, `phase-5-results.md`, `phase-6-results.md`)
+are worked should `apps/admin` be deployed and the branch merged.
+
+Before deploying `apps/admin`, `phase-4-security-review.md`'s *Before any
+deploy* list, `phase-5-results.md`'s *Maintainer-only checklist*, and
+`phase-6-results.md`'s *Maintainer-only checklist* must all be worked
+through — they are complementary, not duplicates.
 
 Also integrated along the way, outside the numbered phases: the `design-system`
 branch (13 commits rebased in, its obsolete workspace-conversion commit
