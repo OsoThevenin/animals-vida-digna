@@ -2146,15 +2146,25 @@ gh pr create --title "feat(admin): admin app shell and email-OTP authentication"
 ## Test plan
 - [x] apps/admin/tests/*.test.ts and packages/content/tests/schema-auth.test.ts pass (pnpm turbo test)
 - [x] Local end-to-end login/logout with AUTH_DEV_LOG_OTP=1 (Task 9)
-- [x] Production login with a real allowlisted email, code delivered by Resend (Task 11)
-- [x] session row confirmed in D1 (wrangler d1 execute avd-content --remote)
-- [x] non-allowlisted email produces no email and a generic error
+- [ ] Production login with a real allowlisted email, code delivered by Resend (Task 11)
+- [ ] session row confirmed in D1 (wrangler d1 execute avd-content --remote)
+- [ ] non-allowlisted email produces no email and a generic error
 - [x] wrangler deploy --dry-run compressed size well under the 3 MB Workers Free limit
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
 )"
 ```
+
+> **Pending — corrected 2026-09-10 (H3, phase-4-security-review.md).** The
+> three test-plan items above were ticked before Task 10 and Task 11 (this
+> task) had ever been executed. Nothing has been deployed as of this
+> correction: every empirical result on record came from local D1 with
+> `AUTH_DEV_LOG_OTP=1`, which short-circuits Resend, so the Resend delivery
+> path has never executed inside a Worker. They stay un-ticked until the
+> maintainer runs the first real deploy and Task 11's manual steps. A first
+> real send is the only thing that will surface an unverified sender domain
+> or a mis-scoped Resend API key — worth doing before cutover, not after.
 
 - [ ] **Step 6: Note what Phase 5 still owes**
 
