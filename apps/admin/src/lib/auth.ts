@@ -50,8 +50,29 @@ import { buildOtpEmail } from './otp-email';
  * `{ success: true }` shape used for a non-allowlisted address and for a
  * genuine send. So whether a given address is allowlisted, throttled,
  * both, or neither is never observable from the response.
+ *
+ * Row pruning (fix-round-1 finding): this counter lives in the same
+ * `rate_limit` table better-auth's own storage prunes itself.
+ * `deleteExpiredRows` in `createDatabaseStorageWrapper`
+ * (better-auth/dist/api/rate-limiter/index.mjs) issues a DELETE with no
+ * key filter — `WHERE lastRequest < now - longestObservedWindow * 1000`
+ * — over the *whole table*, so it can sweep this app's address rows
+ * along with better-auth's own IP rows. `longestObservedWindow`
+ * (`getConfiguredRateLimitWindows`, same file) is the max window across
+ * `ctx.rateLimit.window`, the built-in special rules, any plugin rules,
+ * and any *object-form* `rateLimit.customRules` entry. The
+ * `customRules` entry below registers this endpoint's window at
+ * `EMAIL_SEND_THROTTLE_WINDOW_SECONDS` for exactly this reason — without
+ * it, `longestObservedWindow` would resolve to the built-in special
+ * rule's 60s, and any row (including this counter's) older than 60s
+ * would be pruned well before this counter's own 300s window should
+ * have reset it, letting an attacker who paces requests ~65-70s apart
+ * bypass the limit indefinitely. See
+ * tests/otp-send-address-throttle-pruning.test.ts, which fails without
+ * that `customRules` entry.
  */
 const EMAIL_SEND_THROTTLE_WINDOW_MS = 5 * 60 * 1000;
+const EMAIL_SEND_THROTTLE_WINDOW_SECONDS = EMAIL_SEND_THROTTLE_WINDOW_MS / 1000;
 const EMAIL_SEND_THROTTLE_MAX = 5;
 
 function emailSendThrottleKey(email: string): string {
@@ -64,9 +85,13 @@ function emailSendThrottleKey(email: string): string {
  * semantics of better-auth's own database rate-limit storage
  * (createDatabaseStorageWrapper in
  * better-auth/dist/api/rate-limiter/index.mjs): a denial never advances
- * `lastRequest`, so the window only resets once a full
- * EMAIL_SEND_THROTTLE_WINDOW_MS has elapsed since the last *allowed*
- * request.
+ * `lastRequest`, so *this function's own logic* only resets a key once a
+ * full EMAIL_SEND_THROTTLE_WINDOW_MS has elapsed since the last allowed
+ * request. That guarantee depends on the row surviving that long —
+ * which in turn depends on the `rateLimit.customRules` entry for this
+ * path in `createAuth` keeping better-auth's own row-pruning window
+ * (`longestObservedWindow`) at least this wide. See the block comment
+ * above this section ("Row pruning") for why.
  */
 async function consumeEmailSendThrottle(
   db: DrizzleD1Database<typeof schema>,
@@ -138,6 +163,26 @@ export function createAuth(env: Env) {
     rateLimit: {
       enabled: true,
       storage: 'database',
+      customRules: {
+        // Two purposes, both documented in the "Row pruning" comment
+        // above consumeEmailSendThrottle: (1) registers a 300s window
+        // for this path so better-auth's own row-pruning cutoff
+        // (`longestObservedWindow`) is at least as wide as the
+        // per-address counter's own window, so better-auth cannot prune
+        // that counter's row out from under it early. (2) As an
+        // unavoidable side effect (customRules keys and windows are not
+        // separable in better-auth 1.7.2), this also replaces the
+        // built-in per-IP rule for this exact path — 3 requests per IP
+        // per 60s — with 3 per IP per 300s. That is *strictly stricter*
+        // for a single IP, so it does not weaken the existing per-IP
+        // protection; tests/otp-send-ip-throttle.test.ts was updated
+        // (fix round 1) to assert the new 3-per-300s behaviour instead
+        // of 3-per-60s.
+        '/email-otp/send-verification-otp': {
+          window: EMAIL_SEND_THROTTLE_WINDOW_SECONDS,
+          max: 3,
+        },
+      },
     },
     advanced: {
       // Plain http in `astro dev` needs Secure off; production always

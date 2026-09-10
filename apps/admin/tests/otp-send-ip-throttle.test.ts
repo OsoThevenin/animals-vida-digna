@@ -5,14 +5,34 @@ import { getPlatformProxy } from 'wrangler';
 import { createAuth } from '../src/lib/auth';
 
 /**
- * Regression guard for better-auth 1.7.2's *built-in* per-IP throttle on
- * `/email-otp/send-verification-otp`. This is library default behaviour
+ * Regression guard for the per-IP throttle on
+ * `/email-otp/send-verification-otp`.
+ *
+ * UPDATED in fix round 1 (deliberately, not quietly — flagged here per
+ * that review's requirement): this endpoint's max is still 3, but the
+ * window is no longer better-auth's *default* 60s
  * (`getDefaultSpecialRules()` in
- * `better-auth/dist/api/rate-limiter/index.mjs`, the rule matching
- * `path === "/email-otp/send-verification-otp"` at window: 60, max: 3) —
- * nothing in this repo configures it. A future better-auth upgrade could
- * silently drop or relax it and nothing here would fail, so this test
- * exists purely to catch that regression.
+ * `better-auth/dist/api/rate-limiter/index.mjs`). `src/lib/auth.ts` now
+ * registers an explicit `rateLimit.customRules` entry of `{ window: 300,
+ * max: 3 }` for this exact path, as a side effect of fixing an unrelated
+ * bug: better-auth's own row-pruning (`deleteExpiredRows`) has no key
+ * filter and was deleting this app's *address*-keyed throttle counter
+ * (a different, new-in-this-phase protection — see
+ * tests/otp-send-address-throttle-pruning.test.ts) out from under it
+ * after just over 60s, because nothing registered a wider window with
+ * `getConfiguredRateLimitWindows`. Registering the address counter's
+ * real 300s window via an object-form `customRules` entry fixes that,
+ * but `customRules` entries are keyed by path only in better-auth
+ * 1.7.2 — there is no way to influence pruning without also replacing
+ * the rule for this path, so the per-IP window widened from 60s to
+ * 300s as an unavoidable side effect. This is *strictly stricter* for a
+ * single IP (3 per 5 minutes vs. 3 per 1 minute), so nothing here is
+ * weakened.
+ *
+ * This test's own assertions did not need to change: it fires 4 requests
+ * back-to-back with no simulated time passing, so `max: 3` is the only
+ * thing under test here regardless of which `window` is configured. Only
+ * this comment was stale.
  *
  * This is NOT a mock of the rate limiter: it drives `createAuth` against a
  * real local D1 via `getPlatformProxy` (the same pattern as
