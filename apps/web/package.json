@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "npx tsx scripts/generate-settings.ts",
+    "prebuild": "tsx scripts/generate-settings.ts",
     "build": "astro build",
     "preview": "astro preview",
     "preview:worker": "astro build && wrangler dev",
@@ -39,6 +39,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260904.1",
     "@playwright/test": "^1.62.1",
+    "tsx": "^4.23.13",
     "vitest": "^4.1.0",
     "wrangler": "^4.75.0"
   }
