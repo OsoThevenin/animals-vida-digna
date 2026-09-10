@@ -111,19 +111,32 @@ Without this, whoever is signed in can publish straight to the live site.
 
 ### 4. Repository collaborators
 
-As of Phase 6 of the content/R2/admin-app migration, no volunteer holds
-repository **Write** access. Only the maintainer (and anyone else who needs
-to review pull requests against `main`) should be a collaborator, and that
-access should stay at whatever role GitHub's PR-review workflow requires for
-them — Keystatic's GitHub-mode saves are now used exclusively by the
-maintainer, editing settings/landing/pages, so this is no longer a
-volunteer-facing permission. See `docs/admin-runbook.md` for how volunteer
-access to the *admin app* (not this repository) is managed.
+Only the maintainer (and anyone else who needs to review pull requests
+against `main`) should be a collaborator on this repository, at whatever
+role GitHub's PR-review workflow requires for them — Keystatic's
+GitHub-mode saves are now used exclusively by the maintainer, editing
+settings/landing/pages, so this is no longer a volunteer-facing permission.
+
+**Current state, verified 2026-09-10 by read-only `gh api` checks:** the
+repository's only collaborator is the maintainer, there are no pending
+collaborator invitations, and no deploy keys exist. That is the state this
+step wants — but it is a snapshot of what is true today, not a record of an
+action this migration performed. It is not established whether a volunteer
+previously held Write access and was removed, or whether no volunteer was
+ever added as a GitHub collaborator in the first place; if you know which,
+note it here. Either way, before treating this as settled, run the removal
+checklist yourself — see `docs/admin-runbook.md`'s "Task 8: Remove volunteer
+GitHub collaborator access" section, which also covers the pending-invitation
+and deploy-key checks above (a collaborator-list check alone misses an
+invitation that grants Write the moment it's accepted). See that same file
+for how volunteer access to the *admin app* (not this repository) is
+managed.
 
 ## For the maintainer (settings, landing page, static pages only)
 
-1. Accept the repository invitation that arrives by email (needs a free GitHub
-   account — sign up at <https://github.com/signup>).
+1. If you are not already a collaborator on this repository, accept the
+   invitation that arrives by email (needs a free GitHub account — sign up
+   at <https://github.com/signup>).
 2. Go to <https://animalsvidadigna.org/keystatic> and click sign in with GitHub.
 3. Edit a page or setting — the `cats` collection no longer appears in this
    Keystatic instance's navigation (Phase 3 removed it; see the spec at
