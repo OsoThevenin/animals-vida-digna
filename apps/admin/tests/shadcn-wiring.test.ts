@@ -66,7 +66,7 @@ describe('shadcn/ui wiring', () => {
     expect(pkg.dependencies['class-variance-authority']).toBeDefined();
   });
 
-  it('vendors only the components the admin needs', () => {
+  it('points the CSS token file at the AVD palette, not shadcn neutral defaults', () => {
     const css = readFileSync(join(root, 'src/styles/admin.css'), 'utf-8');
     // The site's palette drives shadcn's tokens; nothing neutral survives.
     expect(css).toContain('--primary: #6b4226');
