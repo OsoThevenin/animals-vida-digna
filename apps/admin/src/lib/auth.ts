@@ -3,11 +3,116 @@ import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { betterAuth } from 'better-auth';
 import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { emailOTP } from 'better-auth/plugins';
+import { eq } from 'drizzle-orm';
+import type { DrizzleD1Database } from 'drizzle-orm/d1';
 import { drizzle } from 'drizzle-orm/d1';
 import { Resend } from 'resend';
 import { isAllowedEmail, parseAllowedEmails } from './allowlist';
 import { assertAuthEnv } from './auth-env';
 import { buildOtpEmail } from './otp-email';
+
+/**
+ * M2 (security review, phase-4-security-review.md): better-auth 1.7.2's
+ * own throttle on this endpoint (getDefaultSpecialRules() in
+ * better-auth/dist/api/rate-limiter/index.mjs — window: 60, max: 3) is
+ * keyed by `createRateLimitKey(ip, path)`, never by the request body's
+ * `email`. An attacker with many IPs can still flood one known
+ * allowlisted volunteer's inbox at up to 3 sends per IP per minute, burn
+ * the Resend quota, and hammer D1 — and every genuine code in that flood
+ * makes a phishing email dropped alongside it more credible. This second,
+ * address-keyed counter closes that regardless of how many IPs the
+ * caller has.
+ *
+ * 5 sends per 5-minute window: the OTP itself expires after 5 minutes
+ * (see `expiresIn: 300` on the emailOTP plugin below), so a volunteer who
+ * mistypes the code or whose first email is slow has headroom to request
+ * a fresh one inside that same window without ever touching this limit —
+ * in practice a real sign-in is 1 send, occasionally 2. 5 per 5 minutes
+ * caps the worst case at ~1,440 emails/day to one address regardless of
+ * how many IPs an attacker rotates through, down from unbounded.
+ *
+ * Storage: reuses the existing `rate_limit` table (same shape a counter
+ * needs: key/count/lastRequest) instead of adding a table, so no new
+ * migration has to be hand-applied to production D1. The key is
+ * namespaced (`email-otp-address:`) so it can never collide with
+ * better-auth's own `createRateLimitKey(ip, path)` keys in the same
+ * table.
+ *
+ * Write cost: exactly one read + at most one write to `rate_limit` per
+ * send-verification-otp request, the same bounded, O(1)-per-request cost
+ * the existing per-IP throttle already pays on every request to this
+ * app — never unbounded, so this does not put the D1 free-tier
+ * 100k-writes/day budget at any additional risk.
+ *
+ * Anti-enumeration: this check runs, and writes to the counter, for
+ * *every* request to this path — allowlisted or not — before the
+ * allowlist check below, and a throttled request returns the exact same
+ * `{ success: true }` shape used for a non-allowlisted address and for a
+ * genuine send. So whether a given address is allowlisted, throttled,
+ * both, or neither is never observable from the response.
+ */
+const EMAIL_SEND_THROTTLE_WINDOW_MS = 5 * 60 * 1000;
+const EMAIL_SEND_THROTTLE_MAX = 5;
+
+function emailSendThrottleKey(email: string): string {
+  return `email-otp-address:${email.trim().toLowerCase()}`;
+}
+
+/**
+ * Returns true if `email` may send now (and records the attempt), false
+ * if it is currently throttled. Mirrors the fixed-window-with-restart
+ * semantics of better-auth's own database rate-limit storage
+ * (createDatabaseStorageWrapper in
+ * better-auth/dist/api/rate-limiter/index.mjs): a denial never advances
+ * `lastRequest`, so the window only resets once a full
+ * EMAIL_SEND_THROTTLE_WINDOW_MS has elapsed since the last *allowed*
+ * request.
+ */
+async function consumeEmailSendThrottle(
+  db: DrizzleD1Database<typeof schema>,
+  email: string,
+  now: number
+): Promise<boolean> {
+  const key = emailSendThrottleKey(email);
+  const existing = (
+    await db
+      .select({
+        count: schema.rateLimit.count,
+        lastRequest: schema.rateLimit.lastRequest,
+      })
+      .from(schema.rateLimit)
+      .where(eq(schema.rateLimit.key, key))
+      .limit(1)
+  )[0];
+
+  if (!existing) {
+    await db.insert(schema.rateLimit).values({
+      id: crypto.randomUUID(),
+      key,
+      count: 1,
+      lastRequest: now,
+    });
+    return true;
+  }
+
+  if (now - existing.lastRequest >= EMAIL_SEND_THROTTLE_WINDOW_MS) {
+    await db
+      .update(schema.rateLimit)
+      .set({ count: 1, lastRequest: now })
+      .where(eq(schema.rateLimit.key, key));
+    return true;
+  }
+
+  if (existing.count >= EMAIL_SEND_THROTTLE_MAX) {
+    return false;
+  }
+
+  await db
+    .update(schema.rateLimit)
+    .set({ count: existing.count + 1, lastRequest: now })
+    .where(eq(schema.rateLimit.key, key));
+  return true;
+}
 
 /**
  * Built fresh per request. The Cloudflare adapter (v12) only exposes
@@ -86,6 +191,20 @@ export function createAuth(env: Env) {
           return ctx.json({ success: true });
         }
         const email = ctx.body?.email;
+        if (typeof email === 'string') {
+          // Runs — and writes to the counter — for every address, not
+          // just allowlisted ones, and returns the same shape on every
+          // branch below. See the EMAIL_SEND_THROTTLE_* comment above
+          // for why this can never become an enumeration oracle.
+          const allowedToSendNow = await consumeEmailSendThrottle(
+            db,
+            email,
+            Date.now()
+          );
+          if (!allowedToSendNow) {
+            return ctx.json({ success: true });
+          }
+        }
         if (typeof email === 'string' && !isAllowedEmail(allowed, email)) {
           return ctx.json({ success: true });
         }
