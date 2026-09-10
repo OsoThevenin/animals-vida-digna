@@ -3,13 +3,16 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-06-PLAN.md
-last_updated: "2026-03-20T08:41:37.893Z"
+stopped_at: Executing content-r2-pipeline phase-6-cutover-docs.md (docs task; deploy-time maintainer checklist still pending)
+last_updated: "2026-09-10T09:41:15.000Z"
 progress:
   total_phases: 4
   completed_phases: 4
   total_plans: 15
   completed_plans: 15
+  content_r2_pipeline_phases: 7
+  content_r2_pipeline_phases_completed_on_branch: 7
+  content_r2_pipeline_deployed: false
 ---
 
 # Project State
@@ -19,12 +22,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Visitors can discover adoptable cats and take action (adopt, donate, contact) in their language, with all content managed by non-technical shelter staff through Keystatic.
-**Current focus:** Phase 04 — seo-accessibility-performance
+**Current focus:** content-r2-pipeline milestone, Phase 6 (cutover & docs) —
+cats now managed through the `apps/admin` app (D1/R2), not Keystatic;
+settings/landing/pages remain in Keystatic. Implementation is complete on
+branch `worktree-content-r2-impl`; nothing is merged or deployed yet, and a
+maintainer deploy-time checklist remains (see `docs/admin-runbook.md`).
 
 ## Current Position
 
-Phase: 04 (seo-accessibility-performance) — EXECUTING
-Plan: 1 of 6
+Phase: 04 (seo-accessibility-performance) — status unchanged by this
+milestone (see gap-closure plans 04-04..04-06 for its own status)
+content-r2-pipeline: Phase 6 (cutover-docs) — all 7 phase documents
+(phase-0 through phase-6) executed on the branch; deploy-time items
+(remote D1 verification, live WAF matrix, browser click-through, `wrangler
+secret list`, second Workers Builds project, GitHub collaborator removal)
+deferred to the maintainer per `docs/admin-runbook.md`
 
 ## Performance Metrics
 
@@ -98,6 +110,10 @@ Recent decisions affecting current work:
 - [Phase 04]: Hero image dimensions 1280x448 matching lg:max-h-[28rem] aspect ratio with fetchpriority=high
 - [Phase 04]: DonateSticky changed from client:only to client:idle since SSR renders null (visible starts false)
 - [Phase 04]: Auto-approved Lighthouse checkpoint per auto_advance config (build successful, all 04-05 fixes in place)
+- [content-r2-pipeline Phase 1]: Converted to pnpm + Turborepo monorepo (`apps/web`, `apps/admin`, `packages/content`, `packages/design-system`)
+- [content-r2-pipeline Phase 3]: Cats moved from Keystatic/git (`src/content/cats/`) to D1 (`avd-content`, tables `cats`/`cat_images`); public cat pages render on demand (`prerender = false`)
+- [content-r2-pipeline Phase 4/5]: New `apps/admin` Astro app with better-auth `emailOTP` login (allowlist-based) and Astro Actions for cat CRUD and R2 image upload
+- [content-r2-pipeline Phase 6]: Deleted the git-based cat pipeline leftovers and updated docs; volunteers' GitHub collaborator access removal is queued for the maintainer (human-only action, not yet performed — see `docs/admin-runbook.md`); Keystatic retained, maintainer-only, for settings/landing/pages
 
 ### Pending Todos
 
@@ -113,9 +129,10 @@ None yet.
 
 - Research flagged Keystatic + Cloudflare adapter compatibility as needing deeper investigation in Phase 1
 - RESOLVED: Tailwind v4 Astro integration works with @tailwindcss/vite in vite.plugins
+- content-r2-pipeline: ADMIN-03 (no volunteer GitHub access) cannot be closed from this sandbox — no Cloudflare or GitHub credentials are available here. The maintainer must run the collaborator-removal steps in `docs/admin-runbook.md` ("Task 8: Remove volunteer GitHub collaborator access") along with the rest of the deploy-time checklist (remote D1 verification, live WAF matrix, browser click-through, `wrangler secret list`, second Workers Builds project) before this milestone can be considered shipped.
 
 ## Session Continuity
 
-Last session: 2026-03-19T13:28:54.469Z
-Stopped at: Completed 04-06-PLAN.md
+Last session: 2026-09-10T09:41:15.000Z
+Stopped at: content-r2-pipeline Phase 6 (cutover-docs) — planning docs updated; maintainer deploy-time checklist still pending, nothing merged or deployed
 Resume file: None

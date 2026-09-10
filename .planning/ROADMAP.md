@@ -59,7 +59,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Submitting the contact form sends an email to the shelter via Resend with localized confirmation, and the adoption form pre-fills the cat name
   2. Forms validate on both client and server, reject spam via honeypot, and enforce basic rate limiting
-  3. Shelter staff can upload images through Keystatic that are stored in R2 via Worker-signed URLs
+  3. Shelter staff can upload images through the admin app (added in the
+     content-r2-pipeline milestone, Phase 5) that are stored in R2; at the
+     time this phase originally shipped (2026-03-18), image upload was via
+     Keystatic's git-backed storage, later superseded
   4. Public images are served through Cloudflare Image Resizing with responsive srcsets, AVIF/WebP auto-format, and long-lived cache headers
   5. Below-fold images and gallery thumbnails lazy-load
 **Plans**: 4 plans
@@ -90,6 +93,38 @@ Plans:
 - [ ] 04-05-PLAN.md — Performance investigation and fixes: LCP image optimization, CLS prevention, lazy Tobii, deferred hydration (gap closure)
 - [ ] 04-06-PLAN.md — Lighthouse score confirmation checkpoint (gap closure)
 
+### Phase 5 (content-r2-pipeline milestone): Content admin & R2
+**Goal**: Cat data and images move out of git into Cloudflare D1/R2, edited
+through a dedicated admin app, so volunteers no longer need GitHub access
+and content changes go live without a pull request
+**Depends on**: Phase 3 (this repository's baseline — the R2 image
+pipeline Phase 3 already established) plus the content-r2-pipeline plan's
+own Phase 0–4. Independent of this repository's Phase 4
+(SEO/Accessibility/Performance), which the Progress table above shows still
+in progress (3/6 plans) — the content-r2-pipeline milestone does not wait
+on it.
+**Requirements**: IMG-02 (superseding), CMS-02 (superseding), ADMIN-01,
+ADMIN-02, ADMIN-03
+**Success Criteria** (what must be TRUE):
+  1. A volunteer with only an email address signs in at
+     `https://admin.animalsvidadigna.org`, edits a cat, uploads a photo, and
+     sees it live on the public site within seconds — no pull request
+  2. Cat pages render on demand from D1; cat images are served from R2
+     through `images.animalsvidadigna.org`
+  3. No volunteer holds GitHub repository Write access
+  4. `docs/admin-guide.md` and `docs/admin-runbook.md` exist and match
+     reality
+**Plans**: see `docs/superpowers/plans/2026-09-03-content-r2-pipeline/README.md`
+(phase-0 through phase-6 documents) — status: implementation complete on
+branch `worktree-content-r2-impl` as of 2026-09-10, **not yet merged or
+deployed**. Phase 6 (this phase) is documentation and cut-over hardening;
+several of its items are deliberately deferred to the maintainer because
+this sandbox has no Cloudflare or GitHub credentials — remote D1
+verification, the live WAF matrix, a real browser click-through, `wrangler
+secret list`, creating the second Workers Builds project, and revoking
+volunteers' GitHub collaborator access (ADMIN-03). See
+`docs/admin-runbook.md` for that checklist.
+
 ## Progress
 
 **Execution Order:**
@@ -101,3 +136,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 2. Public Pages & Cats Directory | 2/2 | Complete    | 2026-03-18 |
 | 3. Forms, Images & Media | 4/4 | Complete   | 2026-03-18 |
 | 4. SEO, Accessibility & Performance | 3/6 | In progress | - |
+| 5. Content admin & R2 (content-r2-pipeline) | 7/7 (phase-0..phase-6) | Implementation complete on branch, pending maintainer deploy checklist | 2026-09-10 |
