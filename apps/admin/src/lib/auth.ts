@@ -173,14 +173,28 @@ export function createAuth(env: Env) {
         // unavoidable side effect (customRules keys and windows are not
         // separable in better-auth 1.7.2), this also replaces the
         // built-in per-IP rule for this exact path — 3 requests per IP
-        // per 60s — with 3 per IP per 300s. That is *strictly stricter*
-        // for a single IP, so it does not weaken the existing per-IP
-        // protection; tests/otp-send-ip-throttle.test.ts was updated
-        // (fix round 1) to assert the new 3-per-300s behaviour instead
-        // of 3-per-60s.
+        // per 60s — with a rule of this shape.
+        //
+        // `max: 15` (fix round 2, whole-branch review Important-4):
+        // 15 per 300s is the exact same per-IP rate as the original
+        // 3-per-60s (both are 3 requests per 60s, just measured over a
+        // wider window), so a single hostile IP gains nothing — it is
+        // NOT a weakening of the per-IP protection. What changes is
+        // *recovery time* for a shared IP: several volunteers behind one
+        // shelter-office NAT sharing 3-per-window meant the office as a
+        // whole could be locked out for up to 5 minutes after 3 sign-ins
+        // in quick succession; 15-per-window gives that same office
+        // headroom for ~5 people to sign in and retry a mistyped code
+        // without tripping it. The per-address throttle just below
+        // (`EMAIL_SEND_THROTTLE_MAX = 5` per 300s) independently caps how
+        // many codes any single email address can receive regardless of
+        // how high this per-IP max goes, so raising it here does not
+        // weaken the protection that actually matters against a
+        // targeted attacker. tests/otp-send-ip-throttle.test.ts asserts
+        // `max: 15` (updated in fix round 2, was 3).
         '/email-otp/send-verification-otp': {
           window: EMAIL_SEND_THROTTLE_WINDOW_SECONDS,
-          max: 3,
+          max: 15,
         },
       },
     },
@@ -221,9 +235,15 @@ export function createAuth(env: Env) {
       //
       // Short-circuiting with the endpoint's own `{ success: true }` shape
       // keeps the HTTP response byte-identical to a real send (no
-      // enumeration signal) and does no extra work on either branch (no
-      // timing signal). Router-level rate limiting (see rateLimit above)
-      // still runs before hooks.before, so every path here stays
+      // enumeration signal) — response-shape indistinguishability, which
+      // is what the tests assert. This is NOT a timing-signal guarantee:
+      // a genuine send awaits a real Resend HTTP round trip while the
+      // short-circuit branches return after at most one D1 read, so the
+      // two are distinguishable by response latency. That pre-existing,
+      // accepted residual is recorded in
+      // docs/superpowers/plans/2026-09-03-content-r2-pipeline/phase-6-results.md
+      // (Known residuals). Router-level rate limiting (see rateLimit
+      // above) still runs before hooks.before, so every path here stays
       // rate-limited exactly like every other request.
       before: createAuthMiddleware(async (ctx) => {
         const isEmailOtpOrForgetPasswordPath =

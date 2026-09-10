@@ -146,6 +146,58 @@ to that person's `session` and `account` rows automatically. If you want to
 be explicit anyway (or if this ever changes), delete `session` and
 `account` rows for that `user_id` first, then `user`, in that order.
 
+## Sign-in rate limits
+
+`POST /email-otp/send-verification-otp` (the "send me a code" request) is
+throttled two ways at once, both defined in `apps/admin/src/lib/auth.ts`:
+
+- **Per-IP: 15 requests per 300s**, a better-auth `rateLimit.customRules`
+  entry. This is the same steady-state rate as the framework default (3
+  per 60s), just measured over a wider window — raised from 3-per-300s in
+  fix round 2 because a handful of volunteers sharing one shelter-office
+  IP could otherwise lock the whole office out of sign-in for up to 5
+  minutes. A shared IP that exceeds this gets better-auth's own opaque
+  `429 {"message":"Too many requests. Please try again later."}` — nothing
+  this app's own code returns.
+- **Per-address: 5 requests per 300s**, this app's own counter
+  (`consumeEmailSendThrottle`, keyed `email-otp-address:<lowercased
+  email>`, stored in the `rate_limit` table). This exists so a per-IP
+  limit alone can't be bypassed by an attacker with many IPs flooding one
+  known volunteer's inbox. A throttled request here returns the exact
+  same `{ success: true }` shape as a real send or a non-allowlisted
+  address, by design — the response never reveals which case occurred.
+
+**Accepted residual — a known volunteer's address can be silently
+saturated.** The per-address counter is consumed before the allowlist
+check and before better-auth's own `type` check, and a denial never
+advances the counter's `lastRequest`. So an attacker who knows a
+volunteer's email (published on the shelter's website) can keep sending
+`{email, type: "anything"}` from just two IPs — 2 × 15 per 300s comfortably
+clears the per-address max of 5 — and hold that address's counter
+permanently saturated. The victim's genuine sign-in attempt lands in the
+same saturated window and gets `{ success: true }` with no email actually
+sent, so neither the volunteer nor the panel shows an error. This is
+recorded as a residual in `phase-6-results.md`'s "Known residuals" section;
+it is accepted, not a bug to fix (the alternative — skipping the
+per-address counter for non-sends — would let an attacker's floods
+through instead).
+
+**How to recognise it:** a volunteer reports never receiving a sign-in
+code despite repeated attempts, and you have confirmed their email is
+correctly present in `ADMIN_ALLOWED_EMAILS` (see "Adding or removing a
+volunteer" above).
+
+**Operator remedy:** delete that address's counter row so it starts fresh:
+
+```bash
+wrangler d1 execute avd-content --remote --command \
+  "delete from rate_limit where key = 'email-otp-address:<lowercased email>'"
+```
+
+The email must be lowercased and trimmed to match `emailSendThrottleKey`'s
+normalisation in `auth.ts`. This only clears the throttle counter — it does
+not touch the `user`/`session`/`account` rows from the section above.
+
 ## D1 migrations workflow
 
 Two separate schemas share the one `avd-content` database and the one

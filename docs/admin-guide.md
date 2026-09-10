@@ -126,8 +126,15 @@ paperera. Si dubtes, despublica en lloc d'esborrar.
 2. Confirma que estàs escrivint exactament el correu electrònic que et va
    donar accés el mantenidor del lloc — un correu no autoritzat no rep mai
    cap codi, i el panell no ho indica per motius de seguretat.
-3. Si continues sense rebre'l, contacta amb el mantenidor del lloc perquè
-   comprovi que el teu correu és a la llista de persones autoritzades.
+3. Si diverses persones de la mateixa oficina o local heu demanat un codi
+   en pocs minuts (per exemple, algú s'ha equivocat en teclejar-lo i n'ha
+   demanat un altre diverses vegades), és possible que hàgiu arribat
+   temporalment al límit de peticions compartit per aquesta connexió a
+   internet. No és que el sistema estigui espatllat: **espera uns minuts i
+   torna-ho a provar** abans de contactar amb ningú.
+4. Si continues sense rebre'l passats uns minuts, contacta amb el
+   mantenidor del lloc perquè comprovi que el teu correu és a la llista de
+   persones autoritzades.
 
 ## On apareixen els canvis
 
