@@ -82,7 +82,18 @@ export default function ImageManager({
   const confirmedCoverIdRef = useRef(initialCoverImageId);
 
   function move(index: number, direction: -1 | 1) {
-    setImages((prev) => moveImage(prev, index, index + direction));
+    // `moveImage` only reorders the array — it never restamps each
+    // item's `.position` field. `ordersDiffer` (used by
+    // `saveOrderAndAlts` to detect a stale in-flight save) compares by
+    // id and `.position`, not array order, so a pure reorder with no
+    // restamp would be invisible to it: a volunteer who reorders while
+    // a save is in flight would see "Desat." for an order the server
+    // never received. Re-applying `withPositions` here keeps on-screen
+    // `.position` values in sync with array order on every move, so
+    // `ordersDiffer` sees the change.
+    setImages((prev) =>
+      withPositions(moveImage(prev, index, index + direction))
+    );
   }
 
   function updateAlt(id: string, field: 'altCa' | 'altEs', value: string) {

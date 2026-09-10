@@ -128,6 +128,46 @@ describe('saveOrderAndAlts (stale-save detection)', () => {
     });
     expect(screen.queryByText('Desat.')).not.toBeInTheDocument();
   });
+
+  it('warns on a pure reorder made while the save is in flight, with no alt-text edit', async () => {
+    const user = userEvent.setup();
+    const update = deferred<{ data?: unknown; error?: unknown }>();
+    updateAction.mockReturnValue(update.promise);
+
+    render(
+      <ImageManager
+        catId="cat-1"
+        coverImageId={null}
+        images={[imageA, imageB]}
+      />
+    );
+
+    await user.click(
+      screen.getByRole('button', {
+        name: "Desa l'ordre i els textos alternatius",
+      })
+    );
+    expect(updateAction).toHaveBeenCalledTimes(1);
+
+    // While the save is still in flight, the volunteer reorders only —
+    // no alt-text edit at all. `moveImage` never restamps `.position`,
+    // so the array order changes but every item's `.position` field
+    // stays exactly what it was when `positioned` was sent. This must
+    // still be detected as a change: the volunteer's intended order is
+    // no longer what the in-flight request is about to confirm.
+    await user.click(screen.getByRole('button', { name: 'Mou "Micu" amunt' }));
+
+    update.resolve({ data: { ok: true }, error: undefined });
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "S'ha desat una versió anterior: hi ha canvis nous. Torna a prémer «Desa» per guardar-los."
+        )
+      ).toBeInTheDocument();
+    });
+    expect(screen.queryByText('Desat.')).not.toBeInTheDocument();
+  });
 });
 
 describe('setCover (stale cover-response guard)', () => {
