@@ -106,32 +106,61 @@ simulated.
 | `pnpm turbo test && pnpm turbo build` | run (via `pnpm turbo test build check lint --force`) | **PASS** |
 | Lighthouse ≥ 95 ×4 ×4 | — | **Maintainer-only, not run** — no browser, nothing deployed |
 | GitHub ruleset unchanged | `gh api repos/OsoThevenin/animals-vida-digna/rulesets/22118349 --jq '.rules[].type'` | **PASS** — returned `deletion`, `non_fast_forward`, `pull_request`, unchanged from the expected set. (`gh` credentials happened to be present in this sandbox for this one read-only call; see note below) |
-| No volunteer holds Write access | `gh api repos/OsoThevenin/animals-vida-digna/collaborators --jq '.[].login'` | **Observed, but flagged, not a confirmed PASS** — returned only `OsoThevenin`. This session did **not** perform Task 8's removal steps (no `DELETE` call was made — that is a deliberate human action this session was told not to take). The single-collaborator result may mean no volunteer was ever added as a GitHub collaborator, or that removal already happened outside this plan. The maintainer must confirm intent before treating ADMIN-03 as satisfied — see *Maintainer-only checklist* |
+| No volunteer holds Write access | `gh api repos/OsoThevenin/animals-vida-digna/collaborators --jq '.[] \| "\(.login) — \(.permissions \| to_entries \| map(select(.value)) \| map(.key) \| join(","))"'`, plus `gh api repos/OsoThevenin/animals-vida-digna/invitations --jq '.[] \| "\(.invitee.login) — \(.permissions)"'` and `gh api repos/OsoThevenin/animals-vida-digna/keys --jq '.[].title'` | **Verified.** Full permission listing: `OsoThevenin — admin,maintain,pull,push,triage`, i.e. the sole collaborator, and it's the maintainer. `invitations` returned no output (no pending, unaccepted invites — see nuance below). `keys` returned no output (no deploy keys). The **current state** is factually correct: nobody but the maintainer holds Write today |
 | `docs/admin-guide.md` exists and matches reality | `test -f`, contents read | **PASS** — exists, 8623 bytes |
 | `docs/admin-runbook.md` exists and matches reality | `test -f`, contents read | **PASS** — exists, 18911 bytes |
 
 Note on the `gh` calls above: this task's brief expected no GitHub credentials
 to be available and instructed recording any auth failure as unverified
-rather than retrying. In this run, two **read-only** `gh api` calls
-(collaborators list, ruleset read) happened to succeed. No write/destructive
+rather than retrying. In this run, `gh` credentials happened to be present,
+so all of the read-only `gh api` calls above succeeded. No write/destructive
 `gh` call was attempted, per the explicit constraint against performing
-Task 8. The results are pasted above as genuinely observed output, not
-inferred — but "observed" is not the same as "Task 8 was executed by this
-session," and the maintainer should not read this row as confirming ADMIN-03.
+Task 8's removal step. The results are pasted above as genuinely observed
+output, not inferred.
+
+**Important nuance — what "verified" does and does not mean here.** The row
+above confirms the *current, observable state* is correct: right now, only
+the maintainer holds Write, nobody has a pending invitation that would grant
+it, and there is no deploy key. It does **not** confirm that Task 8's
+*removal action* was performed by this plan. Two explanations are
+consistent with the observed data and this session cannot distinguish them:
+either (a) volunteers were previously granted GitHub Write access (as the
+old Keystatic GitHub-mode flow implies) and were removed at some point
+before this verification, or (b) no volunteer was ever added as a GitHub
+collaborator in the first place, in which case part of Task 8's premise —
+and the migration's framing about "revoking" volunteer access — describes a
+situation that never existed. The maintainer should confirm which of these
+is true; the practical outcome (no volunteer holds Write today) is the same
+either way, but the history matters for understanding what actually happened
+during this migration.
+
+**A gap in the plan's own check, worth recording for a future audit.** Task
+9/10's own verification for this item (`phase-6-cutover-docs.md` Task 8 Step
+5, and this results file's original template) checks only
+`gh api .../collaborators`. That endpoint does **not** list *pending*
+invitations. A volunteer who was invited with Write but never accepted the
+invitation would be invisible to that check, yet would gain Write the moment
+they clicked accept — possibly long after the maintainer believed access was
+closed off. The separate `/invitations` endpoint (and, for completeness,
+`/keys` for deploy keys) must be checked too. Both were empty in this run,
+so there is no live exposure today, but the maintainer checklist below now
+includes both endpoints so this cannot be missed on a future audit.
 
 ## Outcome
 
 **Partial — Phase 6 is implemented and its automated/git-level checks pass;
 the plan as a whole is not done.** Every check reachable from this sandbox
 (pipeline, e2e, image-file inventory, secret scans, doc existence/links,
-commit count, local bundle size, the two read-only `gh` reads) is real and
-PASS. Six items remain genuinely unverified and are **maintainer-only**:
-`wrangler secret list` against the real Worker, applying migrations to
-production D1, creating the second Workers Builds project, Lighthouse ×4×4
-against a live deployment, the timed volunteer walkthrough, the orphan-sweep
-dry run against real R2/D1, and the deliberate execution (not just
-observation) of Task 8's collaborator removal. See the consolidated checklist
-below.
+commit count, local bundle size, and the full set of read-only `gh` reads —
+collaborators with permissions, invitations, deploy keys, ruleset) is real
+and PASS, including "no volunteer holds Write access," which is now verified
+as a current-state fact (see the Definition-of-done table and its nuance
+note above — verified state, not a verified removal action). Six items
+remain genuinely unverified and are **maintainer-only**: `wrangler secret
+list` against the real Worker, applying migrations to production D1,
+creating the second Workers Builds project, Lighthouse ×4×4 against a live
+deployment, the timed volunteer walkthrough, and the orphan-sweep dry run
+against real R2/D1. See the consolidated checklist below.
 
 ## Known residuals (carried forward, not resolved by Phase 6)
 
@@ -153,9 +182,18 @@ below.
   only, though the new jsdom + Testing Library harness now covers
   `image-manager.tsx`'s async wiring (`image-manager-interaction.test.tsx`)
   and caught a real reorder-during-save data-loss defect, fixed in `e0bf8ea`.
-- **ADMIN-03 is not satisfied**: no evidence exists in this session that a
-  volunteer has had GitHub access deliberately removed as a Task 8 action.
-  See the Definition-of-done table row above for what was actually observed.
+- **ADMIN-03's observable state is now verified, its history is not.** The
+  current GitHub state is confirmed correct: only the maintainer holds
+  Write, there are no pending invitations, and no deploy keys exist (see the
+  Definition-of-done table above). What is *not* established is whether this
+  is the result of a deliberate Task 8 removal performed during this plan,
+  or whether no volunteer was ever granted GitHub Write access at all — in
+  which case Task 8's premise (and the migration's framing about "revoking"
+  volunteer access) describes something that never happened. `ADMIN-03` in
+  `.planning/REQUIREMENTS.md` is currently marked unchecked/"pending
+  maintainer action"; the maintainer can now revisit it, since the
+  observable state it describes is satisfied — this file does not edit that
+  requirements doc, since it is out of this task's scope.
 
 ## Maintainer-only checklist
 
@@ -173,26 +211,54 @@ wrangler 4.75.0 before being written here.
 **1. Task 8 — remove volunteer GitHub collaborator access (decision +
 execution, not just observation)**
 ```bash
-gh api repos/OsoThevenin/animals-vida-digna/collaborators --jq '.[].login'
+gh api repos/OsoThevenin/animals-vida-digna/collaborators \
+  --jq '.[] | "\(.login) — \(.permissions | to_entries | map(select(.value)) | map(.key) | join(","))"'
 ```
 Cross-reference against who needs ongoing review access to `main`. For each
 volunteer to remove:
 ```bash
 gh api -X DELETE repos/OsoThevenin/animals-vida-digna/collaborators/<login>
 ```
-Then confirm the ruleset is unchanged and re-list:
+**`collaborators` alone is insufficient** — it does not list *pending*,
+unaccepted invitations. A volunteer invited with Write who never accepted is
+invisible to that check yet gains Write the moment they accept, possibly
+long after the maintainer believes access is closed. Always also check:
+```bash
+gh api repos/OsoThevenin/animals-vida-digna/invitations \
+  --jq '.[] | "\(.invitee.login) — \(.permissions)"'
+```
+Expected: no output (no pending invitations). If any invitation appears,
+revoke it:
+```bash
+gh api -X DELETE repos/OsoThevenin/animals-vida-digna/invitations/<invitation_id>
+```
+Also check for deploy keys, which are a separate access path entirely:
+```bash
+gh api repos/OsoThevenin/animals-vida-digna/keys --jq '.[].title'
+```
+Expected: no output (no deploy keys), unless the maintainer knowingly
+provisioned one.
+
+Then confirm the ruleset is unchanged and re-list everything:
 ```bash
 gh api repos/OsoThevenin/animals-vida-digna/rulesets/22118349 --jq '.rules[].type'
-gh api repos/OsoThevenin/animals-vida-digna/collaborators --jq '.[].login'
+gh api repos/OsoThevenin/animals-vida-digna/collaborators \
+  --jq '.[] | "\(.login) — \(.permissions | to_entries | map(select(.value)) | map(.key) | join(","))"'
+gh api repos/OsoThevenin/animals-vida-digna/invitations --jq '.[] | "\(.invitee.login) — \(.permissions)"'
+gh api repos/OsoThevenin/animals-vida-digna/keys --jq '.[].title'
 ```
 Expected ruleset output: `deletion`, `non_fast_forward`, `pull_request`
 (unchanged). Expected final collaborator list: only the maintainer(s) who
-review PRs. This session observed the collaborators list already showing
-only `OsoThevenin` — confirm with the maintainer whether that reflects a
-deliberate removal already done, or whether no volunteer was ever added as a
-GitHub collaborator in the first place (in which case there is nothing to
-remove and this item is trivially satisfied, but that should be a conscious
-conclusion, not an inferred one).
+review PRs, with `admin`/`maintain`/`push` permissions; no invitations; no
+unexpected deploy keys.
+
+**Already verified as of 2026-09-10** (this session, read-only, no removal
+performed): collaborators = only `OsoThevenin` (`admin,maintain,pull,push,triage`),
+invitations = none, deploy keys = none, ruleset unchanged. The *current
+state* is correct. What is not established is *why* — whether a volunteer
+was deliberately removed during this plan, or whether no volunteer was ever
+added as a GitHub collaborator at all. Confirm which, since the migration's
+own framing ("revoking volunteers' GitHub Write access") assumes the former.
 
 **2. `wrangler secret list` — exactly 5 names, two must be absent**
 ```bash
